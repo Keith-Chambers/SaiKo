@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>resources/full basics.png</file>
+        <file>resources/play.png</file>
+        <file>resources/player.png</file>
+        <file>resources/side bar.png</file>
+        <file>qml.qrc</file>
+        <file>resources/cover.jpg</file>
+        <file>resources/saiko.png</file>
+        <file>resources/back.png</file>
+        <file>resources/forward.png</file>
+        <file>resources/pause.png</file>
+        <file>resources/music.ico</file>
+    </qresource>
+</RCC>
