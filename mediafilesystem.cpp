@@ -6,57 +6,55 @@ MediaFileSystem::MediaFileSystem(QObject *parent) : QObject(parent)
     qDebug() << "Don't use this constructor";
 }
 
-MediaFileSystem::MediaFileSystem(QStringList libraryAbsPaths, QQmlApplicationEngine *engine, QObject *parent)
+MediaFileSystem::MediaFileSystem(QStringList pLibraryAbsPaths, QQmlApplicationEngine *pEngine, QObject *parent)
     : QObject(parent)
 {
-    this->libraryAbsPaths = libraryAbsPaths;
-    this->engine = engine;
-    dirLevel = 0;
-    currLibrary = -1;
-    currentDir = Q_NULLPTR;
-    filters << "*.flac" << "*.mp3";
+    mLibraryAbsPaths = pLibraryAbsPaths;
+    mEngine = pEngine;
+    mDirLevelIndex = 0;
+    mCurrentLibraryIndex = -1;
+    mCurrentDir = Q_NULLPTR;
+    mFilters << "*.flac" << "*.mp3";
 }
 
 void MediaFileSystem::upDir()
 {
-    qDebug() << "upDir: Lv " << dirLevel;
+    qDebug() << "upDir: Lv " << mDirLevelIndex;
 
-    switch(dirLevel)
+    switch(mDirLevelIndex)
     {
     case 0:
         return;
     case 1:
-        dirLevel = 0;
-        currLibrary = -1;
-        if(currentDir)
-            delete currentDir;
-        currentDir = Q_NULLPTR;
+        mDirLevelIndex = 0;
+        mCurrentLibraryIndex = -1;
+        if(mCurrentDir)
+            delete mCurrentDir;
+        mCurrentDir = Q_NULLPTR;
         break;
     default:
     {
-        if(currentDir)
-            currentDir->cdUp();
-        dirLevel--;
+        if(mCurrentDir)
+            mCurrentDir->cdUp();
+        mDirLevelIndex--;
     }
     }
 
     generateMediaItems();
 }
 
-void MediaFileSystem::invokeMediaItem(QString dirName)
+void MediaFileSystem::invokeMediaItem(QString pDirName)
 {
-    if(!currentDir || !currentDir->exists())
+    if(!mCurrentDir || !mCurrentDir->exists())
     {
-        downDir(dirName);
+        downDir(pDirName);
         return;
     }
 
-    qDebug() << "Dir exists";
-
     QFileInfoList fileInfo;
     QStringList nameFilters;
-    nameFilters.append(dirName + "*");
-    fileInfo = currentDir->entryInfoList(nameFilters);
+    nameFilters.append(pDirName + "*");
+    fileInfo = mCurrentDir->entryInfoList(nameFilters);
 
     if(fileInfo.size() != 1)
     {
@@ -66,39 +64,39 @@ void MediaFileSystem::invokeMediaItem(QString dirName)
 
     if(fileInfo.at(0).isFile())
     {
-        qDebug() << "Playing from " << dirName;
-        generatePlaylist(dirName);
+        qDebug() << "Playing from " << pDirName;
+        generatePlaylist(pDirName);
     }else if(fileInfo.at(0).isDir())
     {
-        downDir(dirName);
+        downDir(pDirName);
     }
 
 }
 
-QString MediaFileSystem::getNameFromPath(QString path)
+QString MediaFileSystem::getNameFromPath(QString pPath)
 {
-    int numElements = path.size() - 1;
+    int numElements = pPath.size() - 1;
     // Remove trailing / or \ if present
-    if(path.at(numElements) == '/' || path.at(numElements) == '\\' )
-        path.remove(numElements, 1);
+    if(pPath.at(numElements) == '/' || pPath.at(numElements) == '\\' )
+        pPath.remove(numElements, 1);
 
     QChar sep('/');
-    QString name = path.section(sep, -1, -1);
+    QString name = pPath.section(sep, -1, -1);
 
     return name;
 }
 
-void MediaFileSystem::downDir(QString dirName)
+void MediaFileSystem::downDir(QString pDirName)
 {
     // Assert dirLevel is positive and dirName is valid
-    qDebug() << "Moving down to " << dirName;
-    qDebug() << "DirLevel: " << dirLevel;
+    qDebug() << "Moving down to " << pDirName;
+    qDebug() << "DirLevel: " << mDirLevelIndex;
 
     int libNumber = 0;
 
-    if(dirLevel == 0)
+    if(mDirLevelIndex == 0)
     {
-        foreach(QString libPath, libraryAbsPaths)
+        foreach(QString libPath, mLibraryAbsPaths)
         {
             QDir temp(libPath);
             if(!temp.exists())
@@ -107,29 +105,29 @@ void MediaFileSystem::downDir(QString dirName)
                 continue;
             }
 
-            if(temp.exists(dirName))
+            if(temp.exists(pDirName))
             {
-                qDebug() << libPath + "/" + dirName + " == " + dirName;
-                currentDir = new QDir(libPath + "/" + dirName);
-                dirLevel++;
-                currLibrary = libNumber;
+                qDebug() << libPath + "/" + pDirName + " == " + pDirName;
+                mCurrentDir = new QDir(libPath + "/" + pDirName);
+                mDirLevelIndex++;
+                mCurrentLibraryIndex = libNumber;
                 break;
             }
             libNumber++;
         }
     }else
     {
-        if(!currentDir)
+        if(!mCurrentDir)
         {
             qDebug() << "currentDir NULL in ::downDir()";
             return;
         }
 
-        if(currentDir->exists(dirName))
+        if(mCurrentDir->exists(pDirName))
         {
-            currentDir->cd(dirName);
-            dirLevel++;
-            qDebug() << "cd " << dirName << " successful";
+            mCurrentDir->cd(pDirName);
+            mDirLevelIndex++;
+            qDebug() << "cd " << pDirName << " successful";
         }
     }
 
@@ -138,23 +136,23 @@ void MediaFileSystem::downDir(QString dirName)
 
 // TODO: Overload function to take index etc
 // I should probably make a playlist structure of something
-void MediaFileSystem::generatePlaylist(QString songName)
+void MediaFileSystem::generatePlaylist(QString pSongName)
 {
-    playlist.clear();
+    mPlaylist.clear();
     QStringList songNames;
 
-    if(!currentDir)
+    if(!mCurrentDir)
     {
         qDebug() << "Failed to generate playlist as currentDir is NULL";
         return;
     }
 
-    songNames = currentDir->entryList(filters, QDir::Files, QDir::Name);
+    songNames = mCurrentDir->entryList(mFilters, QDir::Files, QDir::Name);
     QStringList tempNames = songNames;
 
     for(int i = 0; i < tempNames.size(); i++)
     {
-        if(tempNames.at(i) != songName)
+        if(tempNames.at(i) != pSongName)
         {
             //qDebug() << "Skipping " << tempNames.at(i);
             songNames.pop_front();
@@ -169,12 +167,11 @@ void MediaFileSystem::generatePlaylist(QString songName)
     for(int i = 0; i < songNames.size(); i++)
     {
         QString path;
-        path = currentDir->absoluteFilePath(songNames.at(i));
-        playlist.append(path);
-        //qDebug() << playlist.at(i);
+        path = mCurrentDir->absoluteFilePath(songNames.at(i));
+        mPlaylist.append(path);
     }
 
-    emit playlistChanged(playlist);
+    emit playlistChanged(mPlaylist);
     return;
 }
 
@@ -182,16 +179,17 @@ void MediaFileSystem::generatePlaylist(QString songName)
 void MediaFileSystem::generateMediaItemsFromRoot()
 {
     MediaItem *next;
-    qmlMediaItems.clear();
+    mQmlMediaItems.clear();
     QStringList directories;
-    qDebug() << "libraryAbsPaths size : " << libraryAbsPaths.size();
 
-    for(int i = 0; i < libraryAbsPaths.size(); i++)
+    qDebug() << "libraryAbsPaths size : " << mLibraryAbsPaths.size();
+
+    for(int i = 0; i < mLibraryAbsPaths.size(); i++)
     {
-        QDir *rootDir = new QDir(libraryAbsPaths.at(i));
+        QDir *rootDir = new QDir(mLibraryAbsPaths.at(i));
         if(!rootDir->exists())
         {
-            qDebug() << libraryAbsPaths.at(i) << " doesn't exist";
+            qDebug() << mLibraryAbsPaths.at(i) << " doesn't exist";
             delete rootDir;
             continue;
         }
@@ -200,7 +198,7 @@ void MediaFileSystem::generateMediaItemsFromRoot()
 
         for(int libIndex = 0; libIndex < directories.size(); libIndex++)
         {
-            QString dirFullPath = libraryAbsPaths.at(i) + "/" + directories.at(libIndex);
+            QString dirFullPath = mLibraryAbsPaths.at(i) + "/" + directories.at(libIndex);
             QDir currDir(dirFullPath);
             if(!currDir.exists())
             {
@@ -208,13 +206,10 @@ void MediaFileSystem::generateMediaItemsFromRoot()
                 continue;
             }
 
-            //qDebug() << "Full Path: " << dirFullPath;
-
             QString dirName = getNameFromPath(dirFullPath);
             QString imagePath = dirFullPath + "/" + dirName + "_art.jpg";
             if(!currDir.exists(imagePath))
             {
-                //qDebug() << imagePath << " doesn't exist";
                 next = new MediaItem(dirFullPath, false);
             }else
             {
@@ -222,13 +217,51 @@ void MediaFileSystem::generateMediaItemsFromRoot()
                 next = new MediaItem(dirFullPath, imagePath, false);
             }
 
-            qmlMediaItems.append(next);
+            mQmlMediaItems.append(next);
         }
     }
 
-    qDebug() << "Loading to context";
-    engine->rootContext()->setContextProperty("MediaList", QVariant::fromValue(qmlMediaItems));
-    qDebug() << "Complete";
+    mEngine->rootContext()->setContextProperty("MediaList", QVariant::fromValue(mQmlMediaItems));
+    qDebug() << "Root Media Items loaded successfuly";
+}
+
+QStringList MediaFileSystem::extractFolderImagePaths(QString pCurrentAbsPath)
+{
+    QFile saikFile(pCurrentAbsPath + "data.saik");
+    QStringList result;
+
+    if(!saikFile.exists())
+    {
+        qDebug() << saikFile.fileName() + " doesn't exist";
+        return result;
+    }
+
+    if(!saikFile.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "Failed to open: " + pCurrentAbsPath + "data.saik";
+        return result;
+    }
+
+    QTextStream in(&saikFile);
+
+    while(!in.atEnd())
+    {
+        QString line = in.readLine();
+        QChar sep(':');
+        QString type = line.section(sep, 0, 0);
+
+        if(type.compare("#ART") != 0)
+        {
+            qDebug() << "Item extracted is not of type ART";
+            continue;
+        }
+
+        line.remove(0, type.size() + 1);
+        qDebug() << "Appending " + line;
+        result.append(line);
+    }
+
+    return result;
 }
 
 
@@ -239,78 +272,120 @@ void MediaFileSystem::generateMediaItems()
     QStringList directories;
     QStringList files;
     MediaItem *next;
-    qmlMediaItems.clear();
+    mQmlMediaItems.clear();
 
-    if(!currentDir || !currentDir->exists())
+    if(!mCurrentDir || !mCurrentDir->exists())
     {
-        qDebug() << "At root directory";
         generateMediaItemsFromRoot();
         return;
     }
 
-    qDebug() << "CurrentDir exists";
-
-    directories = currentDir->entryList(QDir::AllDirs | QDir::NoDotAndDotDot, QDir::Name);
-
-    qDebug() << "directories fetched";
+    directories = mCurrentDir->entryList(QDir::AllDirs | QDir::NoDotAndDotDot, QDir::Name);
 
     if(directories.size() <= 0)
     {
         qDebug() << "No directories found in current folder";
-        files = currentDir->entryList(filters, QDir::Files, QDir::Name);
+        files = mCurrentDir->entryList(mFilters, QDir::Files, QDir::Name);
 
         for(int i = 0; i < files.size(); i++)
         {
             qDebug() << "F: " << files.at(i) << " found";
             next = new MediaItem(files.at(i), true);
 
-            qmlMediaItems.append((QObject *)next);
+            mQmlMediaItems.append((QObject *)next);
         }
-
-        //engine->rootContext()->setContextProperty("MediaList", QVariant::fromValue(qmlMediaItems));
-        //return;
     }
 
     for(int i = 0; i < directories.size(); i++)
     {
         qDebug() << "D: " << directories.at(i) << " found";
 
-        QString imageDirString = libraryAbsPaths.at(currLibrary) + "/" + currRelativePath +
-                "/" + directories.at(i) + "/";
-        QDir imageDir(imageDirString);
-        QString imageName = directories.at(i) + "_art.jpg";
+        //QString folderPath = mLibraryAbsPaths.at(mCurrentLibraryIndex) + directories.at(i) + "/";
+        QString folderPath = mCurrentDir->absolutePath() + "/" + directories.at(i) + "/";
+        QStringList imageNameList = extractFolderImagePaths(folderPath);
+        QString imagePath;
 
-        qDebug() << "Searching for Image at : " << imageDirString + imageName;
+        qDebug() << "FolderPath: " + folderPath;
 
-        if(imageDir.exists(imageName))
+        for(int i = 0; i < imageNameList.size(); i++)
         {
-            qDebug() << "Image found for directory";
-            QString imagePath = imageDirString + imageName;
+            QDir folderDir(folderPath);
+            if(folderDir.exists(imageNameList.at(i)))
+            {
+                imagePath = folderPath + "/" + imageNameList.at(i);
+                qDebug() << imagePath + " exists";
+            }
+        }
+
+        if(imagePath.size() != 0)
+        {
             next = new MediaItem(directories.at(i), imagePath, false);
         }else
         {
             next = new MediaItem(directories.at(i), false);
         }
 
-        qmlMediaItems.append((QObject *)next);
+        mQmlMediaItems.append((QObject *)next);
     }
 
-    engine->rootContext()->setContextProperty("MediaList", QVariant::fromValue(qmlMediaItems));
+    mEngine->rootContext()->setContextProperty("MediaList", QVariant::fromValue(mQmlMediaItems));
 
 }
 
-void MediaFileSystem::printLibRecursive()
+void MediaFileSystem::createSaikFiles(bool pRecheck)
 {
-    QFile file("./TEST.txt");
+    QString path;
+    path = mLibraryAbsPaths.at(0);
+    QStringList nameFilters;
 
-    if(!file.open(QIODevice::ReadWrite))
+    QDirIterator itr(path, nameFilters, QDir::AllDirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    nameFilters << "*.jpg";
+
+    while(itr.hasNext())
     {
-        qDebug() << "Failed to open TEST.txt";
-        return;
+        itr.next();
+        QDir currentDir(itr.filePath());
+
+        if(currentDir.exists("data.saik"))
+        {
+            qDebug() << "data.saik alreay exists for : " << currentDir.absolutePath();
+
+            if(!pRecheck)
+                continue;
+        }
+
+        // create a .saik file inside the directory
+        QFile saikFile(itr.filePath() + "/data.saik");
+
+        if(!saikFile.open(QIODevice::ReadWrite))
+        {
+            qDebug() << "Failed to open .saik file";
+            break;
+        }
+
+        if(pRecheck)
+            saikFile.resize(0);
+
+        // Load a list of image paths from within dir
+        QStringList imageNames = currentDir.entryList(nameFilters, QDir::Files, QDir::Name);
+        QTextStream out(&saikFile);
+
+        foreach(QString imageName, imageNames)
+        {
+            out << "#ART:" << imageName << endl;
+            qDebug() << "Appending " + imageName + " to saik file";
+        }
+
+        qDebug() << currentDir.absolutePath();
     }
 
-    qDebug() << "Successfully created";
+    qDebug() << "Successfully created all saik files";
 }
 
+/*
+void MediaFileSystem::purgeSaikFiles()
+{
 
+}
+*/
 

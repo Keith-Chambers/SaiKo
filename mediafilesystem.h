@@ -10,6 +10,7 @@
 #include <QVariant>
 #include <QFile>
 #include <QFileInfoList>
+#include <QDirIterator>
 
 #include "mediaitem.h"
 
@@ -18,32 +19,33 @@ class MediaFileSystem : public QObject
     Q_OBJECT
 public:
     explicit MediaFileSystem(QObject *parent = 0);
-    MediaFileSystem(QStringList libraryAbsPaths, QQmlApplicationEngine *engine, QObject *parent = 0);
+    MediaFileSystem(QStringList pLibraryAbsPaths, QQmlApplicationEngine *pEngine, QObject *parent = 0);
     Q_INVOKABLE void upDir();
-    void downDir(QString dirName);
-    void generatePlaylist(QString songName);
+    void downDir(QString pDirName);
+    void generatePlaylist(QString pSongName);
     void generateMediaItems();
     void generateMediaItemsFromRoot();
-    void printLibRecursive();
-    Q_INVOKABLE void invokeMediaItem(QString dirName);
+    void createSaikFiles(bool pRecheck);
+    Q_INVOKABLE void invokeMediaItem(QString pDirName);
 signals:
-    void playlistChanged(QStringList playlist);
+    void playlistChanged(QStringList pPlaylist);
 public slots:
 
 private:
     // Functions
-    QString getNameFromPath(QString path);
+    QString getNameFromPath(QString pPath);
+    QStringList extractFolderImagePaths(QString pCurrentAbsPath);
 
     // Variables
-    QDir *currentDir;
-    int dirLevel;
-    int currLibrary;
-    QStringList playlist;
-    QStringList libraryAbsPaths;
-    QString currRelativePath;
-    QStringList filters;
-    QQmlApplicationEngine *engine;
-    QObjectList qmlMediaItems;
+    QDir *mCurrentDir;
+    int mDirLevelIndex;
+    int mCurrentLibraryIndex;
+    QStringList mPlaylist;
+    QStringList mLibraryAbsPaths;
+    QString mCurrentRelativePath;
+    QStringList mFilters;
+    QQmlApplicationEngine *mEngine;
+    QObjectList mQmlMediaItems;
 };
 
 #endif // MEDIAFILESYSTEM_H

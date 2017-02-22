@@ -48,7 +48,8 @@ int main(int argc, char *argv[])
 
     MediaFileSystem mFileSys(libPaths, &engine);
     mFileSys.generateMediaItems();
-    //mFileSys.printLibRecursive();
+
+    mFileSys.createSaikFiles(false);
 
     // Connect signals to slots
     QObject::connect(&mFileSys, &MediaFileSystem::playlistChanged, &audioplayer, &AudioPlayer::setPlaylist);
