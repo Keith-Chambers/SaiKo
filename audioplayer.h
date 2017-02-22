@@ -20,17 +20,15 @@ class AudioPlayer : public QObject
 public:
     explicit AudioPlayer(QObject *parent = 0);
     ~AudioPlayer();
-    Q_INVOKABLE void nextSong();
-    Q_INVOKABLE void prevSong();
-    Q_INVOKABLE bool getIsPlaying();
+    Q_INVOKABLE void nextSong(void);
+    Q_INVOKABLE void prevSong(void);
+    Q_INVOKABLE bool getIsPlaying(void);
     Q_INVOKABLE void setIsPlaying(bool isPlaying);
     Q_INVOKABLE void setPlayPosition(double pos);
-    Q_INVOKABLE double getPlayPosition();
-    Q_INVOKABLE void togglePause();
-    Q_INVOKABLE void stopAudio();
-    //void setPlaylist(QStringList playlist);
-    void setupMusic();
-    //Q_INVOKABLE boolean setSong(QString directory, QString file);
+    Q_INVOKABLE double getPlayPosition(void);
+    Q_INVOKABLE void togglePause(void);
+    Q_INVOKABLE void stopAudio(void);
+    void setupMusic(void);
 signals:
     void playPositionChanged(double);
     void isPlayingChanged(bool);

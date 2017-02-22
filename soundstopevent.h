@@ -11,6 +11,8 @@ public:
     SoundStopEvent();
     void OnSoundStopped(irrklang::ISound *sound, irrklang::E_STOP_EVENT_CAUSE reason, void * userData);
     //~SoundStopEvent(){}
+private:
+
 };
 
 #endif // SOUNDSTOPEVENT_H

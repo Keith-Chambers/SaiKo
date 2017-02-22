@@ -13,11 +13,9 @@ AudioPlayer::AudioPlayer(QObject *parent) : QObject(parent), soundStopEvent()
     }
 
     playlistIndex = 0;
-    // TODO: Remove this
-    //m_curr_sound = m_engine->play2D("C:/libs/media/ophelia.mp3", true, true);
 }
 
-AudioPlayer::~AudioPlayer()
+AudioPlayer::~AudioPlayer(void)
 {
     m_curr_sound->drop();
     m_engine->drop();
@@ -32,13 +30,16 @@ void AudioPlayer::setPlaylist(QStringList playlist)
     setupMusic();
 }
 
-void AudioPlayer::setupMusic()
+void AudioPlayer::setupMusic(void)
 {
+    qDebug() << "Setting up music";
+
     if(m_curr_sound)
     {
-        m_engine->removeAllSoundSources();
         m_curr_sound->drop();
+        m_curr_sound = Q_NULLPTR;
     }
+
 
     if(playlist.size() == 0)
     {
@@ -54,8 +55,7 @@ void AudioPlayer::setupMusic()
     }
 
     m_curr_sound = m_engine->play2D(playlist.at(playlistIndex).toUtf8(), false, true);
-    m_curr_sound->setSoundStopEventReceiver((irrklang::ISoundStopEventReceiver*) &soundStopEvent);
-
+    m_curr_sound->setSoundStopEventReceiver((irrklang::ISoundStopEventReceiver*) &soundStopEvent, this);
     m_curr_sound->setIsPaused(false);
 }
 
@@ -68,7 +68,7 @@ void AudioPlayer::setPlayPosition(double pos)
     qDebug() << "Audio position changed";
 }
 
-double AudioPlayer::getPlayPosition()
+double AudioPlayer::getPlayPosition(void)
 {
     unsigned long fullLength = m_curr_sound->getPlayLength();
     unsigned long currPos = m_curr_sound->getPlayPosition();
@@ -76,17 +76,27 @@ double AudioPlayer::getPlayPosition()
     return (double)currPos / (double)fullLength;
 }
 
-void AudioPlayer::nextSong()
+void AudioPlayer::nextSong(void)
 {
+    if((playlistIndex + 1) >= playlist.size())
+        return;
+
+    playlistIndex++;
+    setupMusic();
     qDebug() << "nextSong invoked";
 }
 
-void AudioPlayer::prevSong()
+void AudioPlayer::prevSong(void)
 {
+    if(playlistIndex - 1 < 0)
+        return;
+
+    playlistIndex--;
+    setupMusic();
     qDebug() << "prevSong invoked";
 }
 
-void AudioPlayer::togglePause()
+void AudioPlayer::togglePause(void)
 {
     if(m_engine->getSoundSourceCount() == 0 || !m_curr_sound)
         return;
@@ -99,7 +109,7 @@ void AudioPlayer::togglePause()
     qDebug() << "togglePause invoked";
 }
 
-bool AudioPlayer::getIsPlaying()
+bool AudioPlayer::getIsPlaying(void)
 {
     if(!m_curr_sound)
         return false;
@@ -113,7 +123,7 @@ void AudioPlayer::setIsPlaying(bool isPlaying)
     m_curr_sound->setIsPaused(isPlaying);
 }
 
-void AudioPlayer::stopAudio()
+void AudioPlayer::stopAudio(void)
 {
     qDebug() << "stopAudio invoked";
 }

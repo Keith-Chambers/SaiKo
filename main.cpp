@@ -13,6 +13,7 @@
 #include "audioplayer.h"
 #include "mediaitem.h"
 #include "mediafilesystem.h"
+#include "soundstopevent.h"
 
 int main(int argc, char *argv[])
 {
@@ -22,7 +23,7 @@ int main(int argc, char *argv[])
     app.setWindowIcon(QIcon(":/resources/music.ico"));
     QQmlApplicationEngine engine;
 
-    AudioPlayer audioplayer(0);
+    AudioPlayer audioplayer(&engine);
 
     QStringList libPaths;
     //QString libPath("C:/libs/media");
