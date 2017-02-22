@@ -35,11 +35,7 @@ void AudioPlayer::setupMusic(void)
     qDebug() << "Setting up music";
 
     if(m_curr_sound)
-    {
-        m_curr_sound->drop();
-        m_curr_sound = Q_NULLPTR;
-    }
-
+        m_curr_sound->stop();
 
     if(playlist.size() == 0)
     {
