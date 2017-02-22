@@ -4,13 +4,12 @@
 SoundStopEvent::SoundStopEvent()
 {
     qDebug() << "soundStopEvent constructor called";
-    //mAudioPlayer = pAudioPlayer;
 }
 
-void SoundStopEvent::OnSoundStopped(irrklang::ISound *sound, irrklang::E_STOP_EVENT_CAUSE reason, void * userData)
+void SoundStopEvent::OnSoundStopped(irrklang::ISound *pSound, irrklang::E_STOP_EVENT_CAUSE pReason, void *pUserData)
 {
-    if(reason != irrklang::E_STOP_EVENT_CAUSE::ESEC_SOUND_FINISHED_PLAYING )
+    if(pReason != irrklang::E_STOP_EVENT_CAUSE::ESEC_SOUND_FINISHED_PLAYING )
         return;
-    ((AudioPlayer*)userData)->nextSong();
-    qDebug() << "onSoundStopped event called";
+    ((AudioPlayer*)pUserData)->nextSong();
+    qDebug() << "onSoundStopped event complete";
 }

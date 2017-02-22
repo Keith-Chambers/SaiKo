@@ -13,29 +13,30 @@ class MediaItem : public QObject
     Q_PROPERTY(QString imagePath READ getImagePath WRITE setImagePath NOTIFY imagePathChanged)
     Q_PROPERTY(bool isPlayable READ getIsPlayable WRITE setIsPlayable NOTIFY isPlayableChanged)
 public:
-    explicit MediaItem(QObject *parent = 0);
-    MediaItem(QString item_path, bool canPlay, QObject *parent = 0);
-    MediaItem(QString item_path, QString image_path, bool canPlay, QObject *parent = 0);
+    //TODO: Remove default constructor
+    //explicit MediaItem(QObject *parent = 0);
+    MediaItem(QString pItemPath, bool pIsPlayable, QObject *parent = 0);
+    MediaItem(QString pItemPath, QString pImagePath, bool pIsPlayable, QObject *parent = 0);
     ~MediaItem();
 
-    QString getItemName(){ return itemName; }
-    QString getImagePath(){ return imagePath; }
-    bool getIsPlayable(){ return isPlayable; }
+    QString getItemName(){ return mItemName; }
+    QString getImagePath(){ return mImagePath; }
+    bool getIsPlayable(){ return mIsPlayable; }
 
-    void setItemName(QString newItemName);
-    void setImagePath(QString newDirImage);
-    void setIsPlayable(bool newIsPlayable);
+    void setItemName(QString pItemName);
+    void setImagePath(QString pDirImage);
+    void setIsPlayable(bool pIsPlayable);
 signals:
-    void itemNameChanged(QString newItemName);
-    void imagePathChanged(QString newDirImage);
-    void isPlayableChanged(bool newIsPlayable);
+    void itemNameChanged(QString pItemName);
+    void imagePathChanged(QString pDirImage);
+    void isPlayableChanged(bool pIsPlayable);
 
 public slots:
 
 private:
-    QString imagePath;
-    QString itemName;
-    bool isPlayable;
+    QString mImagePath;
+    QString mItemName;
+    bool mIsPlayable;
 };
 
 #endif // MEDIAITEM_H

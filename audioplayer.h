@@ -23,24 +23,25 @@ public:
     Q_INVOKABLE void nextSong(void);
     Q_INVOKABLE void prevSong(void);
     Q_INVOKABLE bool getIsPlaying(void);
-    Q_INVOKABLE void setIsPlaying(bool isPlaying);
-    Q_INVOKABLE void setPlayPosition(double pos);
+    Q_INVOKABLE void setIsPlaying(bool pIsPlaying);
+    Q_INVOKABLE void setPlayPosition(double pPos);
     Q_INVOKABLE double getPlayPosition(void);
     Q_INVOKABLE void togglePause(void);
     Q_INVOKABLE void stopAudio(void);
-    void setupMusic(void);
+    void playMusic(void);
 signals:
     void playPositionChanged(double);
     void isPlayingChanged(bool);
 public slots:
     void setPlaylist(QStringList playlist);
 private:
-   irrklang::ISoundEngine* m_engine;
-   irrklang::ISound* m_curr_sound;
-   QStringList playlist;
-   int playlistIndex;
-   QLinkedList<irrklang::ISound*> m_playQueue;
-   SoundStopEvent soundStopEvent;
+   irrklang::ISoundEngine* mEngine;
+   irrklang::ISound* mCurrentSound;
+   QStringList mPlaylist;
+   int mPlaylistIndex;
+   // Is this even used?
+   //QLinkedList<irrklang::ISound*> mPlayQueue;
+   SoundStopEvent mSoundStopEvent;
 };
 
 #endif // AUDIOPLAYER_H

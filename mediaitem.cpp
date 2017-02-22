@@ -1,25 +1,19 @@
 #include "mediaitem.h"
 
-MediaItem::MediaItem(QObject *parent) : QObject(parent)
-{
-    Q_UNUSED(parent);
-    qDebug() << "Please don't call this..";
-}
-
-MediaItem::MediaItem(QString item_path, bool canPlay, QObject *parent) : QObject(parent)
+MediaItem::MediaItem(QString pItemPath, bool pIsPlayable, QObject *parent) : QObject(parent)
 {
     QChar sep('/');
-    itemName = item_path.section(sep, -1, -1);
-    isPlayable = canPlay;
+    mItemName = pItemPath.section(sep, -1, -1);
+    mIsPlayable = pIsPlayable;
 }
 
-MediaItem::MediaItem(QString item_path, QString image_path, bool canPlay, QObject *parent) : QObject(parent)
+MediaItem::MediaItem(QString pItemPath, QString pImagePath, bool pIsPlayable, QObject *parent) : QObject(parent)
 {
     QChar sep('/');
-    itemName = item_path.section(sep, -1, -1);
-    imagePath = image_path;
-    imagePath.prepend("file:///");
-    isPlayable = canPlay;
+    mItemName = pItemPath.section(sep, -1, -1);
+    mImagePath = pImagePath;
+    mImagePath.prepend("file:///");
+    mIsPlayable = pIsPlayable;
 }
 
 MediaItem::~MediaItem()
@@ -27,17 +21,17 @@ MediaItem::~MediaItem()
     qDebug() << "Freeing MediaItem";
 }
 
-void MediaItem::setItemName(QString newItemName)
+void MediaItem::setItemName(QString pItemName)
 {
-    itemName = newItemName;
+    mItemName = pItemName;
 }
 
-void MediaItem::setImagePath(QString newImagePath)
+void MediaItem::setImagePath(QString pImagePath)
 {
-    imagePath = newImagePath;
+    mImagePath = pImagePath;
 }
 
-void MediaItem::setIsPlayable(bool newIsPlayable)
+void MediaItem::setIsPlayable(bool pIsPlayable)
 {
-    isPlayable = newIsPlayable;
+    mIsPlayable = pIsPlayable;
 }

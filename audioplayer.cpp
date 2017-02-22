@@ -1,122 +1,123 @@
 #include "audioplayer.h"
 
-AudioPlayer::AudioPlayer(QObject *parent) : QObject(parent), soundStopEvent()
+AudioPlayer::AudioPlayer(QObject *parent) : QObject(parent), mSoundStopEvent()
 {
     qDebug() << "AudioPlayer Constructer invoked";
 
-    m_curr_sound = Q_NULLPTR;
-    m_engine = irrklang::createIrrKlangDevice();
+    mCurrentSound = Q_NULLPTR;
+    mEngine = irrklang::createIrrKlangDevice();
 
-    if (!m_engine)
+    if (!mEngine)
     {
         printf("Could not startup engine\n");
     }
 
-    playlistIndex = 0;
+    mPlaylistIndex = 0;
 }
 
 AudioPlayer::~AudioPlayer(void)
 {
-    m_curr_sound->drop();
-    m_engine->drop();
+    mCurrentSound->drop();
+    mEngine->drop();
 }
 
-void AudioPlayer::setPlaylist(QStringList playlist)
+void AudioPlayer::setPlaylist(QStringList pPlaylist)
 {
-    this->playlist.clear();
-    this->playlist = playlist;
-    playlistIndex = 0;
+    mPlaylist.clear();
+    mPlaylist = pPlaylist;
+    mPlaylistIndex = 0;
 
-    setupMusic();
+    playMusic();
 }
 
-void AudioPlayer::setupMusic(void)
+void AudioPlayer::playMusic(void)
 {
     qDebug() << "Setting up music";
 
-    if(m_curr_sound)
-        m_curr_sound->stop();
+    if(mCurrentSound)
+        mCurrentSound->stop();
 
-    if(playlist.size() == 0)
+    if(mPlaylist.size() == 0)
     {
-        m_curr_sound = Q_NULLPTR;
+        mCurrentSound = Q_NULLPTR;
         return;
     }
 
-    if(playlistIndex >= playlist.size() || playlistIndex < 0)
+    if(mPlaylistIndex >= mPlaylist.size() || mPlaylistIndex < 0)
     {
-        qDebug() << "Error playlist size = " << playlist.size() << " and playlistIndex = " << playlistIndex;
-        m_curr_sound = Q_NULLPTR;
+        qDebug() << "Error playlist size = " << mPlaylist.size() << " and playlistIndex = " << mPlaylistIndex;
+        mCurrentSound = Q_NULLPTR;
         return;
     }
 
-    m_curr_sound = m_engine->play2D(playlist.at(playlistIndex).toUtf8(), false, true);
-    m_curr_sound->setSoundStopEventReceiver((irrklang::ISoundStopEventReceiver*) &soundStopEvent, this);
-    m_curr_sound->setIsPaused(false);
+    // TODO: You can set pause to false here if you set the forth param
+    mCurrentSound = mEngine->play2D(mPlaylist.at(mPlaylistIndex).toUtf8(), false, true);
+    mCurrentSound->setSoundStopEventReceiver((irrklang::ISoundStopEventReceiver*) &mSoundStopEvent, this);
+    mCurrentSound->setIsPaused(false);
 }
 
-void AudioPlayer::setPlayPosition(double pos)
+void AudioPlayer::setPlayPosition(double pPos)
 {
-    unsigned long currPos = m_curr_sound->getPlayPosition();
-    currPos = (double)currPos * pos;
-    m_curr_sound->setPlayPosition(currPos);
+    unsigned long currPos = mCurrentSound->getPlayPosition();
+    currPos = (double)currPos * pPos;
+    mCurrentSound->setPlayPosition(currPos);
 
     qDebug() << "Audio position changed";
 }
 
 double AudioPlayer::getPlayPosition(void)
 {
-    unsigned long fullLength = m_curr_sound->getPlayLength();
-    unsigned long currPos = m_curr_sound->getPlayPosition();
+    unsigned long fullLength = mCurrentSound->getPlayLength();
+    unsigned long currPos = mCurrentSound->getPlayPosition();
 
     return (double)currPos / (double)fullLength;
 }
 
 void AudioPlayer::nextSong(void)
 {
-    if((playlistIndex + 1) >= playlist.size())
+    if((mPlaylistIndex + 1) >= mPlaylist.size())
         return;
 
-    playlistIndex++;
-    setupMusic();
+    mPlaylistIndex++;
+    playMusic();
     qDebug() << "nextSong invoked";
 }
 
 void AudioPlayer::prevSong(void)
 {
-    if(playlistIndex - 1 < 0)
+    if(mPlaylistIndex - 1 < 0)
         return;
 
-    playlistIndex--;
-    setupMusic();
+    mPlaylistIndex--;
+    playMusic();
     qDebug() << "prevSong invoked";
 }
 
 void AudioPlayer::togglePause(void)
 {
-    if(m_engine->getSoundSourceCount() == 0 || !m_curr_sound)
+    if(mEngine->getSoundSourceCount() == 0 || !mCurrentSound)
         return;
 
-    if(m_curr_sound->getIsPaused())
-        m_curr_sound->setIsPaused(false);
+    if(mCurrentSound->getIsPaused())
+        mCurrentSound->setIsPaused(false);
     else
-        m_curr_sound->setIsPaused(true);
+        mCurrentSound->setIsPaused(true);
 
     qDebug() << "togglePause invoked";
 }
 
 bool AudioPlayer::getIsPlaying(void)
 {
-    if(!m_curr_sound)
+    if(!mCurrentSound)
         return false;
-    return m_curr_sound->getIsPaused();
+    return mCurrentSound->getIsPaused();
 }
 
-void AudioPlayer::setIsPlaying(bool isPlaying)
+void AudioPlayer::setIsPlaying(bool pIsPlaying)
 {
-    if(!m_curr_sound)
+    if(!mCurrentSound)
         return;
-    m_curr_sound->setIsPaused(isPlaying);
+    mCurrentSound->setIsPaused(pIsPlaying);
 }
 
 void AudioPlayer::stopAudio(void)

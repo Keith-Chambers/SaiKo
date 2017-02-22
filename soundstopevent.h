@@ -9,8 +9,7 @@ class SoundStopEvent : irrklang::ISoundStopEventReceiver
 {
 public:
     SoundStopEvent();
-    void OnSoundStopped(irrklang::ISound *sound, irrklang::E_STOP_EVENT_CAUSE reason, void * userData);
-    //~SoundStopEvent(){}
+    void OnSoundStopped(irrklang::ISound *pSound, irrklang::E_STOP_EVENT_CAUSE pReason, void * pUserData);
 private:
 
 };
