@@ -12,5 +12,6 @@
         <file>resources/forward.png</file>
         <file>resources/pause.png</file>
         <file>resources/music.ico</file>
+        <file>resources/record.png</file>
     </qresource>
 </RCC>

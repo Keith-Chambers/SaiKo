@@ -93,6 +93,10 @@ ApplicationWindow
                         id: folderImage
                         anchors.fill: parent;
                         anchors.margins: 2
+                        asynchronous: true
+                        sourceSize.width: 130
+                        sourceSize.height: 130
+                        smooth: false
 
                         source:
                         {
@@ -372,7 +376,7 @@ ApplicationWindow
                 Image
                 {
                     id: currentlyPlayingImage
-                    source: "qrc:///resources/cover.jpg"
+                    source: "qrc:///resources/record.png"
                     anchors.fill: parent;
                 }
             }
