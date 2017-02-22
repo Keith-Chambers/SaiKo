@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
     mFileSys.generateMediaItems();
 
     mFileSys.createSaikFiles(false);
+    //mFileSys.purgeSaikFiles();
 
     // Connect signals to slots
     QObject::connect(&mFileSys, &MediaFileSystem::playlistChanged, &audioplayer, &AudioPlayer::setPlaylist);

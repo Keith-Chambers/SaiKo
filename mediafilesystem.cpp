@@ -332,6 +332,7 @@ void MediaFileSystem::generateMediaItems()
 
 }
 
+// TODO: This feature is currently only implemented for the first library
 void MediaFileSystem::createSaikFiles(bool pRecheck)
 {
     QString path;
@@ -382,10 +383,29 @@ void MediaFileSystem::createSaikFiles(bool pRecheck)
     qDebug() << "Successfully created all saik files";
 }
 
-/*
+// TODO: This feature is currently only implemented for the first library
 void MediaFileSystem::purgeSaikFiles()
 {
+    QString path;
+    path = mLibraryAbsPaths.at(0);
 
+    QStringList nameFilters;
+    QDirIterator itr(path, nameFilters, QDir::AllDirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+
+    while(itr.hasNext())
+    {
+        itr.next();
+        QDir currentDir(itr.filePath());
+
+        if(currentDir.exists("data.saik"))
+        {
+            QFile saikFile(itr.filePath() + "/data.saik");
+            qDebug() << saikFile.fileName() + " deleted";
+            saikFile.remove();
+        }
+    }
+
+    qDebug() << "Successfully created all saik files";
 }
-*/
+
 

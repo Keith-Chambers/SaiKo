@@ -26,6 +26,7 @@ public:
     void generateMediaItems();
     void generateMediaItemsFromRoot();
     void createSaikFiles(bool pRecheck);
+    void purgeSaikFiles();
     Q_INVOKABLE void invokeMediaItem(QString pDirName);
 signals:
     void playlistChanged(QStringList pPlaylist);
