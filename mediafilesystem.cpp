@@ -405,7 +405,7 @@ void MediaFileSystem::purgeSaikFiles()
         }
     }
 
-    qDebug() << "Successfully created all saik files";
+    qDebug() << "Successfully removed all saik files";
 }
 
 

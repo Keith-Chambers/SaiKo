@@ -26,8 +26,6 @@ int main(int argc, char *argv[])
     AudioPlayer audioplayer(&engine);
 
     QStringList libPaths;
-    //QString libPath("C:/libs/media");
-    //QString libPath("G:/Keith/Media/Music");
     QString libPath;
 
     // Load library from file..
@@ -53,7 +51,9 @@ int main(int argc, char *argv[])
     //mFileSys.purgeSaikFiles();
 
     // Connect signals to slots
+
     QObject::connect(&mFileSys, &MediaFileSystem::playlistChanged, &audioplayer, &AudioPlayer::setPlaylist);
+    QObject::connect(&app, &QGuiApplication::aboutToQuit, &mFileSys, &MediaFileSystem::purgeSaikFiles);
 
     engine.rootContext()->setContextProperty("AudioPlayer", QVariant::fromValue(&audioplayer));
     engine.rootContext()->setContextProperty("MFileSys", QVariant::fromValue(&mFileSys));

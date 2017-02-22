@@ -4,7 +4,6 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 import Qt.labs.folderlistmodel 2.1
-//import QtQuick.Controls.Styles 1.4
 
 ApplicationWindow
 {
@@ -432,7 +431,6 @@ ApplicationWindow
                     bottom: parent.bottom;
                     topMargin: 5;
                     bottomMargin: 5;
-                    //leftMargin: 240;
                     horizontalCenter: parent.horizontalCenter;
                 }
 
@@ -464,7 +462,7 @@ ApplicationWindow
                         id: audioTogglePlayImage;
                         anchors.fill: parent;
                         fillMode: Image.Stretch;
-                        source: "qrc:///resources/play.png";
+                        source: (AudioPlayer.getIsPlaying()) ? "qrc:///resources/play.png" : "qrc:///resources/pause.png";
 
                         MouseArea
                         {
@@ -473,12 +471,12 @@ ApplicationWindow
                             onClicked:
                             {
                                 console.log("Clicked");
-                                if(AudioPlayer.getIsPlaying() == true)
-                                    audioTogglePlayImage.source = "qrc:///resources/pause.png"
-                                else
-                                    audioTogglePlayImage.source = "qrc:///resources/play.png"
-
                                 AudioPlayer.togglePause();
+
+                                if(AudioPlayer.getIsPlaying() == true)
+                                    audioTogglePlayImage.source = "qrc:///resources/play.png"
+                                else
+                                    audioTogglePlayImage.source = "qrc:///resources/pause.png"
                             }
                         }
                     }
