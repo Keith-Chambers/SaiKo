@@ -56,17 +56,6 @@ void AudioPlayer::setupMusic()
     m_curr_sound = m_engine->play2D(playlist.at(playlistIndex).toUtf8(), false, true);
     m_curr_sound->setSoundStopEventReceiver((irrklang::ISoundStopEventReceiver*) &soundStopEvent);
 
-    // TODO: Remove this and use something more efficient
-    //m_engine->removeAllSoundSources();
-    /*
-    for(int i = 1; i < playlist.size(); i++)
-    {
-        qDebug() << "Adding " + playlist.at(i) + " as a source";
-        //QString::toUtf8()
-        m_engine->addSoundSourceFromFile(playlist.at(i).toUtf8());
-    }
-    */
-
     m_curr_sound->setIsPaused(false);
 }
 
@@ -99,15 +88,14 @@ void AudioPlayer::prevSong()
 
 void AudioPlayer::togglePause()
 {
-    if(m_engine->getSoundSourceCount() == 0)
+    if(m_engine->getSoundSourceCount() == 0 || !m_curr_sound)
         return;
 
-    static int x = 1;
-    if(x % 2 == 0)
-        m_curr_sound->setIsPaused(true);
-    else
+    if(m_curr_sound->getIsPaused())
         m_curr_sound->setIsPaused(false);
-    x++;
+    else
+        m_curr_sound->setIsPaused(true);
+
     qDebug() << "togglePause invoked";
 }
 
