@@ -2,18 +2,18 @@
 
 MediaItem::MediaItem(QString pItemPath, bool pIsPlayable, QObject *parent) : QObject(parent)
 {
-    QChar sep('/');
-    mItemName = pItemPath.section(sep, -1, -1);
     mIsPlayable = pIsPlayable;
+    QChar sep('/');
+    setItemName(pItemPath.section(sep, -1, -1));
 }
 
 MediaItem::MediaItem(QString pItemPath, QString pImagePath, bool pIsPlayable, QObject *parent) : QObject(parent)
 {
+    mIsPlayable = pIsPlayable;
     QChar sep('/');
-    mItemName = pItemPath.section(sep, -1, -1);
+    setItemName(pItemPath.section(sep, -1, -1));
     mImagePath = pImagePath;
     mImagePath.prepend("file:///");
-    mIsPlayable = pIsPlayable;
 }
 
 MediaItem::~MediaItem()
@@ -23,6 +23,14 @@ MediaItem::~MediaItem()
 
 void MediaItem::setItemName(QString pItemName)
 {
+
+    // Removes file extension
+    if(mIsPlayable)
+    {
+        QChar sep('.');
+        pItemName = pItemName.section(sep, 0, -2);
+    }
+
     mItemName = pItemName;
 }
 
