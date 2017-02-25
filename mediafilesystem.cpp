@@ -53,6 +53,7 @@ void MediaFileSystem::invokeMediaItem(QString pDirName)
 
     QFileInfoList fileInfo;
     QStringList nameFilters;
+    qDebug() << pDirName;
     nameFilters.append(pDirName + "*");
     fileInfo = mCurrentDir->entryInfoList(nameFilters);
 

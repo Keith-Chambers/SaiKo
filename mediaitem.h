@@ -12,6 +12,7 @@ class MediaItem : public QObject
     Q_PROPERTY(QString itemName READ getItemName WRITE setItemName NOTIFY itemNameChanged)
     Q_PROPERTY(QString imagePath READ getImagePath WRITE setImagePath NOTIFY imagePathChanged)
     Q_PROPERTY(bool isPlayable READ getIsPlayable WRITE setIsPlayable NOTIFY isPlayableChanged)
+    Q_PROPERTY(QString extension READ getExtension WRITE setExtension NOTIFY extensionChanged)
 public:
     //TODO: Remove default constructor
     //explicit MediaItem(QObject *parent = 0);
@@ -22,14 +23,17 @@ public:
     QString getItemName(){ return mItemName; }
     QString getImagePath(){ return mImagePath; }
     bool getIsPlayable(){ return mIsPlayable; }
+    QString getExtension(){ return mExtension; }
 
     void setItemName(QString pItemName);
     void setImagePath(QString pDirImage);
     void setIsPlayable(bool pIsPlayable);
+    void setExtension(QString pExtension);
 signals:
     void itemNameChanged(QString pItemName);
     void imagePathChanged(QString pDirImage);
     void isPlayableChanged(bool pIsPlayable);
+    void extensionChanged(QString pExtension);
 
 public slots:
 
@@ -37,6 +41,7 @@ private:
     QString mImagePath;
     QString mItemName;
     bool mIsPlayable;
+    QString mExtension;
 };
 
 #endif // MEDIAITEM_H

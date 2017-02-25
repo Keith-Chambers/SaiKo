@@ -28,6 +28,8 @@ void MediaItem::setItemName(QString pItemName)
     if(mIsPlayable)
     {
         QChar sep('.');
+
+        mExtension = pItemName.section(sep, -1, -1);
         pItemName = pItemName.section(sep, 0, -2);
     }
 
@@ -42,4 +44,11 @@ void MediaItem::setImagePath(QString pImagePath)
 void MediaItem::setIsPlayable(bool pIsPlayable)
 {
     mIsPlayable = pIsPlayable;
+}
+
+void MediaItem::setExtension(QString pExtension)
+{
+    if(pExtension.size() > 4)
+        return;
+    mExtension = pExtension;
 }
