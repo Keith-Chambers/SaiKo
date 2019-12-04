@@ -8,8 +8,9 @@ SoundStopEvent::SoundStopEvent()
 
 void SoundStopEvent::OnSoundStopped(irrklang::ISound *pSound, irrklang::E_STOP_EVENT_CAUSE pReason, void *pUserData)
 {
-    if(pReason != irrklang::E_STOP_EVENT_CAUSE::ESEC_SOUND_FINISHED_PLAYING )
+    if(pReason != irrklang::E_STOP_EVENT_CAUSE::ESEC_SOUND_FINISHED_PLAYING ) {
         return;
-    ((AudioPlayer*)pUserData)->nextSong();
+    }
+//    ((AudioPlayer*)pUserData)->nextSong();
     qDebug() << "onSoundStopped event complete";
 }

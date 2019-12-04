@@ -15,6 +15,9 @@
 #include "mediafilesystem.h"
 #include "soundstopevent.h"
 
+#include "inc/irrKlang.h"
+#include "inc/conio.h"
+
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -47,7 +50,7 @@ int main(int argc, char *argv[])
     MediaFileSystem mFileSys(libPaths, &engine);
     mFileSys.generateMediaItems();
 
-    mFileSys.createSaikFiles(false);
+    //mFileSys.createSaikFiles(false);
     //mFileSys.purgeSaikFiles();
 
     // Connect signals to slots

@@ -25,6 +25,12 @@ void AudioPlayer::setPlaylist(QStringList pPlaylist)
 {
     mPlaylist.clear();
     mPlaylist = pPlaylist;
+
+    qDebug() << "Playlist:";
+    for(int i = 0; i < mPlaylist.size(); i++) {
+        qDebug() << mPlaylist[i];
+    }
+
     mPlaylistIndex = 0;
 
     playMusic();
@@ -34,11 +40,14 @@ void AudioPlayer::playMusic(void)
 {
     qDebug() << "Setting up music";
 
-    if(mCurrentSound)
+    if(mCurrentSound) {
+        qDebug() << "Stopping current sound";
         mCurrentSound->stop();
+    }
 
     if(mPlaylist.size() == 0)
     {
+        qDebug() << "Playlist empty";
         mCurrentSound = Q_NULLPTR;
         return;
     }
@@ -51,9 +60,14 @@ void AudioPlayer::playMusic(void)
     }
 
     // TODO: You can set pause to false here if you set the forth param
+
+    qDebug() << "Playing: " << mPlaylist.at(mPlaylistIndex).toUtf8();
+
     mCurrentSound = mEngine->play2D(mPlaylist.at(mPlaylistIndex).toUtf8(), false, true);
     mCurrentSound->setSoundStopEventReceiver((irrklang::ISoundStopEventReceiver*) &mSoundStopEvent, this);
     mCurrentSound->setIsPaused(false);
+
+    qDebug() << "Music playing";
 }
 
 void AudioPlayer::setPlayPosition(double pPos)

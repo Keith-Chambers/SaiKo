@@ -6,22 +6,23 @@ SOURCES += main.cpp \
     audioplayer.cpp \
     mediaitem.cpp \
     mediafilesystem.cpp \
-    soundstopevent.cpp
+    soundstopevent.cpp \
+    textparser.cpp
 
 RESOURCES += \
     qml.qrc
 
-# Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
 
-# Default rules for deployment.
 include(deployment.pri)
 
 HEADERS += \
     audioplayer.h \
     mediaitem.h \
     mediafilesystem.h \
-    soundstopevent.h
+    soundstopevent.h \
+    textparser.h
 
-
-LIBS += -lirrKlang
+LIBS += -L$$PWD/libs/linux/ -lIrrKlang
+LIBS += -L$$PWD/libs/linux/ikpMP3.so
+LIBS += -L$$PWD/libs/linux/ikpFlac.so

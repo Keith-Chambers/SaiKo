@@ -7,7 +7,6 @@
 
 // irrKlangIncludes
 #include "./inc/irrKlang.h"
-#include <conio.h>
 
 #include "soundstopevent.h"
 
@@ -39,8 +38,6 @@ private:
    irrklang::ISound* mCurrentSound;
    QStringList mPlaylist;
    int mPlaylistIndex;
-   // Is this even used?
-   //QLinkedList<irrklang::ISound*> mPlayQueue;
    SoundStopEvent mSoundStopEvent;
 };
 

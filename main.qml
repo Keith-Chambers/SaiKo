@@ -58,10 +58,10 @@ ApplicationWindow
                 top: parent.top;
                 bottom: parent.bottom;
                 right: parent.right;
-                left: parent.left;
+                left: sideMenuBackground.right;
                 bottomMargin: 70;
+                leftMargin: 50;
                 topMargin: 100
-                leftMargin: 300;
             }
 
             cellWidth: 200
@@ -100,7 +100,7 @@ ApplicationWindow
 
                         source:
                         {
-                            if(model.modelData.imagePath != "")
+                            if(model.modelData.imagePath !== "")
                                 return model.modelData.imagePath;
                             else
                                 return "";
@@ -136,228 +136,6 @@ ApplicationWindow
 
             width: 200
             color: "#243D45";
-
-            ColumnLayout
-            {
-                id: sideMenuLayout
-                spacing: 2
-                anchors
-                {
-                    top: parent.top;
-                    topMargin: 80;
-                    horizontalCenter: parent.horizontalCenter;
-                }
-
-                Rectangle
-                {
-                    id: artistMenuItem
-                    Layout.minimumHeight: 25;
-                    Layout.minimumWidth: 140;
-                    color: "#6A6B6B";
-                    radius: 1;
-
-                    Label
-                    {
-                        id: artistLabel;
-                        anchors.centerIn: parent;
-                        text: "Artists";
-                        font.family: "Helvetica";
-                        color: "#C5DFE8";
-                        font.pointSize: 12
-                    }
-
-                    MouseArea
-                    {
-                        anchors.fill: parent;
-                        hoverEnabled: true;
-                        onHoveredChanged:
-                        {
-                            if(containsMouse)
-                                artistMenuItem.color = "#044C63";
-                            else
-                                artistMenuItem.color = "#6A6B6B";
-                        }
-                    }
-                }
-
-                Rectangle
-                {
-                    id: albumMenuItem
-                    Layout.minimumHeight: 25;
-                    Layout.minimumWidth: 140;
-                    color: "#6A6B6B";
-                    radius: 1;
-
-                    Label
-                    {
-                        id: albumMenuLabel;
-                        anchors.centerIn: parent;
-                        text: "Albums";
-                        font.family: "Helvetica";
-                        color: "#C5DFE8";
-                        font.pointSize: 12
-                    }
-
-                    MouseArea
-                    {
-                        anchors.fill: parent;
-                        hoverEnabled: true;
-                        onHoveredChanged:
-                        {
-                            if(containsMouse)
-                                albumMenuItem.color = "#044C63";
-                            else
-                                albumMenuItem.color = "#6A6B6B";
-                        }
-                    }
-                }
-
-                Rectangle
-                {
-                    id: songMenuItem
-                    Layout.minimumHeight: 25;
-                    Layout.minimumWidth: 140;
-                    color: "#6A6B6B";
-                    radius: 1;
-
-                    Label
-                    {
-                        id: songMenuLabel;
-                        anchors.centerIn: parent;
-                        text: "Songs";
-                        font.family: "Helvetica";
-                        color: "#C5DFE8";
-                        font.pointSize: 12
-                    }
-
-                    MouseArea
-                    {
-                        anchors.fill: parent;
-                        hoverEnabled: true;
-                        onHoveredChanged:
-                        {
-                            if(containsMouse)
-                                songMenuItem.color = "#044C63";
-                            else
-                                songMenuItem.color = "#6A6B6B";
-                        }
-                    }
-                }
-
-                Rectangle
-                {
-                    id: genreMenuItem
-                    Layout.minimumHeight: 25;
-                    Layout.minimumWidth: 140;
-                    color: "#6A6B6B";
-                    radius: 1;
-
-                    Label
-                    {
-                        id: genreMenuLabel;
-                        anchors.centerIn: parent;
-                        text: "Genres";
-                        font.family: "Helvetica";
-                        color: "#C5DFE8";
-                        font.pointSize: 12
-                    }
-
-                    MouseArea
-                    {
-                        anchors.fill: parent;
-                        hoverEnabled: true;
-                        onHoveredChanged:
-                        {
-                            if(containsMouse)
-                                genreMenuItem.color = "#044C63";
-                            else
-                                genreMenuItem.color = "#6A6B6B";
-                        }
-                    }
-                }
-
-                Rectangle
-                {
-                    id: playlistMenuItem
-                    Layout.minimumHeight: 25;
-                    Layout.minimumWidth: 140;
-                    color: "#6A6B6B";
-                    radius: 1;
-
-                    Label
-                    {
-                        id: playListMenuLabel;
-                        anchors.centerIn: parent;
-                        text: "Playlists";
-                        font.family: "Helvetica";
-                        color: "#C5DFE8";
-                        font.pointSize: 12
-                    }
-
-                    MouseArea
-                    {
-                        anchors.fill: parent;
-                        hoverEnabled: true;
-                        onHoveredChanged:
-                        {
-                            if(containsMouse)
-                                playlistMenuItem.color = "#044C63";
-                            else
-                                playlistMenuItem.color = "#6A6B6B";
-                        }
-                    }
-                }
-            }
-
-            Rectangle
-            {
-                id: nowPlayingInfo
-                anchors
-                {
-                    bottom: nowPlayingImageRect.top;
-                    top: sideMenuLayout.bottom;
-                    bottomMargin: 20;
-                    topMargin: 40;
-                    left: parent.left;
-                    right: parent.right
-                    leftMargin: 10;
-                    rightMargin: 10;
-                }
-                color: "#243D45";
-
-                Label
-                {
-                    id: newPlayingLabel
-                    text: "Now Playing: ";
-                    font.family: "Helvetica";
-                    color: "#C5DFE8";
-                    font.pointSize: 14
-
-                    anchors
-                    {
-                        top: parent.top;
-                        left: parent.left
-                        leftMargin: 2;
-                    }
-                }
-
-                Label
-                {
-                    id: currentSongLabel
-                    text: "Artist - Song";
-                    font.family: "Poster";
-                    color: "#C5DFE8"
-                    font.pointSize: 15
-
-                    anchors
-                    {
-                        left: parent.left;
-                        leftMargin: 2;
-                        top: newPlayingLabel.bottom;
-                        topMargin: 5;
-                    }
-                }
-            }
 
             Rectangle
             {
@@ -423,7 +201,7 @@ ApplicationWindow
                         }
                     }
 
-                value: 0.5
+                value: 0.0;
             }
 
             RowLayout

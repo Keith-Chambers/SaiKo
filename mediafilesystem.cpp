@@ -45,6 +45,8 @@ void MediaFileSystem::upDir()
 
 void MediaFileSystem::invokeMediaItem(QString pDirName)
 {
+    qDebug() << "Invoking media item";
+
     if(!mCurrentDir || !mCurrentDir->exists())
     {
         downDir(pDirName);
@@ -66,6 +68,7 @@ void MediaFileSystem::invokeMediaItem(QString pDirName)
     if(fileInfo.at(0).isFile())
     {
         qDebug() << "Playing from " << pDirName;
+        pDirName += ".mp3"; // TODO: Remove
         generatePlaylist(pDirName);
     }else if(fileInfo.at(0).isDir())
     {
@@ -142,6 +145,8 @@ void MediaFileSystem::generatePlaylist(QString pSongName)
     mPlaylist.clear();
     QStringList songNames;
 
+    qDebug() << "Song to play -> " << pSongName;
+
     if(!mCurrentDir)
     {
         qDebug() << "Failed to generate playlist as currentDir is NULL";
@@ -155,7 +160,7 @@ void MediaFileSystem::generatePlaylist(QString pSongName)
     {
         if(tempNames.at(i) != pSongName)
         {
-            //qDebug() << "Skipping " << tempNames.at(i);
+            qDebug() << "Skipping " << tempNames.at(i);
             songNames.pop_front();
         }else
         {
@@ -165,8 +170,10 @@ void MediaFileSystem::generatePlaylist(QString pSongName)
     }
 
     qDebug() << "Generating playlist absolute paths";
+    qDebug() << "Songs:";
     for(int i = 0; i < songNames.size(); i++)
     {
+        qDebug() << songNames[i];
         QString path;
         path = mCurrentDir->absoluteFilePath(songNames.at(i));
         mPlaylist.append(path);
@@ -277,6 +284,7 @@ void MediaFileSystem::generateMediaItems()
 
     if(!mCurrentDir || !mCurrentDir->exists())
     {
+        qDebug() << "Generating from root";
         generateMediaItemsFromRoot();
         return;
     }
@@ -306,8 +314,6 @@ void MediaFileSystem::generateMediaItems()
         QStringList imageNameList = extractFolderImagePaths(folderPath);
         QString imagePath;
 
-        qDebug() << "FolderPath: " + folderPath;
-
         for(int i = 0; i < imageNameList.size(); i++)
         {
             QDir folderDir(folderPath);
@@ -325,6 +331,9 @@ void MediaFileSystem::generateMediaItems()
         {
             next = new MediaItem(directories.at(i), false);
         }
+
+        qDebug() << "Applying options to folder -> " << folderPath;
+        next->applyFolderOptions(QDir(folderPath));
 
         mQmlMediaItems.append((QObject *)next);
     }
