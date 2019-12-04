@@ -26,7 +26,7 @@ public:
     void generateMediaItems();
     void generateMediaItemsFromRoot();
     void createSaikFiles(bool pRecheck);
-    Q_INVOKABLE void invokeMediaItem(QString pDirName);
+    Q_INVOKABLE void invokeMediaItem(QString fileName, QString extension);
 signals:
     void playlistChanged(QStringList pPlaylist);
 public slots:

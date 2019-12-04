@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QDebug>
 #include <QLinkedList>
+#include <QTimer>
 
 // irrKlangIncludes
 #include "./inc/irrKlang.h"
@@ -17,7 +18,7 @@ class AudioPlayer : public QObject
     Q_PROPERTY(double playPosition READ getPlayPosition WRITE setPlayPosition NOTIFY playPositionChanged)
     Q_PROPERTY(bool isPlaying READ getIsPlaying WRITE setIsPlaying NOTIFY isPlayingChanged)
 public:
-    explicit AudioPlayer(QObject *parent = 0);
+    explicit AudioPlayer(QObject *parent = nullptr);
     ~AudioPlayer();
     Q_INVOKABLE void nextSong(void);
     Q_INVOKABLE void prevSong(void);
@@ -28,6 +29,7 @@ public:
     Q_INVOKABLE void togglePause(void);
     Q_INVOKABLE void stopAudio(void);
     void playMusic(void);
+    void updateAudioPosition();
 signals:
     void playPositionChanged(double);
     void isPlayingChanged(bool);
@@ -39,6 +41,7 @@ private:
    QStringList mPlaylist;
    int mPlaylistIndex;
    SoundStopEvent mSoundStopEvent;
+   QTimer* mPositionTimer;
 };
 
 #endif // AUDIOPLAYER_H

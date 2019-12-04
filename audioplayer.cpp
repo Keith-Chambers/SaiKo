@@ -12,6 +12,10 @@ AudioPlayer::AudioPlayer(QObject *parent) : QObject(parent), mSoundStopEvent()
         printf("Could not startup engine\n");
     }
 
+    mPositionTimer = new QTimer(this);
+    connect(mPositionTimer, &QTimer::timeout, this, &AudioPlayer::updateAudioPosition);
+    mPositionTimer->start(1000);
+
     mPlaylistIndex = 0;
 }
 
@@ -68,19 +72,31 @@ void AudioPlayer::playMusic(void)
     mCurrentSound->setIsPaused(false);
 
     qDebug() << "Music playing";
+
+
+}
+
+void AudioPlayer::updateAudioPosition()
+{
+    emit playPositionChanged( getPlayPosition() );
 }
 
 void AudioPlayer::setPlayPosition(double pPos)
 {
-    unsigned long currPos = mCurrentSound->getPlayPosition();
-    currPos = (double)currPos * pPos;
+    unsigned int endPos = mCurrentSound->getPlayLength();
+    unsigned int currPos = static_cast<unsigned int>(endPos * pPos);
+
     mCurrentSound->setPlayPosition(currPos);
 
-    qDebug() << "Audio position changed";
+    qDebug() << "Audio position changed to " << currPos / endPos;
 }
 
 double AudioPlayer::getPlayPosition(void)
 {
+    if(!mCurrentSound) {
+        return 0.0;
+    }
+
     unsigned long fullLength = mCurrentSound->getPlayLength();
     unsigned long currPos = mCurrentSound->getPlayPosition();
 

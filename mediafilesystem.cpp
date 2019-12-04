@@ -43,37 +43,45 @@ void MediaFileSystem::upDir()
     generateMediaItems();
 }
 
-void MediaFileSystem::invokeMediaItem(QString pDirName)
+void MediaFileSystem::invokeMediaItem(QString pFileName, QString pExtension)
 {
     qDebug() << "Invoking media item";
 
     if(!mCurrentDir || !mCurrentDir->exists())
     {
-        downDir(pDirName);
+        downDir(pFileName);
         return;
     }
 
-    QFileInfoList fileInfo;
-    QStringList nameFilters;
-    qDebug() << pDirName;
-    nameFilters.append(pDirName + "*");
-    fileInfo = mCurrentDir->entryInfoList(nameFilters);
-
-    if(fileInfo.size() != 1)
-    {
-        qDebug() << "fileInfo size : " << fileInfo.size();
-        return;
+    if(pExtension != "") {
+        generatePlaylist(pFileName + "." + pExtension);
+    } else {
+        downDir(pFileName);
     }
 
-    if(fileInfo.at(0).isFile())
-    {
-        qDebug() << "Playing from " << pDirName;
-        pDirName += ".mp3"; // TODO: Remove
-        generatePlaylist(pDirName);
-    }else if(fileInfo.at(0).isDir())
-    {
-        downDir(pDirName);
-    }
+
+
+//    QFileInfoList fileInfo;
+//    QStringList nameFilters;
+//    qDebug() << pDirName;
+//    nameFilters.append(pDirName + "*");
+//    fileInfo = mCurrentDir->entryInfoList(nameFilters);
+
+//    if(fileInfo.size() != 1)
+//    {
+//        qDebug() << "fileInfo size : " << fileInfo.size();
+//        return;
+//    }
+
+//    if(fileInfo.at(0).isFile())
+//    {
+//        qDebug() << "Playing from " << pDirName;
+//        pDirName += ".mp3"; // TODO: Remove
+//        generatePlaylist(pDirName);
+//    }else if(fileInfo.at(0).isDir())
+//    {
+//        downDir(pDirName);
+//    }
 
 }
 

@@ -113,7 +113,8 @@ ApplicationWindow
                         onClicked:
                         {
                             console.log("Enter dir : " + model.modelData.itemName);
-                            MFileSys.invokeMediaItem(itemName);
+
+                            MFileSys.invokeMediaItem(model.modelData.itemName, model.modelData.extension);
                         }
                     }
                 }
@@ -183,6 +184,18 @@ ApplicationWindow
                     horizontalCenter: parent.horizontalCenter;
                 }
 
+                onValueChanged: {
+                    if(playPosSlider.pressed) {
+                        AudioPlayer.playPosition = value;
+                    }
+                }
+
+                Binding {
+                    target: playPosSlider
+                    property: "value"
+                    value: AudioPlayer.playPosition
+                }
+
                 style: SliderStyle {
                         groove: Rectangle {
                             implicitWidth: 700
@@ -201,7 +214,7 @@ ApplicationWindow
                         }
                     }
 
-                value: 0.0;
+//                value: AudioPlayer.playPosition;
             }
 
             RowLayout
