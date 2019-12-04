@@ -72,8 +72,6 @@ void AudioPlayer::playMusic(void)
     mCurrentSound->setIsPaused(false);
 
     qDebug() << "Music playing";
-
-
 }
 
 void AudioPlayer::updateAudioPosition()

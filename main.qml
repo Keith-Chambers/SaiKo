@@ -244,6 +244,14 @@ ApplicationWindow
                         anchors.fill: parent
                         source: "qrc:///resources/back.png";
                     }
+
+                    MouseArea {
+                        id: audioPrevSongMouseArea;
+                        anchors.fill: parent;
+                        onClicked: {
+                            AudioPlayer.prevSong();
+                        }
+                    }
                 }
 
                 Rectangle
@@ -289,6 +297,14 @@ ApplicationWindow
                         id: audioNextImage;
                         anchors.fill: parent
                         source: "qrc:///resources/forward.png";
+                    }
+
+                    MouseArea {
+                        id: audioNextSongMouseArea;
+                        anchors.fill: parent;
+                        onClicked: {
+                            AudioPlayer.nextSong();
+                        }
                     }
                 }
             }
