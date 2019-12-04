@@ -18,8 +18,8 @@ class MediaFileSystem : public QObject
 {
     Q_OBJECT
 public:
-    explicit MediaFileSystem(QObject *parent = 0);
-    MediaFileSystem(QStringList pLibraryAbsPaths, QQmlApplicationEngine *pEngine, QObject *parent = 0);
+    explicit MediaFileSystem(QObject *parent = nullptr);
+    MediaFileSystem(QStringList pLibraryAbsPaths, QQmlApplicationEngine *pEngine, QObject *parent = nullptr);
     Q_INVOKABLE void upDir();
     void downDir(QString pDirName);
     void generatePlaylist(QString pSongName);

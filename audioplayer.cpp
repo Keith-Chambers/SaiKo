@@ -69,7 +69,11 @@ void AudioPlayer::playMusic(void)
 
     mCurrentSound = mEngine->play2D(mPlaylist.at(mPlaylistIndex).toUtf8(), false, true);
     mCurrentSound->setSoundStopEventReceiver((irrklang::ISoundStopEventReceiver*) &mSoundStopEvent, this);
+
+    // TODO: Introduce a delay to prevent skipping
     mCurrentSound->setIsPaused(false);
+
+    emit isPlayingChanged(true);
 
     qDebug() << "Music playing";
 }
@@ -131,6 +135,8 @@ void AudioPlayer::togglePause(void)
     else
         mCurrentSound->setIsPaused(true);
 
+    emit isPlayingChanged( ! mCurrentSound->getIsPaused() );
+
     qDebug() << "togglePause invoked";
 }
 
@@ -138,7 +144,8 @@ bool AudioPlayer::getIsPlaying(void)
 {
     if(!mCurrentSound)
         return false;
-    return mCurrentSound->getIsPaused();
+
+    return !mCurrentSound->getIsPaused();
 }
 
 void AudioPlayer::setIsPlaying(bool pIsPlaying)

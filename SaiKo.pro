@@ -3,6 +3,7 @@ QT += qml quick
 CONFIG += c++11
 
 SOURCES += main.cpp \
+    audiofile.cpp \
     audioplayer.cpp \
     mediaitem.cpp \
     mediafilesystem.cpp \
@@ -17,6 +18,7 @@ QML_IMPORT_PATH =
 include(deployment.pri)
 
 HEADERS += \
+    audiofile.h \
     audioplayer.h \
     mediaitem.h \
     mediafilesystem.h \

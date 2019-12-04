@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     // Connect signals to slots
 
     QObject::connect(&mFileSys, &MediaFileSystem::playlistChanged, &audioplayer, &AudioPlayer::setPlaylist);
-    QObject::connect(&app, &QGuiApplication::aboutToQuit, &mFileSys, &MediaFileSystem::purgeSaikFiles);
+//    QObject::connect(&app, &QGuiApplication::aboutToQuit, &mFileSys, &MediaFileSystem::purgeSaikFiles);
 
     engine.rootContext()->setContextProperty("AudioPlayer", QVariant::fromValue(&audioplayer));
     engine.rootContext()->setContextProperty("MFileSys", QVariant::fromValue(&mFileSys));

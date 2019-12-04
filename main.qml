@@ -64,8 +64,8 @@ ApplicationWindow
                 topMargin: 100
             }
 
-            cellWidth: 200
-            cellHeight: 200
+            cellWidth: 150
+            cellHeight: 150
 
             Component
             {
@@ -73,7 +73,7 @@ ApplicationWindow
                 Rectangle
                 {
                     width: 130;
-                    height: 130
+                    height: 130;
                     color:
                         {
                             (model.modelData.isPlayable) ? "grey" : "#999FCC"
@@ -135,7 +135,7 @@ ApplicationWindow
                 bottomMargin: 70;
             }
 
-            width: 200
+            width: 250
             color: "#243D45";
 
             Rectangle
@@ -159,6 +159,25 @@ ApplicationWindow
                     anchors.fill: parent;
                 }
             }
+
+//            Rectangle
+//            {
+//                id: nowPlayingRect;
+//                visible: AudioPlayer.isPlaying;
+
+//                anchors {
+//                    top: logoImg.bottom;
+//                    left: parent.left;
+//                    right: parent.right;
+//                }
+
+//                height: 300;
+
+//                Text {
+//                    id: currentArtistText
+//                    text: qsTr( AudioPlayer. );
+//                }
+//            }
         }
 
         Rectangle
@@ -185,10 +204,17 @@ ApplicationWindow
                 }
 
                 onValueChanged: {
-                    if(playPosSlider.pressed) {
+                    if(playPosSlider.pressed && AudioPlayer.isPlaying) {
                         AudioPlayer.playPosition = value;
+                        return;
+                    }
+
+                    if(!AudioPlayer.isPlaying) {
+                        value = 0.0;
                     }
                 }
+
+                updateValueWhileDragging: true;
 
                 Binding {
                     target: playPosSlider
@@ -265,7 +291,7 @@ ApplicationWindow
                         id: audioTogglePlayImage;
                         anchors.fill: parent;
                         fillMode: Image.Stretch;
-                        source: (AudioPlayer.getIsPlaying()) ? "qrc:///resources/play.png" : "qrc:///resources/pause.png";
+                        source: (AudioPlayer.isPlaying) ? "qrc:///resources/pause.png" : "qrc:///resources/play.png";
 
                         MouseArea
                         {
@@ -275,11 +301,6 @@ ApplicationWindow
                             {
                                 console.log("Clicked");
                                 AudioPlayer.togglePause();
-
-                                if(AudioPlayer.getIsPlaying() == true)
-                                    audioTogglePlayImage.source = "qrc:///resources/play.png"
-                                else
-                                    audioTogglePlayImage.source = "qrc:///resources/pause.png"
                             }
                         }
                     }
