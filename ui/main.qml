@@ -5,6 +5,8 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 import Qt.labs.folderlistmodel 2.1
 
+import "./MusicFolderView.qml"
+
 ApplicationWindow
 {
     visible: true
@@ -51,78 +53,91 @@ ApplicationWindow
             }
         }
 
-        GridView
-        {
-            anchors
-            {
-                top: parent.top;
-                bottom: parent.bottom;
-                right: parent.right;
-                left: sideMenuBackground.right;
-                bottomMargin: 70;
-                leftMargin: 50;
-                topMargin: 100
-            }
+//        MusicFolderView
+//        {
+//            anchors
+//            {
+//                top: parent.top;
+//                bottom: parent.bottom;
+//                right: parent.right;
+//                left: sideMenuBackground.right;
+//                bottomMargin: 70;
+//                leftMargin: 50;
+//                topMargin: 100
+//            }
+//        }
 
-            cellWidth: 150
-            cellHeight: 150
+//        GridView
+//        {
+//            anchors
+//            {
+//                top: parent.top;
+//                bottom: parent.bottom;
+//                right: parent.right;
+//                left: sideMenuBackground.right;
+//                bottomMargin: 70;
+//                leftMargin: 50;
+//                topMargin: 100
+//            }
 
-            Component
-            {
-                id: fileDelegate
-                Rectangle
-                {
-                    width: 130;
-                    height: 130;
-                    color:
-                        {
-                            (model.modelData.isPlayable) ? "grey" : "#999FCC"
-                        }
+//            cellWidth: 150
+//            cellHeight: 150
 
-                    Text
-                    {
-                        anchors.fill: parent
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        text: model.modelData.itemName
-                        elide: Text.ElideRight
-                    }
+//            Component
+//            {
+//                id: fileDelegate
+//                Rectangle
+//                {
+//                    width: 150;
+//                    height: 150;
+//                    color:
+//                        {
+//                            (model.modelData.isPlayable) ? "grey" : "#999FCC"
+//                        }
 
-                    Image
-                    {
-                        id: folderImage
-                        anchors.fill: parent;
-                        anchors.margins: 2
-                        asynchronous: true
-                        sourceSize.width: 130
-                        sourceSize.height: 130
-                        smooth: false
+//                    Text
+//                    {
+//                        anchors.fill: parent
+//                        verticalAlignment: Text.AlignVCenter
+//                        horizontalAlignment: Text.AlignHCenter
+//                        text: model.modelData.itemName
+//                        elide: Text.ElideRight
+//                    }
 
-                        source:
-                        {
-                            if(model.modelData.imagePath !== "")
-                                return model.modelData.imagePath;
-                            else
-                                return "";
-                        }
-                    }
+//                    Image
+//                    {
+//                        id: folderImage
+//                        anchors.fill: parent;
+//                        asynchronous: true
+//                        sourceSize.width: 150
+//                        sourceSize.height: 150
+//                        smooth: false
 
-                    MouseArea
-                    {
-                        anchors.fill: parent;
-                        onClicked:
-                        {
-                            console.log("Enter dir : " + model.modelData.itemName);
+//                        source:
+//                        {
+//                            if(model.modelData.imagePath !== "")
+//                                return model.modelData.imagePath;
+//                            else
+//                                return "";
+//                        }
+//                    }
 
-                            MFileSys.invokeMediaItem(model.modelData.itemName, model.modelData.extension);
-                        }
-                    }
-                }
-            }
+//                    MouseArea
+//                    {
+//                        anchors.fill: parent;
+//                        onClicked:
+//                        {
+//                            console.log("Enter dir : " + model.modelData.itemName);
 
-            model: MediaList
-            delegate: fileDelegate
-        }
+//                            MFileSys.invokeMediaItem(model.modelData.itemName, model.modelData.extension);
+//                        }
+//                    }
+//                }
+//            }
+
+//            model: MediaList
+//            delegate: fileDelegate
+//        }
 
         Rectangle
         {
