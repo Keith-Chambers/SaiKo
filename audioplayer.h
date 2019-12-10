@@ -10,6 +10,7 @@
 #include "./inc/irrKlang.h"
 
 #include "soundstopevent.h"
+#include "audiofile.h"
 
 class AudioPlayer : public QObject
 {
@@ -17,6 +18,7 @@ class AudioPlayer : public QObject
 
     Q_PROPERTY(double playPosition READ getPlayPosition WRITE setPlayPosition NOTIFY playPositionChanged)
     Q_PROPERTY(bool isPlaying READ getIsPlaying WRITE setIsPlaying NOTIFY isPlayingChanged)
+//    Q_PROPERTY(AudioFile currentAudio READ getCurrentAudio NOTIFY currentAudioChanged)
 public:
     explicit AudioPlayer(QObject *parent = nullptr);
     ~AudioPlayer();
@@ -30,9 +32,11 @@ public:
     Q_INVOKABLE void stopAudio(void);
     void playMusic(void);
     void updateAudioPosition();
+    void setCurrentAudio(QString path);
 signals:
     void playPositionChanged(double);
     void isPlayingChanged(bool);
+    void songChanged();
 public slots:
     void setPlaylist(QStringList playlist);
 private:
@@ -42,6 +46,7 @@ private:
    int mPlaylistIndex;
    SoundStopEvent mSoundStopEvent;
    QTimer* mPositionTimer;
+   AudioFile mCurrentAudio;
 };
 
 #endif // AUDIOPLAYER_H

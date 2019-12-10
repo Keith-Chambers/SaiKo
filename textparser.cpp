@@ -18,6 +18,48 @@ ParseValue parseSaikoLine(std::string line, const std::vector<ParseOption> valid
     };
 }
 
+QString removeExtension(const QString& fileName)
+{
+    int removeEnd = 0;
+
+    for(int i = fileName.size() - 1; i != 0; i++)
+    {
+        if(fileName[i] != '.') {
+            removeEnd++;
+            continue;
+        }
+
+        break;
+    }
+
+    if(removeEnd == fileName.size()) {
+        return fileName;
+    }
+
+    return fileName.right(fileName.size() - removeEnd);
+}
+
+std::string removeExtension(const std::string& fileName)
+{
+    unsigned long removeEnd = 0;
+
+    for(unsigned long i = fileName.size() - 1; i != 0; i++)
+    {
+        if(fileName[i] != '.') {
+            removeEnd++;
+            continue;
+        }
+
+        break;
+    }
+
+    if(removeEnd == fileName.size()) {
+        return fileName;
+    }
+
+    return fileName.substr(fileName.size() - removeEnd, std::string::npos);
+}
+
 void trimEnd(std::string& str)
 {
     int remove = 0;

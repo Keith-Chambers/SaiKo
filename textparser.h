@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <QString>
+
 enum class SaikOption {
     FRONT_COVER,
     BACK_COVER,
@@ -33,6 +35,9 @@ const std::vector<ParseOption> PARSE_OPTIONS {
     }
 };
 
+
+QString removeExtension(const QString& fileName);
+std::string removeExtension(const std::string& fileName);
 void trimFront(std::string& str);
 void trimEnd(std::string& str);
 ParseValue parseSaikoLine(std::string line, const std::vector<ParseOption> validOptions);

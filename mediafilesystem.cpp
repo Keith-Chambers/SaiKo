@@ -4,6 +4,8 @@
 MediaFileSystem::MediaFileSystem(QObject *parent) : QObject(parent)
 {
     qDebug() << "Don't use this constructor";
+
+    mEngine->rootContext()->setContextProperty("CurrentFolderAudioList", QVariant::fromValue(mQmlCurrentFolderAudioFiles));
 }
 
 MediaFileSystem::MediaFileSystem(QStringList pLibraryAbsPaths, QQmlApplicationEngine *pEngine, QObject *parent)
@@ -15,6 +17,8 @@ MediaFileSystem::MediaFileSystem(QStringList pLibraryAbsPaths, QQmlApplicationEn
     mCurrentLibraryIndex = -1;
     mCurrentDir = Q_NULLPTR;
     mFilters << "*.flac" << "*.mp3";
+
+    mEngine->rootContext()->setContextProperty("CurrentFolderAudioList", QVariant::fromValue(mQmlCurrentFolderAudioFiles));
 }
 
 void MediaFileSystem::upDir()
@@ -43,6 +47,30 @@ void MediaFileSystem::upDir()
     generateMediaItems();
 }
 
+void MediaFileSystem::loadAudioFromFolder(QDir folder)
+{
+    qDebug() << "Loading audio files from -> " << folder.absolutePath();
+
+    QStringList audioFileNames = audioFilesInFolder(folder);
+
+    mQmlCurrentFolderAudioFiles.clear();
+    mCurrentFolderAudioFiles.clear();
+
+    mQmlCurrentFolderAudioFiles.reserve(audioFileNames.size());
+    mCurrentFolderAudioFiles.reserve(static_cast<unsigned long>(audioFileNames.size()));
+
+    for(auto& audioFileName : audioFileNames) {
+        qDebug() << "Adding: " << audioFileName;
+
+        AudioFile audioFile(audioFileName, "Unknown Artist");
+
+        mCurrentFolderAudioFiles.push_back(std::move(audioFile));
+        mQmlCurrentFolderAudioFiles.append(&mCurrentFolderAudioFiles.back());
+    }
+
+    mEngine->rootContext()->setContextProperty("CurrentFolderAudioList", QVariant::fromValue(mQmlCurrentFolderAudioFiles));
+}
+
 void MediaFileSystem::invokeMediaItem(QString pFileName, QString pExtension)
 {
     qDebug() << "Invoking media item";
@@ -56,39 +84,22 @@ void MediaFileSystem::invokeMediaItem(QString pFileName, QString pExtension)
     if(pExtension != "") {
         generatePlaylist(pFileName + "." + pExtension);
     } else {
-        downDir(pFileName);
+
+        if(hasAudioContainingSubFolders(makeChildDir(*mCurrentDir, pFileName))) {
+            downDir(pFileName);
+        }
+
+        if(isFolderContainingAudio(makeChildDir(*mCurrentDir, pFileName))) {
+            qDebug() << "Loading audio files";
+            loadAudioFromFolder(makeChildDir(*mCurrentDir, pFileName));
+        }
     }
-
-
-
-//    QFileInfoList fileInfo;
-//    QStringList nameFilters;
-//    qDebug() << pDirName;
-//    nameFilters.append(pDirName + "*");
-//    fileInfo = mCurrentDir->entryInfoList(nameFilters);
-
-//    if(fileInfo.size() != 1)
-//    {
-//        qDebug() << "fileInfo size : " << fileInfo.size();
-//        return;
-//    }
-
-//    if(fileInfo.at(0).isFile())
-//    {
-//        qDebug() << "Playing from " << pDirName;
-//        pDirName += ".mp3"; // TODO: Remove
-//        generatePlaylist(pDirName);
-//    }else if(fileInfo.at(0).isDir())
-//    {
-//        downDir(pDirName);
-//    }
-
 }
 
 QString MediaFileSystem::getNameFromPath(QString pPath)
 {
     int numElements = pPath.size() - 1;
-    // Remove trailing / or \ if present
+    // TODO: Remove trailing / or \ if present
     if(pPath.at(numElements) == '/' || pPath.at(numElements) == '\\' )
         pPath.remove(numElements, 1);
 
@@ -101,8 +112,8 @@ QString MediaFileSystem::getNameFromPath(QString pPath)
 void MediaFileSystem::downDir(QString pDirName)
 {
     // Assert dirLevel is positive and dirName is valid
-    qDebug() << "Moving down to " << pDirName;
-    qDebug() << "DirLevel: " << mDirLevelIndex;
+//    qDebug() << "Moving down to " << pDirName;
+//    qDebug() << "DirLevel: " << mDirLevelIndex;
 
     int libNumber = 0;
 
@@ -139,7 +150,7 @@ void MediaFileSystem::downDir(QString pDirName)
         {
             mCurrentDir->cd(pDirName);
             mDirLevelIndex++;
-            qDebug() << "cd " << pDirName << " successful";
+//            qDebug() << "cd " << pDirName << " successful";
         }
     }
 
@@ -148,12 +159,14 @@ void MediaFileSystem::downDir(QString pDirName)
 
 // TODO: Overload function to take index etc
 // I should probably make a playlist structure of something
+// TODO: Add every song in the folder to the playlist and just jump to the song the user clicked.
+// This will allow the user to use previous song to get all the way to the beginning of the song list in the folder
 void MediaFileSystem::generatePlaylist(QString pSongName)
 {
     mPlaylist.clear();
     QStringList songNames;
 
-    qDebug() << "Song to play -> " << pSongName;
+//    qDebug() << "Song to play -> " << pSongName;
 
     if(!mCurrentDir)
     {
@@ -177,11 +190,11 @@ void MediaFileSystem::generatePlaylist(QString pSongName)
         }
     }
 
-    qDebug() << "Generating playlist absolute paths";
-    qDebug() << "Songs:";
+//    qDebug() << "Generating playlist absolute paths";
+//    qDebug() << "Songs:";
     for(int i = 0; i < songNames.size(); i++)
     {
-        qDebug() << songNames[i];
+//        qDebug() << songNames[i];
         QString path;
         path = mCurrentDir->absoluteFilePath(songNames.at(i));
         mPlaylist.append(path);
@@ -189,6 +202,76 @@ void MediaFileSystem::generatePlaylist(QString pSongName)
 
     emit playlistChanged(mPlaylist);
     return;
+}
+
+bool MediaFileSystem::hasAudioContainingSubFolders(QDir folder)
+{
+    QStringList subFolders = folder.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+
+    for(const auto& subFolder : subFolders) {
+        if(hasAudioContainingSubFolders(subFolder)) {
+            qDebug() << "Has audio!";
+            return true;
+        }
+    }
+
+    qDebug() << folder.absolutePath() << " does not have audio";
+
+    return false;
+}
+
+QDir MediaFileSystem::makeChildDir(QDir parent, QString childName)
+{
+    return QDir(parent.absolutePath() + "/" + childName);
+}
+
+QStringList MediaFileSystem::audioContainingSubFolders(QDir folder)
+{
+    QStringList subFolders = folder.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+    QStringList audioContainingSubFolders;
+
+
+    for(const auto& subFolder : subFolders) {
+        if(hasAudioContainingSubFolders(makeChildDir(folder,subFolder))) {
+            audioContainingSubFolders.append(subFolder);
+        }
+    }
+
+    return audioContainingSubFolders;
+}
+
+QStringList MediaFileSystem::audioFilesInFolder(QDir folder)
+{
+    QStringList audioExtensionFilters;
+    audioExtensionFilters << "*.mp3";
+    audioExtensionFilters << "*.flac";
+    audioExtensionFilters << "*.FLAC";
+    audioExtensionFilters << "*.wav";
+    audioExtensionFilters << "*.WAV";
+    audioExtensionFilters << "*.ogg";
+    audioExtensionFilters << "*.OGG";
+
+    QStringList audioFiles = folder.entryList(audioExtensionFilters, QDir::Files, QDir::Name);
+
+    return audioFiles;
+}
+
+bool MediaFileSystem::isFolderContainingAudio(QDir folder)
+{
+    QStringList audioExtensionFilters;
+    audioExtensionFilters << "*.mp3";
+    audioExtensionFilters << "*.flac";
+    audioExtensionFilters << "*.FLAC";
+    audioExtensionFilters << "*.wav";
+    audioExtensionFilters << "*.WAV";
+    audioExtensionFilters << "*.ogg";
+    audioExtensionFilters << "*.OGG";
+
+    QStringList audioFiles = folder.entryList(audioExtensionFilters, QDir::Files, QDir::Name);
+
+    qDebug() << folder.absolutePath() << " contains " << audioFiles.size() << " files";
+
+    return ! audioFiles.empty();
 }
 
 // *NOTE: We're assuming that the root folders only contain more folders atm

@@ -1,14 +1,14 @@
 import QtQuick 2.0
 
 Item {
-
     id: root;
 
     GridView
     {
-        anchors: parent.fill;
         cellWidth: 150;
         cellHeight: 150;
+
+        anchors.fill: parent;
 
         Component
         {

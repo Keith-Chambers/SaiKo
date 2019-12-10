@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>main.qml</file>
         <file>resources/full basics.png</file>
         <file>resources/play.png</file>
         <file>resources/player.png</file>
@@ -12,5 +11,9 @@
         <file>resources/pause.png</file>
         <file>resources/music.ico</file>
         <file>resources/record.png</file>
+        <file>ui/components/MusicFolderView.qml</file>
+        <file>ui/main.qml</file>
+        <file>ui/components/AudioControls.qml</file>
+        <file>ui/components/AudioFileListView.qml</file>
     </qresource>
 </RCC>

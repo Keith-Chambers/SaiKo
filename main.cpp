@@ -50,18 +50,14 @@ int main(int argc, char *argv[])
     MediaFileSystem mFileSys(libPaths, &engine);
     mFileSys.generateMediaItems();
 
-    //mFileSys.createSaikFiles(false);
-    //mFileSys.purgeSaikFiles();
-
     // Connect signals to slots
-
     QObject::connect(&mFileSys, &MediaFileSystem::playlistChanged, &audioplayer, &AudioPlayer::setPlaylist);
-//    QObject::connect(&app, &QGuiApplication::aboutToQuit, &mFileSys, &MediaFileSystem::purgeSaikFiles);
+//    QObject::connect(&audioplayer, &AudioPlayer::songChanged, &currentAudio, &AudioPlayer::setPlaylist);
 
     engine.rootContext()->setContextProperty("AudioPlayer", QVariant::fromValue(&audioplayer));
     engine.rootContext()->setContextProperty("MFileSys", QVariant::fromValue(&mFileSys));
 
-    engine.load(QUrl(QLatin1String("qrc:/main.qml")));
+    engine.load(QUrl(QLatin1String("qrc:/ui/main.qml")));
 
 
     return app.exec();

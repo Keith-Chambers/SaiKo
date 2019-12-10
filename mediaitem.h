@@ -90,8 +90,11 @@ public slots:
 private:
     QString mImagePath;
     QString mItemName;
-    bool mIsPlayable;
+    bool mIsPlayable; // Can be removed. Use extension to determine this
     QString mExtension;
+
+    QDir mLocation;
+    bool mIsFolder;
 };
 
 #endif // MEDIAITEM_H

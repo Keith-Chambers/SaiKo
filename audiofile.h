@@ -9,7 +9,7 @@ class AudioFile : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(QString name READ getName NOTIFY nameChanged)
+    Q_PROPERTY(QString title READ getName NOTIFY nameChanged)
     Q_PROPERTY(QString artist READ getArtist NOTIFY artistChanged)
     Q_PROPERTY(QImage art READ getArt NOTIFY artChanged)
     Q_PROPERTY(bool hasArt READ getHasArt NOTIFY hasArtChanged)
@@ -17,6 +17,8 @@ class AudioFile : public QObject
 public:
     AudioFile(QString pName, QString pArtist);
     AudioFile(QString pName, QString pArtist, QImage* pArt);
+
+    AudioFile(AudioFile&& audioFile);
 
     QString getName();
     QString getArtist();

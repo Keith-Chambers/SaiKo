@@ -1,6 +1,7 @@
 #include "audioplayer.h"
 
-AudioPlayer::AudioPlayer(QObject *parent) : QObject(parent), mSoundStopEvent()
+AudioPlayer::AudioPlayer(QObject *parent)
+    : QObject(parent), mSoundStopEvent(), mCurrentAudio("Unknown", "Unknown")
 {
     qDebug() << "AudioPlayer Constructer invoked";
 
@@ -14,7 +15,7 @@ AudioPlayer::AudioPlayer(QObject *parent) : QObject(parent), mSoundStopEvent()
 
     mPositionTimer = new QTimer(this);
     connect(mPositionTimer, &QTimer::timeout, this, &AudioPlayer::updateAudioPosition);
-    mPositionTimer->start(1000);
+    mPositionTimer->start(250);
 
     mPlaylistIndex = 0;
 }
@@ -74,8 +75,16 @@ void AudioPlayer::playMusic(void)
     mCurrentSound->setIsPaused(false);
 
     emit isPlayingChanged(true);
+    emit songChanged();
+
+
 
     qDebug() << "Music playing";
+}
+
+void AudioPlayer::setCurrentAudio(QString fileName)
+{
+
 }
 
 void AudioPlayer::updateAudioPosition()

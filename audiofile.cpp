@@ -8,6 +8,10 @@ AudioFile::AudioFile(QString pName, QString pArtist, QImage* pArt)
     : mName {pName}, mArtist {pArtist}, mArt {pArt}
 {}
 
+AudioFile::AudioFile(AudioFile&& audioFile)
+    : mName { std::move(audioFile.mName) }, mArtist { std::move(audioFile.mArtist) }, mArt { audioFile.mArt }
+{}
+
 QString AudioFile::getName()
 {
     return mName;
