@@ -96,6 +96,22 @@ ApplicationWindow
             width: 250
             color: "#243D45";
 
+            Text
+            {
+                id: nowPlayingTitleText
+                height: 40
+                visible: AudioPlayer.isPlaying
+                anchors
+                {
+                    bottom: nowPlayingImageRect.top;
+                    bottomMargin: 20;
+                    left: parent.left
+                    leftMargin: 20;
+                    right: parent.right;
+                }
+                text: (AudioPlayer.isPlaying) ? AudioPlayer.currentAudio.title : "";
+            }
+
             Rectangle
             {
                 id: nowPlayingImageRect;
@@ -103,17 +119,33 @@ ApplicationWindow
                 {
                     bottom: sideMenuBackground.bottom;
                     left: parent.left;
-                    rightMargin: 20;
-                    leftMargin: 20;
+                    leftMargin: 50;
                     bottomMargin: 20;
-                    right: parent.right
                 }
+                width: 150;
                 height: 150;
 
                 Image
                 {
                     id: currentlyPlayingImage
-                    source: "qrc:///resources/record.png"
+                    source: {
+                        console.log("Checking whether to change image");
+
+                        if(!AudioPlayer.isPlaying) {
+                            console.log("Not playing");
+                            return "qrc:///resources/cover.jpg";
+                        }
+
+                        if(!AudioPlayer.currentAudio.hasArt) {
+                            console.log("Current audio has no art");
+                            console.log(AudioPlayer.currentAudio.title);
+                            return "qrc:///resources/cover.jpg";
+                        }
+
+                        console.log("Returning path " + "file:" + AudioPlayer.currentAudio.artPath);
+
+                        return AudioPlayer.currentAudio.artPath;
+                    }
                     anchors.fill: parent;
                 }
             }

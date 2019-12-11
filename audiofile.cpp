@@ -1,20 +1,20 @@
 #include "audiofile.h"
 
 AudioFile::AudioFile(QString pName, QString pArtist)
-    : mName {pName}, mArtist {pArtist}
+    : mTitle {pName}, mArtist {pArtist}, mArtPath {""}
 {}
 
-AudioFile::AudioFile(QString pName, QString pArtist, QImage* pArt)
-    : mName {pName}, mArtist {pArtist}, mArt {pArt}
+AudioFile::AudioFile(QString pName, QString pArtist, QString pArtPath)
+    : mTitle {pName}, mArtist {pArtist}, mArtPath {pArtPath}
 {}
 
 AudioFile::AudioFile(AudioFile&& audioFile)
-    : mName { std::move(audioFile.mName) }, mArtist { std::move(audioFile.mArtist) }, mArt { audioFile.mArt }
+    : mTitle { std::move(audioFile.mTitle) }, mArtist { std::move(audioFile.mArtist) }, mArtPath { audioFile.mArtPath }
 {}
 
-QString AudioFile::getName()
+QString AudioFile::getTitle()
 {
-    return mName;
+    return mTitle;
 }
 
 QString AudioFile::getArtist()
@@ -22,12 +22,27 @@ QString AudioFile::getArtist()
     return mArtist;
 }
 
-QImage AudioFile::getArt()
+QString AudioFile::getArtPath()
 {
-    return *mArt;
+    return mArtPath;
 }
 
 bool AudioFile::getHasArt()
 {
-    return mArt != nullptr;
+    return mArtPath != "";
+}
+
+void AudioFile::setTitle(QString title)
+{
+    mTitle = title;
+}
+
+void AudioFile::setArtist(QString artist)
+{
+    mArtist = artist;
+}
+
+void AudioFile::setArtPath(QString artPath)
+{
+    mArtPath = artPath;
 }

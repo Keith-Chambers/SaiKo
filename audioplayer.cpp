@@ -26,7 +26,12 @@ AudioPlayer::~AudioPlayer(void)
     mEngine->drop();
 }
 
-void AudioPlayer::setPlaylist(QStringList pPlaylist)
+AudioFile * AudioPlayer::getCurrentAudio()
+{
+    return &mCurrentAudio;
+}
+
+void AudioPlayer::AudioPlayer::setPlaylist(QStringList pPlaylist)
 {
     mPlaylist.clear();
     mPlaylist = pPlaylist;
@@ -39,6 +44,96 @@ void AudioPlayer::setPlaylist(QStringList pPlaylist)
     mPlaylistIndex = 0;
 
     playMusic();
+}
+
+QString AudioPlayer::loadAlbumArtToFileIfExists(QString filePath, QString successPath, QString failurePath)
+{
+    static const char *IdPicture = "APIC" ;
+
+    std::string path = filePath.toStdString();
+
+    TagLib::MPEG::File mpegFile(path.c_str());
+    TagLib::ID3v2::Tag *id3v2tag = mpegFile.ID3v2Tag();
+    TagLib::ID3v2::FrameList Frame ;
+    TagLib::ID3v2::AttachedPictureFrame *PicFrame ;
+    void *SrcImage;
+    unsigned long Size;
+
+    if (id3v2tag)
+    {
+        Frame = id3v2tag->frameListMap()[IdPicture] ;
+
+        if (!Frame.isEmpty() )
+        {
+            // find cover art
+            for(TagLib::ID3v2::FrameList::ConstIterator it = Frame.begin(); it != Frame.end(); ++it)
+            {
+                qDebug() << "Loop begin";
+                PicFrame = (TagLib::ID3v2::AttachedPictureFrame *)(*it);
+
+                if(PicFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover)
+                {
+                    // extract image (in it's compressed form)
+                    Size = PicFrame->picture().size();
+                    SrcImage = malloc ( Size );
+
+                    if(SrcImage)
+                    {
+                        FILE *jpegFile = fopen(successPath.toStdString().c_str(), "wb");
+
+                        if(!jpegFile) {
+                            return failurePath;
+                        }
+
+                        memcpy(SrcImage, PicFrame->picture().data(), Size) ;
+                        fwrite(SrcImage, Size, 1, jpegFile);
+                        fclose(jpegFile);
+
+                        free(SrcImage);
+
+                        return successPath;
+                    }
+                }
+                qDebug() << "Loop end";
+            }
+        }
+    }
+
+    qDebug() << "Failed to write album art";
+
+    return failurePath;
+}
+
+QString AudioPlayer::getAudioTitle(QFile audioFile)
+{
+    TagLib::FileRef f(audioFile.fileName().toStdString().c_str());
+    TagLib::Tag *tag = f.tag();
+
+    return QString::fromStdString(std::string(tag->title().to8Bit()));
+
+//    TagLib::String artist = f.tag()->artist(); // artist == "Frank Zappa"
+//    f.tag()->setAlbum("Fillmore East");
+//    f.save();
+//    TagLib::FileRef g("Free City Rhymes.ogg");
+//    TagLib::String album = g.tag()->album(); // album == "NYC Ghosts & Flowers"
+//    g.tag()->setTrack(1);
+//    g.save();
+}
+
+QString AudioPlayer::getAudioArtist(QFile audioFile)
+{
+    TagLib::FileRef f(audioFile.fileName().toStdString().c_str());
+    TagLib::Tag *tag = f.tag();
+
+    return QString::fromStdString(std::string(tag->artist().to8Bit()));
+}
+
+QString AudioPlayer::getAudioAlbum(QFile audioFile)
+{
+    TagLib::FileRef f(audioFile.fileName().toStdString().c_str());
+    TagLib::Tag *tag = f.tag();
+
+    return QString::fromStdString(std::string(tag->album().to8Bit()));
 }
 
 void AudioPlayer::playMusic(void)
@@ -68,6 +163,44 @@ void AudioPlayer::playMusic(void)
 
     qDebug() << "Playing: " << mPlaylist.at(mPlaylistIndex).toUtf8();
 
+    QFile audioFile = QFile(mPlaylist.at(mPlaylistIndex));
+
+    qDebug() << "Setting title";
+    QString title = getAudioTitle(QFile(mPlaylist.at(mPlaylistIndex)));
+
+    if(title == "") {
+        title = QFileInfo(QFile(mPlaylist.at(mPlaylistIndex))).fileName();
+    }
+
+    qDebug() << "Setting Artist";
+    QString artist = getAudioArtist(QFile(mPlaylist.at(mPlaylistIndex)));
+    qDebug() << "Setting Album";
+    QString album = getAudioAlbum(QFile(mPlaylist.at(mPlaylistIndex)));
+
+    QString albumArtLocation = "file:/home/keith/current_album_art.jpg";
+
+    QDir parentDir(mPlaylist.at(mPlaylistIndex));
+    parentDir.cdUp();
+
+    QString failurePath = frontImageForFolder(parentDir);
+
+    if(failurePath == "") {
+        failurePath = "qrc:///resources/cover.jpg";
+    } else {
+        failurePath.prepend("file:");
+    }
+
+    qDebug() << "Setting Art";
+    QString artPath = loadAlbumArtToFileIfExists(mPlaylist.at(mPlaylistIndex), albumArtLocation, failurePath);
+    qDebug() << "Art path -> " << artPath;
+
+    qDebug() << "File name -> " << title;
+
+    mCurrentAudio.setTitle(title);
+    mCurrentAudio.setArtist(artist);
+    mCurrentAudio.setArtPath(artPath);
+    qDebug() << "Done";
+
     mCurrentSound = mEngine->play2D(mPlaylist.at(mPlaylistIndex).toUtf8(), false, true);
     mCurrentSound->setSoundStopEventReceiver((irrklang::ISoundStopEventReceiver*) &mSoundStopEvent, this);
 
@@ -76,8 +209,6 @@ void AudioPlayer::playMusic(void)
 
     emit isPlayingChanged(true);
     emit songChanged();
-
-
 
     qDebug() << "Music playing";
 }

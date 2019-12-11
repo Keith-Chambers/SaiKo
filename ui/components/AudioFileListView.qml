@@ -71,7 +71,9 @@ Item {
                     {
                         anchors.fill: parent
                         onClicked: {
+                            MFileSys.invokeMediaItem(model.modelData.itemName, model.modelData.extension);
                             audioListView.currentIndex = index;
+                            MFileSys.playFromCurrentAudioSelection(index);
                         }
                     }
                 }

@@ -26,6 +26,8 @@ Item
                 horizontalCenter: parent.horizontalCenter;
             }
 
+            width: 400;
+
             onValueChanged: {
                 if(playPosSlider.pressed && AudioPlayer.isPlaying) {
                     AudioPlayer.playPosition = value;

@@ -18,6 +18,39 @@ ParseValue parseSaikoLine(std::string line, const std::vector<ParseOption> valid
     };
 }
 
+QString frontImageForFolder(QDir directory)
+{
+    ParseValue parseSaikoLine(std::string line, const std::vector<ParseOption> validOptions);
+
+    if(!directory.exists(".saik")) {
+        qDebug() << "Warning: No .saik file found for directory -> " << directory.path();
+        return "";
+    }
+
+    QFile file(directory.path() + "/.saik");
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        qDebug() << "Failed to open " << file.fileName();
+        return "";
+    }
+
+    while(!file.atEnd())
+    {
+        std::string line = file.readLine().toStdString();
+        ParseValue option = parseSaikoLine(line, PARSE_OPTIONS);
+        if(option.optionType != SaikOption::FRONT_COVER) {
+            continue;
+        }
+
+        trimEnd(option.value);
+        trimFront(option.value);
+
+        return directory.absolutePath() + "/" + QString::fromStdString(option.value);
+    }
+
+    return "";
+}
+
 QString removeExtension(const QString& fileName)
 {
     int removeEnd = 0;

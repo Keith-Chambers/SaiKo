@@ -21,6 +21,82 @@ MediaFileSystem::MediaFileSystem(QStringList pLibraryAbsPaths, QQmlApplicationEn
     mEngine->rootContext()->setContextProperty("CurrentFolderAudioList", QVariant::fromValue(mQmlCurrentFolderAudioFiles));
 }
 
+QString MediaFileSystem::getAudioTitle(QFile audioFile)
+{
+    TagLib::FileRef f(audioFile.fileName().toStdString().c_str());
+    TagLib::Tag *tag = f.tag();
+
+    return QString::fromStdString(std::string(tag->title().to8Bit()));
+}
+
+QString MediaFileSystem::getAudioArtist(QFile audioFile)
+{
+    TagLib::FileRef f(audioFile.fileName().toStdString().c_str());
+    TagLib::Tag *tag = f.tag();
+
+    return QString::fromStdString(std::string(tag->artist().to8Bit()));
+}
+
+QString MediaFileSystem::getAudioAlbum(QFile audioFile)
+{
+    TagLib::FileRef f(audioFile.fileName().toStdString().c_str());
+    TagLib::Tag *tag = f.tag();
+
+    return QString::fromStdString(std::string(tag->album().to8Bit()));
+}
+
+QString MediaFileSystem::loadAlbumArtToFileIfExists(QString filePath, QString successPath, QString failurePath)
+{
+    static const char *IdPicture = "APIC" ;
+
+    std::string path = filePath.toStdString();
+
+    TagLib::MPEG::File mpegFile(path.c_str());
+    TagLib::ID3v2::Tag *id3v2tag = mpegFile.ID3v2Tag();
+    TagLib::ID3v2::FrameList Frame ;
+    TagLib::ID3v2::AttachedPictureFrame *PicFrame ;
+    void *SrcImage;
+    unsigned long Size;
+
+    if (id3v2tag)
+    {
+        Frame = id3v2tag->frameListMap()[IdPicture] ;
+
+        if (!Frame.isEmpty() )
+        {
+            // find cover art
+            for(TagLib::ID3v2::FrameList::ConstIterator it = Frame.begin(); it != Frame.end(); ++it)
+            {
+                PicFrame = (TagLib::ID3v2::AttachedPictureFrame *)(*it);
+
+                if(PicFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover)
+                {
+                    // extract image (in it's compressed form)
+                    Size = PicFrame->picture().size();
+                    SrcImage = malloc ( Size );
+
+                    if(SrcImage)
+                    {
+                        FILE *jpegFile = fopen(successPath.toStdString().c_str(), "wb");
+
+                        memcpy (SrcImage, PicFrame->picture().data(), Size) ;
+                        fwrite(SrcImage, Size, 1, jpegFile);
+                        fclose(jpegFile);
+
+                        free(SrcImage);
+
+                        return successPath;
+                    }
+                }
+            }
+        }
+    }
+
+    qDebug() << "Failed to write album art";
+
+    return failurePath;
+}
+
 void MediaFileSystem::upDir()
 {
     qDebug() << "upDir: Lv " << mDirLevelIndex;
@@ -59,10 +135,19 @@ void MediaFileSystem::loadAudioFromFolder(QDir folder)
     mQmlCurrentFolderAudioFiles.reserve(audioFileNames.size());
     mCurrentFolderAudioFiles.reserve(static_cast<unsigned long>(audioFileNames.size()));
 
+    QString albumArtLocation = "/home/keith/current_album_art.jpg";
+
     for(auto& audioFileName : audioFileNames) {
         qDebug() << "Adding: " << audioFileName;
 
-        AudioFile audioFile(audioFileName, "Unknown Artist");
+//        QString artist = MediaFileSystem::getAudioArtist(audioFileName);
+//        QString title = MediaFileSystem::getAudioTitle(audioFileName);
+//        QString album = MediaFileSystem::getAudioAlbum(audioFileName);
+
+        AudioFile audioFile(audioFileName, "artist");
+//        audioFile.setArtPath( loadAlbumArtToFileIfExists(folder.absolutePath() + "/" + audioFileName, albumArtLocation, frontImageForFolder(mAudioFolder.value())) );
+
+        qDebug() << "Art path -> " << audioFile.getArtPath();
 
         mCurrentFolderAudioFiles.push_back(std::move(audioFile));
         mQmlCurrentFolderAudioFiles.append(&mCurrentFolderAudioFiles.back());
@@ -91,9 +176,30 @@ void MediaFileSystem::invokeMediaItem(QString pFileName, QString pExtension)
 
         if(isFolderContainingAudio(makeChildDir(*mCurrentDir, pFileName))) {
             qDebug() << "Loading audio files";
+
+            mAudioFolder = makeChildDir(*mCurrentDir, pFileName);
+//            QString imagePath = frontImageForFolder(mAudioFolder.value());
+//            mCurrentAlbumImagePath = (imagePath != "") ? imagePath : "qrc:///resources/record.png";
+
             loadAudioFromFolder(makeChildDir(*mCurrentDir, pFileName));
         }
     }
+}
+
+void MediaFileSystem::playFromCurrentAudioSelection(unsigned long index)
+{
+    if(mAudioFolder == std::nullopt) {
+        qDebug() << "No audio folder set";
+        return;
+    }
+
+    mPlaylist.clear();
+
+    for(unsigned long i = index; i < mCurrentFolderAudioFiles.size(); i++) {
+        mPlaylist.append(mAudioFolder.value().absolutePath() + "/" + mCurrentFolderAudioFiles[i].getTitle());
+    }
+
+    emit playlistChanged(mPlaylist);
 }
 
 QString MediaFileSystem::getNameFromPath(QString pPath)

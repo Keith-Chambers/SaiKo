@@ -5,6 +5,9 @@
 #include <vector>
 
 #include <QString>
+#include <QImage>
+#include <QDir>
+#include <QDebug>
 
 enum class SaikOption {
     FRONT_COVER,
@@ -35,6 +38,7 @@ const std::vector<ParseOption> PARSE_OPTIONS {
     }
 };
 
+QString frontImageForFolder(QDir folder);
 
 QString removeExtension(const QString& fileName);
 std::string removeExtension(const std::string& fileName);

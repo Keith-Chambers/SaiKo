@@ -3,38 +3,41 @@
 
 #include <QObject>
 #include <QString>
-#include <QImage>
 
 class AudioFile : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(QString title READ getName NOTIFY nameChanged)
+    Q_PROPERTY(QString title READ getTitle NOTIFY titleChanged)
     Q_PROPERTY(QString artist READ getArtist NOTIFY artistChanged)
-    Q_PROPERTY(QImage art READ getArt NOTIFY artChanged)
+    Q_PROPERTY(QString artPath READ getArtPath NOTIFY artPathChanged)
     Q_PROPERTY(bool hasArt READ getHasArt NOTIFY hasArtChanged)
 
 public:
     AudioFile(QString pName, QString pArtist);
-    AudioFile(QString pName, QString pArtist, QImage* pArt);
+    AudioFile(QString pName, QString pArtist, QString pArtPath);
 
     AudioFile(AudioFile&& audioFile);
 
-    QString getName();
+    void setTitle(QString title);
+    void setArtist(QString artist);
+    void setArtPath(QString artPath);
+
+    QString getTitle();
     QString getArtist();
-    QImage getArt();
+    QString getArtPath();
     bool getHasArt();
 
 signals:
-    void nameChanged(QString);
+    void titleChanged(QString);
     void artistChanged(QString);
-    void artChanged(QImage);
+    void artPathChanged(QString);
     void hasArtChanged(bool);
 
 private:
-    QString mName;
+    QString mTitle;
     QString mArtist;
-    QImage* mArt;
+    QString mArtPath;
 };
 
 #endif // AUDIOFILE_H
