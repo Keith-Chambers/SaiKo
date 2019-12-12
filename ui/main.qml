@@ -96,21 +96,60 @@ ApplicationWindow
             width: 250
             color: "#243D45";
 
-            Text
+            Column
             {
-                id: nowPlayingTitleText
-                height: 40
-                visible: AudioPlayer.isPlaying
                 anchors
                 {
                     bottom: nowPlayingImageRect.top;
-                    bottomMargin: 20;
-                    left: parent.left
-                    leftMargin: 20;
+                    bottomMargin: 10;
+                    left: nowPlayingImageRect.left
                     right: parent.right;
                 }
-                text: (AudioPlayer.isPlaying) ? AudioPlayer.currentAudio.title : "";
+
+                Text
+                {
+                    id: nowPlayingTitleText
+//                    height: 40
+                    color: "white";
+                    elide: Text.ElideRight
+                    font {
+                        bold: false;
+                    }
+
+                    anchors {
+                        left: parent.left;
+                        rightMargin: 30;
+                        right: parent.right
+                    }
+
+                    visible: AudioPlayer.isPlaying
+
+                    text: (AudioPlayer.isPlaying) ? AudioPlayer.currentAudio.title : "";
+                }
+
+                Text
+                {
+                    id: nowPlayingArtistText
+//                    height: 40
+                    color: "light grey";
+                    elide: Text.ElideRight
+                    anchors {
+                        left: parent.left;
+                        rightMargin: 30;
+                        right: parent.right
+                    }
+
+                    font {
+                        bold: true;
+                    }
+                    visible: AudioPlayer.isPlaying
+                    text: (AudioPlayer.isPlaying) ? AudioPlayer.currentAudio.artist : "";
+                }
             }
+
+
+
+
 
             Rectangle
             {
@@ -170,7 +209,7 @@ ApplicationWindow
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.topMargin: 20;
-            anchors.leftMargin: 20;
+            anchors.leftMargin: 50;
             height: 30
             width: 100
             source: "qrc:///resources/saiko.png"

@@ -6,59 +6,83 @@ Item {
     GridView
     {
         cellWidth: 150;
-        cellHeight: 150;
+        cellHeight: 170;
 
         anchors.fill: parent;
 
         Component
         {
             id: fileDelegate
-            Rectangle
+
+            Item
             {
-                width: 150;
-                height: 150;
-                color:
+                id: musicFolderItemContainer
+//                opacity: 0.0;
+                width: 145;
+                height: 165;
+
+                Rectangle
+                {
+                    id: musicFolderRect
+                    width: 145;
+                    height: 145;
+                    color:
+                        {
+                            (model.modelData.isPlayable) ? "grey" : "dark grey"
+                        }
+
+                    Image
                     {
-                        (model.modelData.isPlayable) ? "grey" : "#999FCC"
+                        id: folderImage
+                        anchors {
+                            top: parent.top;
+                            left: parent.left
+                            right: parent.right
+                        }
+                        height: parent.height
+
+                        asynchronous: true
+                        sourceSize.width: 150
+                        sourceSize.height: 150
+                        smooth: false
+
+                        source:
+                        {
+                            if(model.modelData.imagePath !== "")
+                                return model.modelData.imagePath;
+                            else
+                                return "";
+                        }
                     }
+
+                    MouseArea
+                    {
+                        anchors.fill: parent;
+                        onClicked:
+                        {
+                            console.log("Enter dir : " + model.modelData.itemName);
+
+                            MFileSys.invokeMediaItem(model.modelData.itemName, model.modelData.extension);
+                        }
+                    }
+                }
 
                 Text
                 {
-                    anchors.fill: parent
+                    anchors {
+                        top: musicFolderRect.bottom
+                        left: parent.left
+                        right: parent.right
+                    }
+                    color: "white";
+
+
                     verticalAlignment: Text.AlignVCenter
                     horizontalAlignment: Text.AlignHCenter
                     text: model.modelData.itemName
                     elide: Text.ElideRight
                 }
 
-                Image
-                {
-                    id: folderImage
-                    anchors.fill: parent;
-                    asynchronous: true
-                    sourceSize.width: 150
-                    sourceSize.height: 150
-                    smooth: false
-
-                    source:
-                    {
-                        if(model.modelData.imagePath !== "")
-                            return model.modelData.imagePath;
-                        else
-                            return "";
-                    }
-                }
-
-                MouseArea
-                {
-                    anchors.fill: parent;
-                    onClicked:
-                    {
-                        console.log("Enter dir : " + model.modelData.itemName);
-
-                        MFileSys.invokeMediaItem(model.modelData.itemName, model.modelData.extension);
-                    }
-                }
             }
         }
 

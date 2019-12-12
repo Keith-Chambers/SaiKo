@@ -172,10 +172,17 @@ void AudioPlayer::playMusic(void)
         title = QFileInfo(QFile(mPlaylist.at(mPlaylistIndex))).fileName();
     }
 
-    qDebug() << "Setting Artist";
     QString artist = getAudioArtist(QFile(mPlaylist.at(mPlaylistIndex)));
-    qDebug() << "Setting Album";
+
+    if(artist == "") {
+        artist = "Unknown";
+    }
+
     QString album = getAudioAlbum(QFile(mPlaylist.at(mPlaylistIndex)));
+
+    if(album == "") {
+        album = "Unknown";
+    }
 
     QString albumArtLocation = "file:/home/keith/current_album_art.jpg";
 

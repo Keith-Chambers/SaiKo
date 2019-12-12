@@ -22,12 +22,14 @@ QString frontImageForFolder(QDir directory)
 {
     ParseValue parseSaikoLine(std::string line, const std::vector<ParseOption> validOptions);
 
-    if(!directory.exists(".saik")) {
-        qDebug() << "Warning: No .saik file found for directory -> " << directory.path();
+    QString saikFolderPath = directory.absolutePath() + "/.saik";
+
+    if(!QDir(saikFolderPath).exists()) {
+        qDebug() << "Warning: No .saik file found for directory -> " << saikFolderPath;
         return "";
     }
 
-    QFile file(directory.path() + "/.saik");
+    QFile file(directory.path() + "/.saik/config.saik");
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)){
         qDebug() << "Failed to open " << file.fileName();

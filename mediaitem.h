@@ -49,12 +49,15 @@ public:
 
     void applyFolderOptions(QDir directory)
     {
-        if(!directory.exists(".saik")) {
-            qDebug() << "Warning: No .saik file found for directory -> " << directory.path();
+
+        QString saikFolderPath = directory.absolutePath() + "/.saik";
+
+        if(!QDir(saikFolderPath).exists()) {
+            qDebug() << "Warning: No .saik file found for directory -> " << saikFolderPath;
             return;
         }
 
-        QFile file(directory.path() + "/.saik");
+        QFile file(directory.path() + "/.saik/config.saik");
 
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)){
             qDebug() << "Failed to open " << file.fileName();

@@ -25,7 +25,7 @@ Item {
             id: audioListView
             anchors.fill: parent;
             anchors.topMargin: 1
-            interactive: false;
+            interactive: true;
 
             Component
             {

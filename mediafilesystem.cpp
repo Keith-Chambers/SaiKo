@@ -178,9 +178,6 @@ void MediaFileSystem::invokeMediaItem(QString pFileName, QString pExtension)
             qDebug() << "Loading audio files";
 
             mAudioFolder = makeChildDir(*mCurrentDir, pFileName);
-//            QString imagePath = frontImageForFolder(mAudioFolder.value());
-//            mCurrentAlbumImagePath = (imagePath != "") ? imagePath : "qrc:///resources/record.png";
-
             loadAudioFromFolder(makeChildDir(*mCurrentDir, pFileName));
         }
     }
@@ -312,10 +309,13 @@ void MediaFileSystem::generatePlaylist(QString pSongName)
 
 bool MediaFileSystem::hasAudioContainingSubFolders(QDir folder)
 {
+    assert(folder.exists() && "hasAudioContainingSubFolders passed folder that doesn't exist");
     QStringList subFolders = folder.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
 
     for(const auto& subFolder : subFolders) {
-        if(hasAudioContainingSubFolders(subFolder)) {
+        qDebug() << "Checking ->" << subFolder;
+        QDir currentFolder = makeChildDir(folder, subFolder);
+        if(isFolderContainingAudio(currentFolder) || hasAudioContainingSubFolders(currentFolder)) {
             qDebug() << "Has audio!";
             return true;
         }
@@ -335,7 +335,6 @@ QStringList MediaFileSystem::audioContainingSubFolders(QDir folder)
 {
     QStringList subFolders = folder.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
     QStringList audioContainingSubFolders;
-
 
     for(const auto& subFolder : subFolders) {
         if(hasAudioContainingSubFolders(makeChildDir(folder,subFolder))) {
@@ -391,6 +390,7 @@ void MediaFileSystem::generateMediaItemsFromRoot()
 
     for(int i = 0; i < mLibraryAbsPaths.size(); i++)
     {
+        // TODO: Is there a reason for this..?
         QDir *rootDir = new QDir(mLibraryAbsPaths.at(i));
         if(!rootDir->exists())
         {
@@ -537,6 +537,74 @@ void MediaFileSystem::generateMediaItems()
 
     mEngine->rootContext()->setContextProperty("MediaList", QVariant::fromValue(mQmlMediaItems));
 
+}
+
+void MediaFileSystem::createSaikIndex(bool pRecheck)
+{
+    QString path;
+    path = mLibraryAbsPaths.at(0);
+
+    QDirIterator itr(path, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+
+    while(itr.hasNext())
+    {
+        itr.next();
+        QDir currentDir(itr.filePath());
+
+        QStringList acceptedImageExtensions;
+        acceptedImageExtensions << "*.jpg";
+        acceptedImageExtensions << "*.png";
+
+        QStringList imageFiles = currentDir.entryList(acceptedImageExtensions, QDir::Files, QDir::Name);
+
+        if(imageFiles.size() == 0) {
+            qDebug() << "No suitable images found for " << currentDir.absolutePath();
+            continue;
+        }
+
+        if(currentDir.exists(".saik"))
+        {
+            qDebug() << ".saik folder alreay exists for : " << currentDir.absolutePath();
+
+            if(!pRecheck)
+                continue;
+        }
+
+        QDir tempDir;
+
+        if(!tempDir.exists(itr.filePath() + "/.saik")) {
+            tempDir.mkdir(itr.filePath() + "/.saik");
+            qDebug() << "Creating '" << itr.filePath() + "/.saik" << "'";
+        }
+
+        QDir saikFolder(itr.filePath() + "/.saik");
+
+        if(!saikFolder.exists("config.saik")) {
+            QFile saikFile(saikFolder.absolutePath() + "/config.saik");
+            qDebug() << "Creating '" << saikFolder.absolutePath() + "/config.saik'";
+        }
+
+        QFile saikConfigFile(saikFolder.absolutePath() + "/config.saik");
+
+        if(!saikConfigFile.open(QIODevice::ReadWrite)) {
+            qDebug() << "Failed to open " << saikConfigFile.fileName();
+            continue;
+        }
+
+        QTextStream out(&saikConfigFile);
+
+        foreach(QString imageName, imageFiles)
+        {
+            out << "front_cover:" << imageName << endl;
+            qDebug() << "Appending " + imageName + " to saik file";
+            break; // TODO: remove or do something
+        }
+
+        out.flush();
+        saikConfigFile.close();
+    }
+
+    qDebug() << "Successfully created all saik files";
 }
 
 // TODO: This feature is currently only implemented for the first library

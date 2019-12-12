@@ -44,6 +44,7 @@ public:
     void generateMediaItems();
     void generateMediaItemsFromRoot();
     void createSaikFiles(bool pRecheck);
+    void createSaikIndex(bool pRecheck);
     Q_INVOKABLE void invokeMediaItem(QString fileName, QString extension);
 
     bool isFolderContainingAudio(QDir folder);

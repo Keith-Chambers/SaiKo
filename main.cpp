@@ -40,7 +40,8 @@ int main(int argc, char *argv[])
     }else
     {
         QTextStream in(&file);
-        in >> libPath;
+        libPath = in.readLine();
+//        in >> libPath;
     }
 
     libPaths.append(libPath);
@@ -49,6 +50,8 @@ int main(int argc, char *argv[])
 
     MediaFileSystem mFileSys(libPaths, &engine);
     mFileSys.generateMediaItems();
+
+//    mFileSys.createSaikIndex(true);
 
     // Connect signals to slots
     QObject::connect(&mFileSys, &MediaFileSystem::playlistChanged, &audioplayer, &AudioPlayer::setPlaylist);
