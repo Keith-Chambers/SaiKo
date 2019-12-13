@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     MediaFileSystem mFileSys(libPaths, &engine);
     mFileSys.generateMediaItems();
 
-//    mFileSys.createSaikIndex(false);
+    mFileSys.createSaikIndex(false);
 //    mFileSys.purgeSaikData();
 
     // Connect signals to slots

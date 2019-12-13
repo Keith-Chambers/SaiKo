@@ -1,5 +1,5 @@
-import QtQuick 2.0
-import QtQuick.Controls 2.0
+import QtQuick 2.12
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.0
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls 1.4
@@ -27,6 +27,7 @@ Item
             }
 
             width: 400;
+            value: 0.0
 
             onValueChanged: {
                 if(playPosSlider.pressed && AudioPlayer.isPlaying) {
@@ -51,17 +52,30 @@ Item
                     groove: Rectangle {
                         implicitWidth: 700
                         implicitHeight: 5
-                        color: "gray"
+                        color: "#4F4F4F"
                         radius: 8
+
+                        Rectangle
+                        {
+                            id: coloredPart
+                            color: "light grey"
+                            radius: 8
+                            anchors {
+                                left: parent.left
+                                top: parent.top
+                                bottom: parent.bottom
+                            }
+                            width: playPosSlider.value * parent.width
+                        }
                     }
                     handle: Rectangle {
-                        anchors.centerIn: parent
-                        color: control.pressed ? "white" : "lightgray"
-                        border.color: "gray"
-                        border.width: 2
-                        implicitWidth: 10
-                        implicitHeight: 15
-                        radius: 5
+//                        anchors.centerIn: parent
+//                        color: control.pressed ? "white" : "lightgray"
+//                        border.color: "gray"
+//                        border.width: 2
+//                        implicitWidth: 10
+//                        implicitHeight: 15
+//                        radius: 5
                     }
                 }
         }

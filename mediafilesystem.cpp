@@ -146,22 +146,14 @@ void MediaFileSystem::loadAudioFromFolder(QDir folder)
     for(auto& audioFileName : audioFileNames) {
         qDebug() << "Adding: " << audioFileName;
 
-//        QString artist = MediaFileSystem::getAudioArtist(audioFileName);
         QString title = MediaFileSystem::getAudioTitle(makeChildDir(folder, audioFileName).absolutePath());
+
         if(title == "") {
             title = audioFileName;
         }
 
-//        QString album = MediaFileSystem::getAudioAlbum(audioFileName);
-
         AudioFile audioFile(title, "artist");
         audioFile.setFileName(audioFileName);
-
-        assert(audioFile.getFileName() != "" && audioFile.getFileName() == audioFileName);
-
-//        audioFile.setArtPath( loadAlbumArtToFileIfExists(folder.absolutePath() + "/" + audioFileName, albumArtLocation, frontImageForFolder(mAudioFolder.value())) );
-
-        qDebug() << "Art path -> " << audioFile.getArtPath();
 
         mCurrentFolderAudioFiles.push_back(std::move(audioFile));
         mQmlCurrentFolderAudioFiles.append(&mCurrentFolderAudioFiles.back());
@@ -170,6 +162,7 @@ void MediaFileSystem::loadAudioFromFolder(QDir folder)
     mEngine->rootContext()->setContextProperty("CurrentFolderAudioList", QVariant::fromValue(mQmlCurrentFolderAudioFiles));
 }
 
+// TODO: Should only be called for a folder now
 void MediaFileSystem::invokeMediaItem(QString pFileName, QString pExtension)
 {
     qDebug() << "Invoking media item";
