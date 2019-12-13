@@ -15,6 +15,8 @@
 #include <vector>
 #include <optional>
 
+#include <Magick++.h>
+
 #include <fileref.h>
 #include <tag.h>
 #include <mpeg/id3v2/id3v2tag.h>
@@ -30,6 +32,13 @@
 #include "mediaitem.h"
 #include "audiofile.h"
 #include "textparser.h"
+
+// TODO: move
+struct Resolution
+{
+    uint32_t width;
+    uint32_t height;
+};
 
 class MediaFileSystem : public QObject
 {
@@ -75,7 +84,11 @@ private:
     QString getNameFromPath(QString pPath);
     QStringList extractFolderImagePaths(QString pCurrentAbsPath);
 
-    static uint16_t availbleImagesInSubFolders(QDir directory);
+    static uint16_t availableImagesInSubFolders(QDir directory);
+    static QStringList getBestImagesPaths(QDir directory, uint16_t numImages, Resolution res);
+    static QString bestResolution(QString first, QString second, Resolution targetRes);
+    static QString bestImageOf(QDir directory, QStringList images, Resolution res);
+    static std::optional<Magick::Image> createTiledImage(QStringList sourceImagesPaths, Resolution res);
 
     void loadAudioFromFolder(QDir folder);
 

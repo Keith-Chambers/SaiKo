@@ -204,6 +204,30 @@ void MediaFileSystem::playFromCurrentAudioSelection(unsigned long index)
         return;
     }
 
+    // TODO:
+//    QDir temp = *mCurrentDir;
+//    qDebug() << "Getting images for " << temp.absolutePath();
+//    QStringList selectedImages = getBestImagesPaths(temp, 4, {50,50});
+
+//    std::optional<Magick::Image> tiledImageOpt = createTiledImage(selectedImages, {200, 200});
+
+//    if(tiledImageOpt != std::nullopt)
+//    {
+//        Magick::Image tiledImage = tiledImageOpt.value();
+//        tiledImage.magick("jpg");
+
+//        if(!QDir(mCurrentDir->absolutePath() + "/.saik").exists()) {
+//            QDir().mkdir(mCurrentDir->absolutePath() + "/.saik");
+//        }
+
+//        QString saveLocation = mCurrentDir->absolutePath() + "/.saik/tiled_artist_art.jpg";
+//        tiledImage.write(saveLocation.toUtf8().data());
+
+//        qDebug() << "Saving image to " << saveLocation;
+//    } else {
+//        qDebug() << "Failed to create tiled image";
+//    }
+
     mPlaylist.clear();
 
     for(unsigned long i = index; i < mCurrentFolderAudioFiles.size(); i++) {
@@ -322,11 +346,11 @@ void MediaFileSystem::generatePlaylist(QString pSongName)
     return;
 }
 
-uint16_t MediaFileSystem::availbleImagesInSubFolders(QDir directory)
+uint16_t MediaFileSystem::availableImagesInSubFolders(QDir directory)
 {
     QStringList acceptedImageExtensions;
     acceptedImageExtensions << "*.jpg";
-//    acceptedImageExtensions << "*.png";
+    acceptedImageExtensions << "*.png";
 
     uint16_t result = 0;
 
@@ -339,14 +363,146 @@ uint16_t MediaFileSystem::availbleImagesInSubFolders(QDir directory)
 
         QStringList imagesInFolder = currentDir.entryList(acceptedImageExtensions, QDir::Files, QDir::Name);
         result += imagesInFolder.size();
-
-//        for(const QString& imageInFolder : imagesInFolder)
-//        {
-
-//        }
     }
 
     return result;
+}
+
+QString MediaFileSystem::bestResolution(QString first, QString second, Resolution targetRes)
+{
+    Magick::Image firstImage(first.toUtf8().data());
+    Magick::Image secondImage(second.toUtf8().data());
+
+    uint32_t firstWidth = static_cast<uint32_t>(firstImage.size().width());
+    uint32_t firstHeight = static_cast<uint32_t>(firstImage.size().height());
+
+    uint32_t secondWidth = static_cast<uint32_t>(secondImage.size().width());
+    uint32_t secondHeight = static_cast<uint32_t>(secondImage.size().height());
+
+    int64_t firstWidthDifference = firstWidth - targetRes.width;
+    int64_t firstHeightDifference = firstHeight - targetRes.height;
+
+    int64_t secondWidthDifference = secondWidth - targetRes.width;
+    int64_t secondHeightDifference = secondHeight - targetRes.height;
+
+    if(firstWidthDifference < 0) {
+        firstWidthDifference = static_cast<int64_t>(static_cast<double>(firstWidthDifference) * -1.3);
+    }
+
+    if(firstHeightDifference < 0) {
+        firstHeightDifference = static_cast<int64_t>(static_cast<double>(firstHeightDifference) * -1.3);
+    }
+
+    if(secondWidthDifference < 0) {
+        secondWidthDifference = static_cast<int64_t>(static_cast<double>(secondWidthDifference) * -1.3);
+    }
+
+    if(secondHeightDifference < 0) {
+        secondHeightDifference = static_cast<int64_t>(static_cast<double>(secondHeightDifference) * -1.3);
+    }
+
+    int64_t firstRating = firstWidthDifference + firstHeightDifference;
+    int64_t secondRating = secondWidthDifference + secondHeightDifference;
+
+    return (firstRating < secondRating) ? first : second;
+}
+
+// Make optional
+QString MediaFileSystem::bestImageOf(QDir directory, QStringList images, Resolution res)
+{
+    if(images.size() == 0) {
+        return "";
+    }
+
+    QString currentBest = directory.absolutePath() + "/" + images[0];
+
+    for(auto& image : images) {
+        currentBest = bestResolution(currentBest, directory.absolutePath() + "/" + image, res);
+    }
+
+    return currentBest;
+}
+
+std::optional<Magick::Image> MediaFileSystem::createTiledImage(QStringList sourceImagesPaths, Resolution res)
+{
+    if(sourceImagesPaths.size() == 0) {
+        return std::nullopt;
+    }
+
+    uint16_t imagesPerSide = static_cast<uint16_t>(sqrt(sourceImagesPaths.size()));
+
+    if(imagesPerSide * imagesPerSide < sourceImagesPaths.size()) {
+        imagesPerSide++;
+    }
+
+    uint32_t subImageWidth = res.width / imagesPerSide;
+    uint32_t subImageHeight = res.height / imagesPerSide;
+
+    assert(subImageWidth == 100 && subImageHeight == 100 && imagesPerSide <= 2);
+
+    Magick::Geometry subImageGeometry(subImageWidth, subImageHeight);
+    subImageGeometry.aspect(true);
+
+    std::vector<Magick::Image> sourceImages;
+
+    for(int i = 0; i < sourceImagesPaths.size(); i++) {
+        sourceImages.push_back(Magick::Image(sourceImagesPaths[i].toUtf8().data()));
+        sourceImages.back().resize(subImageGeometry);
+    }
+
+    // TODO: Use res
+    Magick::Image tiledImage("200x200", "grey");
+
+    for(uint32_t x = 0; x < imagesPerSide; x++)
+    {
+        for(uint32_t y = 0; y < imagesPerSide; y++) {
+            tiledImage.composite(sourceImages[(x * imagesPerSide) + y], Magick::Geometry(subImageWidth, subImageHeight, x * subImageWidth, y * subImageHeight));
+        }
+    }
+
+    return std::optional<Magick::Image>(tiledImage);
+}
+
+QStringList MediaFileSystem::getBestImagesPaths(QDir directory, uint16_t numImages, Resolution res)
+{
+    QStringList acceptedImageExtensions;
+    acceptedImageExtensions << "*.jpg";
+    acceptedImageExtensions << "*.png";
+
+    QStringList bestImages;
+
+    QDirIterator itr(directory.absolutePath(), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+
+    while(itr.hasNext())
+    {
+        itr.next();
+        QDir currentDir(itr.filePath());
+
+        QStringList imagesInFolder = currentDir.entryList(acceptedImageExtensions, QDir::Files, QDir::Name);
+
+        if(imagesInFolder.size() == 0) {
+            continue;
+        } else if (bestImages.size() < numImages) {
+            bestImages.append(bestImageOf(currentDir, imagesInFolder, {50, 50}));
+        } else {
+
+            QString bestImageInFolder = bestImageOf(currentDir, imagesInFolder, {50, 50});
+
+            for(int i = 0; i < bestImages.size(); i++)
+            {
+                if(bestResolution(bestImages[i], bestImageInFolder, res) == bestImageInFolder) {
+                    bestImages[i] = bestImageInFolder;
+                    break;
+                }
+            }
+        }
+    }
+
+    for(auto &image : bestImages) {
+        qDebug() << "Selected Image: " << image;
+    }
+
+    return bestImages;
 }
 
 bool MediaFileSystem::hasAudioContainingSubFolders(QDir folder)

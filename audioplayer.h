@@ -33,6 +33,7 @@ class AudioPlayer : public QObject
     Q_PROPERTY(double playPosition READ getPlayPosition WRITE setPlayPosition NOTIFY playPositionChanged)
     Q_PROPERTY(bool isPlaying READ getIsPlaying WRITE setIsPlaying NOTIFY isPlayingChanged)
     Q_PROPERTY(AudioFile * currentAudio READ getCurrentAudio NOTIFY songChanged)
+    Q_PROPERTY(int currentSongIndex READ getCurrentSongIndex NOTIFY currentSongIndexChanged)
 public:
     explicit AudioPlayer(QObject *parent = nullptr);
     ~AudioPlayer();
@@ -48,10 +49,13 @@ public:
     void updateAudioPosition();
     void setCurrentAudio(QString path);
     AudioFile* getCurrentAudio();
+
+    int getCurrentSongIndex();
 signals:
     void playPositionChanged(double);
     void isPlayingChanged(bool);
     void songChanged();
+    void currentSongIndexChanged(int);
 public slots:
     void setPlaylist(QStringList playlist);
 private:

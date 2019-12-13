@@ -1,0 +1,15 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include/ImageMagick-7
+includearchdir=/usr/local/include/ImageMagick-7
+libname=MagickCore-7.Q16HDRI
+moduledir=${exec_prefix}/lib/ImageMagick-7.0.9/modules-Q16HDRI
+ 
+Name: MagickCore
+Description: MagickCore - C API for ImageMagick (ABI Q16HDRI)
+URL: https://github.com/ImageMagick
+Version: 7.0.9
+Cflags: -I${includearchdir} -I${includedir} -fopenmp -DMAGICKCORE_HDRI_ENABLE=1 -DMAGICKCORE_QUANTUM_DEPTH=16
+Libs: -L${libdir} -l${libname}
+Libs.private: -L${libdir} -l${libname}   -llcms2  -ltiff -lfreetype  -lraqm -lfreetype  -ljpeg   -llqr-1 -lglib-2.0  -lpng16 -lz   -ldjvulibre  -lfftw3    -lfontconfig -lfreetype  -lheif  -lwebpmux -lwebpdemux -lwebp  -lwebp  -lwmflite  -lXext -lXt   -lSM -lICE -lX11  -llzma  -lbz2 -lIlmImf-2_4 -lImath-2_4 -lHalf-2_4 -lIex-2_4 -lIexMath-2_4 -lIlmThread-2_4 -pthread  -lopenjp2  -lpangocairo-1.0 -lpango-1.0 -lgobject-2.0 -lglib-2.0 -lharfbuzz -lcairo  -lraw_r -lstdc++ -fopenmp -llcms2   -lxml2  -lgvc -lcgraph -lcdt  -lz      -lm      -lgomp -lm

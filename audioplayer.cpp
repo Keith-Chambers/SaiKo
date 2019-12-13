@@ -46,6 +46,11 @@ void AudioPlayer::AudioPlayer::setPlaylist(QStringList pPlaylist)
     playMusic();
 }
 
+int AudioPlayer::getCurrentSongIndex()
+{
+    return mPlaylistIndex;
+}
+
 QString AudioPlayer::loadAlbumArtToFileIfExists(QString filePath, QString successPath, QString failurePath)
 {
     static const char *IdPicture = "APIC" ;
