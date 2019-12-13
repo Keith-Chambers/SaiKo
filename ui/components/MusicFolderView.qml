@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtQuick.Controls 2.4
 
 Item {
     id: root;
@@ -7,8 +8,10 @@ Item {
     {
         cellWidth: 150;
         cellHeight: 170;
+        clip: true;
 
         anchors.fill: parent;
+        ScrollBar.vertical: ScrollBar {}
 
         Component
         {
@@ -51,7 +54,7 @@ Item {
                             if(model.modelData.imagePath !== "")
                                 return model.modelData.imagePath;
                             else
-                                return "";
+                                return "qrc:///resources/cover.jpg";
                         }
                     }
 

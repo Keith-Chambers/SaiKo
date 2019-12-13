@@ -61,7 +61,7 @@ ApplicationWindow
                 topMargin: 50;
                 leftMargin: 10;
                 rightMargin: 10;
-                bottom: parent.bottom;
+                bottom: audioControls.top;
                 left: sideMenuBackground.right;
                 right: audioFileListView.left
             }
@@ -147,10 +147,6 @@ ApplicationWindow
                 }
             }
 
-
-
-
-
             Rectangle
             {
                 id: nowPlayingImageRect;
@@ -158,11 +154,11 @@ ApplicationWindow
                 {
                     bottom: sideMenuBackground.bottom;
                     left: parent.left;
-                    leftMargin: 50;
+                    leftMargin: 25;
                     bottomMargin: 20;
                 }
-                width: 150;
-                height: 150;
+                height: 200;
+                width: 200;
 
                 Image
                 {

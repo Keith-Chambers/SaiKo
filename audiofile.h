@@ -22,10 +22,12 @@ public:
     void setTitle(QString title);
     void setArtist(QString artist);
     void setArtPath(QString artPath);
+    void setFileName(QString fileName);
 
     QString getTitle();
     QString getArtist();
     QString getArtPath();
+    QString getFileName();
     bool getHasArt();
 
 signals:
@@ -38,6 +40,7 @@ private:
     QString mTitle;
     QString mArtist;
     QString mArtPath;
+    QString mFileName;
 };
 
 #endif // AUDIOFILE_H

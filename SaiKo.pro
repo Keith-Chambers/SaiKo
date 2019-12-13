@@ -17,7 +17,8 @@ QML_IMPORT_PATH =
 
 INCLUDEPATH +=  $$PWD/inc/taglib/ \
                 $$PWD/inc/taglib/toolkit/ \
-                $$PWD/inc/taglib/mpeg/id3v2/
+                $$PWD/inc/taglib/mpeg/id3v2/ \
+                $$PWD/inc/
 
 include(deployment.pri)
 

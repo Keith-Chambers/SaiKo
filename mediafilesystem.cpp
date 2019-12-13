@@ -24,6 +24,12 @@ MediaFileSystem::MediaFileSystem(QStringList pLibraryAbsPaths, QQmlApplicationEn
 QString MediaFileSystem::getAudioTitle(QFile audioFile)
 {
     TagLib::FileRef f(audioFile.fileName().toStdString().c_str());
+
+    if(f.isNull()) {
+        qDebug() << "Failed to get title for " << audioFile;
+        return "";
+    }
+
     TagLib::Tag *tag = f.tag();
 
     return QString::fromStdString(std::string(tag->title().to8Bit()));
@@ -141,10 +147,18 @@ void MediaFileSystem::loadAudioFromFolder(QDir folder)
         qDebug() << "Adding: " << audioFileName;
 
 //        QString artist = MediaFileSystem::getAudioArtist(audioFileName);
-//        QString title = MediaFileSystem::getAudioTitle(audioFileName);
+        QString title = MediaFileSystem::getAudioTitle(makeChildDir(folder, audioFileName).absolutePath());
+        if(title == "") {
+            title = audioFileName;
+        }
+
 //        QString album = MediaFileSystem::getAudioAlbum(audioFileName);
 
-        AudioFile audioFile(audioFileName, "artist");
+        AudioFile audioFile(title, "artist");
+        audioFile.setFileName(audioFileName);
+
+        assert(audioFile.getFileName() != "" && audioFile.getFileName() == audioFileName);
+
 //        audioFile.setArtPath( loadAlbumArtToFileIfExists(folder.absolutePath() + "/" + audioFileName, albumArtLocation, frontImageForFolder(mAudioFolder.value())) );
 
         qDebug() << "Art path -> " << audioFile.getArtPath();
@@ -193,7 +207,8 @@ void MediaFileSystem::playFromCurrentAudioSelection(unsigned long index)
     mPlaylist.clear();
 
     for(unsigned long i = index; i < mCurrentFolderAudioFiles.size(); i++) {
-        mPlaylist.append(mAudioFolder.value().absolutePath() + "/" + mCurrentFolderAudioFiles[i].getTitle());
+        assert(mCurrentFolderAudioFiles[i].getFileName() != "");
+        mPlaylist.append(mAudioFolder.value().absolutePath() + "/" + mCurrentFolderAudioFiles[i].getFileName());
     }
 
     emit playlistChanged(mPlaylist);
@@ -305,6 +320,33 @@ void MediaFileSystem::generatePlaylist(QString pSongName)
 
     emit playlistChanged(mPlaylist);
     return;
+}
+
+uint16_t MediaFileSystem::availbleImagesInSubFolders(QDir directory)
+{
+    QStringList acceptedImageExtensions;
+    acceptedImageExtensions << "*.jpg";
+//    acceptedImageExtensions << "*.png";
+
+    uint16_t result = 0;
+
+    QDirIterator itr(directory.absolutePath(), QDir::Files | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
+
+    while(itr.hasNext())
+    {
+        itr.next();
+        QDir currentDir(itr.filePath());
+
+        QStringList imagesInFolder = currentDir.entryList(acceptedImageExtensions, QDir::Files, QDir::Name);
+        result += imagesInFolder.size();
+
+//        for(const QString& imageInFolder : imagesInFolder)
+//        {
+
+//        }
+    }
+
+    return result;
 }
 
 bool MediaFileSystem::hasAudioContainingSubFolders(QDir folder)

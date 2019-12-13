@@ -75,6 +75,8 @@ private:
     QString getNameFromPath(QString pPath);
     QStringList extractFolderImagePaths(QString pCurrentAbsPath);
 
+    static uint16_t availbleImagesInSubFolders(QDir directory);
+
     void loadAudioFromFolder(QDir folder);
 
     // Variables
