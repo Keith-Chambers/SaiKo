@@ -429,16 +429,24 @@ std::optional<Magick::Image> MediaFileSystem::createTiledImage(QStringList sourc
         return std::nullopt;
     }
 
+    qDebug() << "Images given -> " << sourceImagesPaths.size();
+
     uint16_t imagesPerSide = static_cast<uint16_t>(sqrt(sourceImagesPaths.size()));
 
     if(imagesPerSide * imagesPerSide < sourceImagesPaths.size()) {
         imagesPerSide++;
     }
 
+    qDebug() << "Images per size -> " << imagesPerSide;
+
     uint32_t subImageWidth = res.width / imagesPerSide;
     uint32_t subImageHeight = res.height / imagesPerSide;
 
-    assert(subImageWidth == 100 && subImageHeight == 100 && imagesPerSide <= 2);
+//    assert(subImageWidth == 100 && subImageHeight == 100 && imagesPerSide <= 2);
+
+    qDebug() << "Sub Image Width -> " << subImageWidth;
+    qDebug() << "Sub Image Height -> " << subImageHeight;
+    qDebug() << "Images per side -> " << imagesPerSide;
 
     Magick::Geometry subImageGeometry(subImageWidth, subImageHeight);
     subImageGeometry.aspect(true);
@@ -450,13 +458,47 @@ std::optional<Magick::Image> MediaFileSystem::createTiledImage(QStringList sourc
         sourceImages.back().resize(subImageGeometry);
     }
 
+    qDebug() << "Resize complete";
+
     // TODO: Use res
     Magick::Image tiledImage("200x200", "grey");
 
-    for(uint32_t x = 0; x < imagesPerSide; x++)
+//    int x = 0;
+//    int y = 0;
+
+//    for(int32_t i = 0; i < sourceImagesPaths.size(); i++) {
+//        tiledImage.composite(sourceImages[(y * imagesPerSide) + x], Magick::Geometry(subImageWidth, subImageHeight, x * subImageWidth, y * subImageHeight));
+
+//        x++;
+//        if(x % imagesPerSide == 0) {
+//            y++;
+//            x = 0;
+//        }
+//    }
+
+    uint32_t sourceImageIndex = 0;
+    bool forwardDirection = true;
+
+    for(uint32_t y = 0; y < imagesPerSide; y++)
     {
-        for(uint32_t y = 0; y < imagesPerSide; y++) {
-            tiledImage.composite(sourceImages[(x * imagesPerSide) + y], Magick::Geometry(subImageWidth, subImageHeight, x * subImageWidth, y * subImageHeight));
+        for(uint32_t x = 0; x < imagesPerSide; x++)
+        {
+            if(sourceImageIndex > 0 && sourceImageIndex % sourceImages.size() == 0) {
+                if(sourceImageIndex % 2 == 0) {
+                    forwardDirection = false;
+                    sourceImageIndex--;
+                } else {
+                    sourceImageIndex = 0;
+                }
+            }
+
+            tiledImage.composite(sourceImages[sourceImageIndex], Magick::Geometry(subImageWidth, subImageHeight, x * subImageWidth, y * subImageHeight));
+
+            if(forwardDirection) {
+                sourceImageIndex++;
+            } else {
+                sourceImageIndex--;
+            }
         }
     }
 
@@ -744,28 +786,50 @@ void MediaFileSystem::createSaikIndex(bool pRecheck)
 
     QDirIterator itr(path, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
 
+    // Skip root
+    itr.next();
+
     while(itr.hasNext())
     {
         itr.next();
         QDir currentDir(itr.filePath());
 
-        QStringList acceptedImageExtensions;
-        acceptedImageExtensions << "*.jpg";
-        acceptedImageExtensions << "*.png";
-
-        QStringList imageFiles = currentDir.entryList(acceptedImageExtensions, QDir::Files, QDir::Name);
-
-        if(imageFiles.size() == 0) {
-            qDebug() << "No suitable images found for " << currentDir.absolutePath();
-            continue;
-        }
-
         if(currentDir.exists(".saik"))
         {
             qDebug() << ".saik folder alreay exists for : " << currentDir.absolutePath();
 
-            if(!pRecheck)
+            if(!pRecheck) {
                 continue;
+            }
+        }
+
+        bool isAudioFolder = isFolderContainingAudio(currentDir);
+
+        if(!isAudioFolder && !hasAudioContainingSubFolders(currentDir)) {
+            qDebug() << "Skipping " << currentDir.absolutePath();
+            continue;
+        }
+
+        QStringList acceptedImageExtensions;
+        acceptedImageExtensions << "*.jpg";
+        acceptedImageExtensions << "*.png";
+
+        uint16_t targetImages = isAudioFolder ? 1 : 4;
+        QStringList imageFiles;
+
+        if(isAudioFolder)
+        {
+            QStringList imagesInFolder = currentDir.entryList(acceptedImageExtensions, QDir::Files, QDir::Name);
+            imageFiles.append(bestImageOf(currentDir, imagesInFolder, {150, 150}).split('/').back());
+        } else
+        {
+            assert(imageFiles.empty());
+            imageFiles.append(getBestImagesPaths(currentDir, targetImages, {150,150}));
+        }
+
+        if(imageFiles.size() == 0) {
+            qDebug() << "No suitable images found for " << currentDir.absolutePath();
+            continue;
         }
 
         QDir tempDir;
@@ -789,17 +853,44 @@ void MediaFileSystem::createSaikIndex(bool pRecheck)
             continue;
         }
 
-        QTextStream out(&saikConfigFile);
+        QString imageLocation;
 
-        foreach(QString imageName, imageFiles)
+        if(!isAudioFolder)
         {
-            out << "front_cover:" << imageName << endl;
-            qDebug() << "Appending " + imageName + " to saik file";
-            break; // TODO: remove or do something
+            qDebug() << "Generating a tiled image from album art";
+
+            std::optional<Magick::Image> tiledImageOpt = createTiledImage(imageFiles, {200, 200});
+
+            qDebug() << "Image created..";
+
+            if(tiledImageOpt != std::nullopt)
+            {
+                Magick::Image tiledImage = tiledImageOpt.value();
+                tiledImage.magick("jpg");
+
+                imageLocation = currentDir.absolutePath() + "/.saik/tiled_artist_art.jpg";
+                qDebug() << "Saving image to " << imageLocation;
+                tiledImage.write(imageLocation.toUtf8().data());
+
+                imageLocation = ".saik/tiled_artist_art.jpg";
+            } else {
+                qDebug() << "ERR: Failed to create tiled image";
+                saikConfigFile.close();
+                continue;
+            }
+        } else {
+            imageLocation = imageFiles[0];
         }
+
+        qDebug() << "Image location -> " << imageLocation;
+
+        QTextStream out(&saikConfigFile);
+        out << "front_cover:" << imageLocation << endl;
 
         out.flush();
         saikConfigFile.close();
+
+        qDebug() << "Written to file";
     }
 
     qDebug() << "Successfully created all saik files";
@@ -857,6 +948,32 @@ void MediaFileSystem::createSaikFiles(bool pRecheck)
 }
 
 // TODO: This feature is currently only implemented for the first library
+
+void MediaFileSystem::purgeSaikData()
+{
+    QString path;
+    path = mLibraryAbsPaths.at(0);
+
+    QDirIterator itr(path, QDir::AllDirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+
+    while(itr.hasNext())
+    {
+        itr.next();
+        QDir currentDir(itr.filePath());
+
+        QDir saikFolder(currentDir.absolutePath() + "/.saik/");
+
+        if(!saikFolder.exists()) {
+            continue;
+        }
+
+        qDebug() << "Removing -> " << saikFolder.absolutePath();
+        saikFolder.removeRecursively();
+    }
+
+    qDebug() << "Successfully removed all saik data";
+}
+
 void MediaFileSystem::purgeSaikFiles()
 {
     QString path;

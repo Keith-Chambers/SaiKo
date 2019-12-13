@@ -61,6 +61,8 @@ public:
     bool hasAudioContainingSubFolders(QDir folder);
     QStringList audioContainingSubFolders(QDir Folder);
 
+    void purgeSaikData();
+
     Q_INVOKABLE void playFromCurrentAudioSelection(unsigned long index);
 
     // TODO: Move to util class

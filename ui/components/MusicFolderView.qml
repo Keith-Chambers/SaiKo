@@ -6,8 +6,8 @@ Item {
 
     GridView
     {
-        cellWidth: 150;
-        cellHeight: 170;
+        cellWidth: 200;
+        cellHeight: 220;
         clip: true;
 
         anchors.fill: parent;
@@ -20,15 +20,14 @@ Item {
             Item
             {
                 id: musicFolderItemContainer
-//                opacity: 0.0;
-                width: 145;
-                height: 165;
+                width: 190;
+                height: 210;
 
                 Rectangle
                 {
                     id: musicFolderRect
-                    width: 145;
-                    height: 145;
+                    width: 180;
+                    height: 180;
                     color:
                         {
                             (model.modelData.isPlayable) ? "grey" : "dark grey"
@@ -45,8 +44,8 @@ Item {
                         height: parent.height
 
                         asynchronous: true
-                        sourceSize.width: 150
-                        sourceSize.height: 150
+                        sourceSize.width: 190
+                        sourceSize.height: 190
                         smooth: false
 
                         source:
@@ -64,7 +63,6 @@ Item {
                         onClicked:
                         {
                             console.log("Enter dir : " + model.modelData.itemName);
-
                             MFileSys.invokeMediaItem(model.modelData.itemName, model.modelData.extension);
                         }
                     }
