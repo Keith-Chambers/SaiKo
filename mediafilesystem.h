@@ -47,6 +47,10 @@ class MediaFileSystem : public QObject
 public:
 
     Q_PROPERTY(QString currentFolderName READ getCurrentFolderName NOTIFY directoryChanged)
+    Q_PROPERTY(QString currentAudioFolderName READ getCurrentAudioFolderName NOTIFY currentAudioFolderChanged)
+
+
+
 
     explicit MediaFileSystem(QObject *parent = nullptr);
     MediaFileSystem(QStringList pLibraryAbsPaths, QQmlApplicationEngine *pEngine, QObject *parent = nullptr);
@@ -58,6 +62,10 @@ public:
     void createSaikFiles(bool pRecheck);
     void createSaikIndex(bool pRecheck);
     Q_INVOKABLE void invokeMediaItem(QString fileName, QString extension);
+
+    QString getCurrentAudioFolderName() {
+        return (mAudioFolder != std::nullopt) ? mAudioFolder.value().dirName() : "";
+    }
 
     bool isFolderContainingAudio(QDir folder);
     QStringList audioFilesInFolder(QDir folder);
@@ -78,6 +86,7 @@ public:
 signals:
     void playlistChanged(QStringList pPlaylist);
     void directoryChanged();
+    void currentAudioFolderChanged();
 public slots:
     void purgeSaikFiles();
 private:

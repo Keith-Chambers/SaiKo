@@ -98,6 +98,18 @@ ApplicationWindow
             }
         }
 
+        Text {
+            id: audioFolderName
+            text: qsTr( MFileSys.currentAudioFolderName )
+            color: "white"
+            anchors {
+                left: audioFileListView.left
+                bottom: audioFileListView.top
+                bottomMargin: 5
+            }
+            font.pointSize: 11
+        }
+
         AudioFileListView
         {
             id: audioFileListView
@@ -106,7 +118,7 @@ ApplicationWindow
             anchors
             {
                 top: backButton.bottom;
-                topMargin: 20;
+                topMargin: 40;
                 bottom: audioControls.top;
                 bottomMargin: 0;
                 right: parent.right;

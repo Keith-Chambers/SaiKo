@@ -187,6 +187,7 @@ void MediaFileSystem::invokeMediaItem(QString pFileName, QString pExtension)
 
             mAudioFolder = makeChildDir(*mCurrentDir, pFileName);
             loadAudioFromFolder(makeChildDir(*mCurrentDir, pFileName));
+            currentAudioFolderChanged();
         }
     }
 }
