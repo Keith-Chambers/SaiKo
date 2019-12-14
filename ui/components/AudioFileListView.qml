@@ -27,6 +27,8 @@ Item {
             anchors.topMargin: 1
             interactive: true;
 
+            currentIndex: -1;
+
             Component
             {
                 id: listDelegate

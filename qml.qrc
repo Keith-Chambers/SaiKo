@@ -15,5 +15,6 @@
         <file>ui/main.qml</file>
         <file>ui/components/AudioControls.qml</file>
         <file>ui/components/AudioFileListView.qml</file>
+        <file>ui/components/AudioVisualization.qml</file>
     </qresource>
 </RCC>

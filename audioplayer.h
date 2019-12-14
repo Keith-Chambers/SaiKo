@@ -10,6 +10,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
+#include <QQmlListProperty>
 
 #include <fileref.h>
 #include <tag.h>
@@ -26,6 +27,38 @@
 #include "audiofile.h"
 #include "textparser.h"
 
+//QColor colorLerp(QColor from, QColor to, double lerpValue)
+//{
+//    int rDiff = from.red() - to.red();
+//    int gDiff = from.green() - to.green();
+//    int bDiff = from.blue() - to.blue();
+
+//    return QColor(from.red() + (rDiff * lerpValue), from.green() + (gDiff * lerpValue), from.blue() + (bDiff * lerpValue));
+//}
+
+//class AudioFrameSlice : public QObject
+//{
+//    Q_OBJECT
+//    Q_PROPERTY(QColor color READ getColor NOTIFY colorChanged)
+//    Q_PROPERTY(double value READ getValue NOTIFY valueChanged)
+//public:
+
+//    AudioFrameSlice(double value)
+//        : mValue {value} {}
+
+//    double getValue(){ return mValue; }
+//    QColor getColor(){ return colorLerp(QColor("white"), QColor("red"), mValue); }
+
+//    void setValue(double value) { mValue = value; }
+
+//signals:
+//    void colorChanged(QColor);
+//    void valueChanged(double);
+
+//private:
+//    double mValue;
+//};
+
 class AudioPlayer : public QObject
 {
     Q_OBJECT
@@ -34,6 +67,8 @@ class AudioPlayer : public QObject
     Q_PROPERTY(bool isPlaying READ getIsPlaying WRITE setIsPlaying NOTIFY isPlayingChanged)
     Q_PROPERTY(AudioFile * currentAudio READ getCurrentAudio NOTIFY songChanged)
     Q_PROPERTY(int currentSongIndex READ getCurrentSongIndex NOTIFY currentSongIndexChanged)
+//    Q_PROPERTY(QQmlListProperty<AudioFrameSlice> currentAudioFrame READ getCurrentAudioFrame NOTIFY currentAudioFrameChanged)
+
 public:
     explicit AudioPlayer(QObject *parent = nullptr);
     ~AudioPlayer();

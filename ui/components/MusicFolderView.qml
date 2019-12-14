@@ -7,7 +7,7 @@ Item {
     GridView
     {
         cellWidth: 200;
-        cellHeight: 220;
+        cellHeight: 200;
         clip: true;
 
         anchors.fill: parent;
@@ -21,13 +21,20 @@ Item {
             {
                 id: musicFolderItemContainer
                 width: 190;
-                height: 210;
+                height: 190;
 
                 Rectangle
                 {
                     id: musicFolderRect
-                    width: 180;
-                    height: 180;
+                    height: 150;
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        leftMargin: 20;
+                        rightMargin: 20;
+                        top: parent.top
+                    }
+
                     color:
                         {
                             (model.modelData.isPlayable) ? "grey" : "dark grey"
@@ -44,8 +51,8 @@ Item {
                         height: parent.height
 
                         asynchronous: true
-                        sourceSize.width: 190
-                        sourceSize.height: 190
+                        sourceSize.width: 150
+                        sourceSize.height: 150
                         smooth: false
 
                         source:
@@ -72,6 +79,7 @@ Item {
                 {
                     anchors {
                         top: musicFolderRect.bottom
+                        topMargin: 5;
                         left: parent.left
                         right: parent.right
                     }

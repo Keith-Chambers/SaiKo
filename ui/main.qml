@@ -23,6 +23,37 @@ ApplicationWindow
         anchors.fill: parent;
         color: "#404040";
 
+        Text
+        {
+            id: currentFolderText
+            color: "white"
+            text: MFileSys.currentFolderName
+            font.pointSize: 14;
+
+            anchors {
+                left: musicFolderView.left
+                leftMargin: 20
+                bottom: topDivider.top
+                bottomMargin: 0;
+            }
+        }
+
+        Rectangle
+        {
+            id: topDivider
+            visible: false;
+            height: 1
+            color: "white"
+            anchors {
+                left: sideMenuBackground.right
+                top: backButton.bottom;
+                topMargin: 20;
+                leftMargin: 50
+//                rightMargin: 50
+                right: audioFileListView.left
+            }
+        }
+
         Rectangle
         {
             id: backButton;
@@ -57,9 +88,9 @@ ApplicationWindow
             id: musicFolderView
             anchors
             {
-                top: parent.top;
-                topMargin: 50;
-                leftMargin: 10;
+                top: topDivider.bottom;
+                topMargin: 20;
+                leftMargin: 50;
                 rightMargin: 10;
                 bottom: audioControls.top;
                 left: sideMenuBackground.right;
@@ -76,7 +107,8 @@ ApplicationWindow
             {
                 top: backButton.bottom;
                 topMargin: 20;
-                bottom: parent.bottom;
+                bottom: audioControls.top;
+                bottomMargin: 0;
                 right: parent.right;
                 rightMargin: 10;
             }

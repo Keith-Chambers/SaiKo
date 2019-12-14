@@ -126,6 +126,7 @@ void MediaFileSystem::upDir()
     }
     }
 
+    directoryChanged();
     generateMediaItems();
 }
 
@@ -289,6 +290,8 @@ void MediaFileSystem::downDir(QString pDirName)
         }
     }
 
+    directoryChanged();
+
     generateMediaItems();
 }
 
@@ -361,9 +364,31 @@ uint16_t MediaFileSystem::availableImagesInSubFolders(QDir directory)
     return result;
 }
 
+bool imageIsValid(QString imagePath)
+{
+    qDebug() << "Checking " << imagePath << "... ";
+
+    bool result = false;
+
+    try {
+        result = Magick::Image(imagePath.toUtf8().data()).isValid() ? true : false;
+    } catch (...) {
+        return false;
+    }
+
+    if(result) {
+        qDebug() << "success";
+    } else {
+        qDebug() << "Invalid";
+    }
+
+    return result;
+}
+
 QString MediaFileSystem::bestResolution(QString first, QString second, Resolution targetRes)
 {
     Magick::Image firstImage(first.toUtf8().data());
+
     Magick::Image secondImage(second.toUtf8().data());
 
     uint32_t firstWidth = static_cast<uint32_t>(firstImage.size().width());
@@ -514,6 +539,12 @@ QStringList MediaFileSystem::getBestImagesPaths(QDir directory, uint16_t numImag
         QDir currentDir(itr.filePath());
 
         QStringList imagesInFolder = currentDir.entryList(acceptedImageExtensions, QDir::Files, QDir::Name);
+
+        for(auto& image : imagesInFolder) {
+            if(!imageIsValid(currentDir.absolutePath() + "/" + image)) {
+                imagesInFolder.removeOne(image);
+            }
+        }
 
         if(imagesInFolder.size() == 0) {
             continue;
@@ -813,6 +844,13 @@ void MediaFileSystem::createSaikIndex(bool pRecheck)
         if(isAudioFolder)
         {
             QStringList imagesInFolder = currentDir.entryList(acceptedImageExtensions, QDir::Files, QDir::Name);
+
+            for(auto& image : imagesInFolder) {
+                if(!imageIsValid(currentDir.absolutePath() + "/" + image)) {
+                    imagesInFolder.removeOne(image);
+                }
+            }
+
             imageFiles.append(bestImageOf(currentDir, imagesInFolder, {150, 150}).split('/').back());
         } else
         {
@@ -984,6 +1022,7 @@ void MediaFileSystem::purgeSaikFiles()
         {
             QFile saikFile(itr.filePath() + "/data.saik");
             qDebug() << saikFile.fileName() + " deleted";
+            assert(saikFile.exists());
             saikFile.remove();
         }
     }

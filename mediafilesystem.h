@@ -45,6 +45,9 @@ class MediaFileSystem : public QObject
     Q_OBJECT
 
 public:
+
+    Q_PROPERTY(QString currentFolderName READ getCurrentFolderName NOTIFY directoryChanged)
+
     explicit MediaFileSystem(QObject *parent = nullptr);
     MediaFileSystem(QStringList pLibraryAbsPaths, QQmlApplicationEngine *pEngine, QObject *parent = nullptr);
     Q_INVOKABLE void upDir();
@@ -61,6 +64,10 @@ public:
     bool hasAudioContainingSubFolders(QDir folder);
     QStringList audioContainingSubFolders(QDir Folder);
 
+    QString getCurrentFolderName() {
+        return (mCurrentDir != nullptr) ? mCurrentDir->dirName() : "Your Music Library";
+    }
+
     void purgeSaikData();
 
     Q_INVOKABLE void playFromCurrentAudioSelection(unsigned long index);
@@ -70,6 +77,7 @@ public:
 
 signals:
     void playlistChanged(QStringList pPlaylist);
+    void directoryChanged();
 public slots:
     void purgeSaikFiles();
 private:
