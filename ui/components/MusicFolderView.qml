@@ -35,10 +35,7 @@ Item {
                         top: parent.top
                     }
 
-                    color:
-                        {
-                            (model.modelData.isPlayable) ? "grey" : "dark grey"
-                        }
+                    color: "grey"
 
                     Image
                     {
@@ -70,7 +67,7 @@ Item {
                         onClicked:
                         {
                             console.log("Enter dir : " + model.modelData.itemName);
-                            MFileSys.invokeMediaItem(model.modelData.itemName, model.modelData.extension);
+                            MFileSys.invokeFolder(model.modelData.itemName);
                         }
                     }
                 }
@@ -95,7 +92,7 @@ Item {
             }
         }
 
-        model: MediaList
+        model: LibraryView
         delegate: fileDelegate
     }
 }

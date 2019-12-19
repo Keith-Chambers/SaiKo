@@ -26,8 +26,7 @@ Item {
             anchors.fill: parent;
             anchors.topMargin: 1
             interactive: true;
-
-            currentIndex: -1;
+            currentIndex: MFileSys.currentPlaylistIndex
 
             Component
             {
@@ -73,18 +72,18 @@ Item {
                     {
                         anchors.fill: parent
                         onClicked: {
-//                            MFileSys.invokeMediaItem(model.modelData.itemName, model.modelData.extension);
-                            audioListView.currentIndex = index;
-                            MFileSys.playFromCurrentAudioSelection(index);
+//                            MFileSys.currentPlaylistIndex = index;
+                            MFileSys.invokeAudioListing(index);
                         }
                     }
                 }
             }
 
             focus: true
-            model: CurrentFolderAudioList
+            model: AudioView
             delegate: listDelegate
             highlight: Rectangle {
+                visible: MFileSys.currentPlaylistIndex != -1
                 color: "light grey"
                 opacity: 0.2
                 anchors {

@@ -27,7 +27,7 @@ ApplicationWindow
         {
             id: currentFolderText
             color: "white"
-            text: MFileSys.currentFolderName
+            text: MFileSys.libraryViewDirName
             font.pointSize: 14;
 
             anchors {
@@ -79,7 +79,7 @@ ApplicationWindow
             {
                 id: backButtonMouse
                 anchors.fill: parent;
-                onClicked: MFileSys.upDir();
+                onClicked: MFileSys.cdUp();
             }
         }
 
@@ -100,7 +100,7 @@ ApplicationWindow
 
         Text {
             id: audioFolderName
-            text: qsTr( MFileSys.currentAudioFolderName )
+            text: qsTr( MFileSys.audioViewDirName )
             color: "white"
             anchors {
                 left: audioFileListView.left
@@ -166,9 +166,8 @@ ApplicationWindow
                         right: parent.right
                     }
 
-                    visible: AudioPlayer.isPlaying
-
-                    text: (AudioPlayer.isPlaying) ? AudioPlayer.currentAudio.title : "";
+                    visible: MFileSys.currentPlaylistIndex != -1
+                    text: (MFileSys.currentPlaylistIndex != -1) ? MFileSys.currentAudio.title : "";
                 }
 
                 Text
@@ -186,8 +185,8 @@ ApplicationWindow
                     font {
                         bold: true;
                     }
-                    visible: AudioPlayer.isPlaying
-                    text: (AudioPlayer.isPlaying) ? AudioPlayer.currentAudio.artist : "";
+                    visible: MFileSys.currentPlaylistIndex != -1
+                    text: (MFileSys.currentPlaylistIndex != -1) ? MFileSys.currentAudio.artist : "";
                 }
             }
 
@@ -208,22 +207,11 @@ ApplicationWindow
                 {
                     id: currentlyPlayingImage
                     source: {
-                        console.log("Checking whether to change image");
-
-                        if(!AudioPlayer.isPlaying) {
-                            console.log("Not playing");
+                        if(MFileSys.currentPlaylistIndex == -1) {
                             return "qrc:///resources/cover.jpg";
                         }
 
-                        if(!AudioPlayer.currentAudio.hasArt) {
-                            console.log("Current audio has no art");
-                            console.log(AudioPlayer.currentAudio.title);
-                            return "qrc:///resources/cover.jpg";
-                        }
-
-                        console.log("Returning path " + "file:" + AudioPlayer.currentAudio.artPath);
-
-                        return AudioPlayer.currentAudio.artPath;
+                        return MFileSys.currentAudio.artPath;
                     }
                     anchors.fill: parent;
                 }

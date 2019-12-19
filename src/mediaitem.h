@@ -22,9 +22,18 @@ class MediaItem : public QObject
 public:
     //TODO: Remove default constructor
     //explicit MediaItem(QObject *parent = 0);
+
+    MediaItem()
+        : QObject{nullptr}
+    {}
+
+    MediaItem(const MediaItem& copy);
+
+    MediaItem& operator=(const MediaItem& assign);
+
     MediaItem(QString pItemPath, bool pIsPlayable, QObject *parent = nullptr);
     MediaItem(QString pItemPath, QString pImagePath, bool pIsPlayable, QObject *parent = nullptr);
-    ~MediaItem();
+    ~MediaItem()=default;
 
     void applyOption(QDir directory, ParseValue option)
     {
@@ -99,5 +108,7 @@ private:
     QDir mLocation;
     bool mIsFolder;
 };
+
+Q_DECLARE_METATYPE(MediaItem)
 
 #endif // MEDIAITEM_H

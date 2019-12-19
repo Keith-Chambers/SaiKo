@@ -12,7 +12,7 @@ void SoundStopEvent::OnSoundStopped(irrklang::ISound *pSound, irrklang::E_STOP_E
         return;
     }
 
-    reinterpret_cast<AudioPlayer*>(pUserData)->nextSong();
+    reinterpret_cast<AudioPlayer*>(pUserData)->audioCompleted();
 
     qDebug() << "onSoundStopped event complete";
 }

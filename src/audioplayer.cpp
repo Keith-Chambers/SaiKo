@@ -1,233 +1,59 @@
 #include "audioplayer.h"
 
 AudioPlayer::AudioPlayer(QObject *parent)
-    : QObject(parent), mSoundStopEvent(), mCurrentAudio("Unknown", "Unknown")
+    : QObject(parent), m_sound_stop_event(), m_update_audio_position_timer {}, m_current_audio {std::nullopt}
 {
-    qDebug() << "AudioPlayer Constructer invoked";
+    m_irrklang_sound = Q_NULLPTR;
+    m_irrklang_engine = irrklang::createIrrKlangDevice();
 
-    mCurrentSound = Q_NULLPTR;
-    mEngine = irrklang::createIrrKlangDevice();
-
-    if (!mEngine)
+    if(!m_irrklang_engine)
     {
-        printf("Could not startup engine\n");
+        qDebug() << "Failed to initialize IrrKlang audio engine";
+        assert(false);
     }
 
-    mPositionTimer = new QTimer(this);
-    connect(mPositionTimer, &QTimer::timeout, this, &AudioPlayer::updateAudioPosition);
-    mPositionTimer->start(250);
-
-    mPlaylistIndex = 0;
+    connect(&m_update_audio_position_timer, &QTimer::timeout, this, &AudioPlayer::updateAudioPosition);
+    m_update_audio_position_timer.start(250);
 }
 
-AudioPlayer::~AudioPlayer(void)
+AudioPlayer::~AudioPlayer()
 {
-    mCurrentSound->drop();
-    mEngine->drop();
+    m_irrklang_sound->drop();
+    m_irrklang_engine->drop();
 }
 
-AudioFile * AudioPlayer::getCurrentAudio()
+void AudioPlayer::playAudio(AudioFile audio)
 {
-    return &mCurrentAudio;
-}
-
-void AudioPlayer::AudioPlayer::setPlaylist(QStringList pPlaylist)
-{
-    mPlaylist.clear();
-    mPlaylist = pPlaylist;
-
-    qDebug() << "Playlist:";
-    for(int i = 0; i < mPlaylist.size(); i++) {
-        qDebug() << mPlaylist[i];
-    }
-
-    mPlaylistIndex = 0;
-
-    playMusic();
-}
-
-int AudioPlayer::getCurrentSongIndex()
-{
-    return mPlaylistIndex;
-}
-
-QString AudioPlayer::loadAlbumArtToFileIfExists(QString filePath, QString successPath, QString failurePath)
-{
-    static const char *IdPicture = "APIC" ;
-
-    std::string path = filePath.toStdString();
-
-    TagLib::MPEG::File mpegFile(path.c_str());
-    TagLib::ID3v2::Tag *id3v2tag = mpegFile.ID3v2Tag();
-    TagLib::ID3v2::FrameList Frame ;
-    TagLib::ID3v2::AttachedPictureFrame *PicFrame ;
-    void *SrcImage;
-    unsigned long Size;
-
-    if (id3v2tag)
-    {
-        Frame = id3v2tag->frameListMap()[IdPicture] ;
-
-        if (!Frame.isEmpty() )
-        {
-            // find cover art
-            for(TagLib::ID3v2::FrameList::ConstIterator it = Frame.begin(); it != Frame.end(); ++it)
-            {
-                qDebug() << "Loop begin";
-                PicFrame = (TagLib::ID3v2::AttachedPictureFrame *)(*it);
-
-                if(PicFrame->type() == TagLib::ID3v2::AttachedPictureFrame::FrontCover)
-                {
-                    // extract image (in it's compressed form)
-                    Size = PicFrame->picture().size();
-                    SrcImage = malloc ( Size );
-
-                    if(SrcImage)
-                    {
-                        FILE *jpegFile = fopen(successPath.toStdString().c_str(), "wb");
-
-                        if(!jpegFile) {
-                            return failurePath;
-                        }
-
-                        memcpy(SrcImage, PicFrame->picture().data(), Size) ;
-                        fwrite(SrcImage, Size, 1, jpegFile);
-                        fclose(jpegFile);
-
-                        free(SrcImage);
-
-                        return successPath;
-                    }
-                }
-                qDebug() << "Loop end";
-            }
-        }
-    }
-
-    qDebug() << "Failed to write album art";
-
-    return failurePath;
-}
-
-QString AudioPlayer::getAudioTitle(QFile audioFile)
-{
-    TagLib::FileRef f(audioFile.fileName().toStdString().c_str());
-    TagLib::Tag *tag = f.tag();
-
-    return QString::fromStdString(std::string(tag->title().to8Bit()));
-
-//    TagLib::String artist = f.tag()->artist(); // artist == "Frank Zappa"
-//    f.tag()->setAlbum("Fillmore East");
-//    f.save();
-//    TagLib::FileRef g("Free City Rhymes.ogg");
-//    TagLib::String album = g.tag()->album(); // album == "NYC Ghosts & Flowers"
-//    g.tag()->setTrack(1);
-//    g.save();
-}
-
-QString AudioPlayer::getAudioArtist(QFile audioFile)
-{
-    TagLib::FileRef f(audioFile.fileName().toStdString().c_str());
-    TagLib::Tag *tag = f.tag();
-
-    return QString::fromStdString(std::string(tag->artist().to8Bit()));
-}
-
-QString AudioPlayer::getAudioAlbum(QFile audioFile)
-{
-    TagLib::FileRef f(audioFile.fileName().toStdString().c_str());
-    TagLib::Tag *tag = f.tag();
-
-    return QString::fromStdString(std::string(tag->album().to8Bit()));
-}
-
-void AudioPlayer::playMusic(void)
-{
-    qDebug() << "Setting up music";
-
-    if(mCurrentSound) {
+    if(m_irrklang_sound) {
         qDebug() << "Stopping current sound";
-        mCurrentSound->stop();
+        m_irrklang_sound->stop();
+        m_irrklang_sound->drop();
+        m_irrklang_sound = nullptr;
     }
 
-    if(mPlaylist.size() == 0)
-    {
-        qDebug() << "Playlist empty";
-        mCurrentSound = Q_NULLPTR;
+    m_current_audio = kpl::filesystem::FileIdentifier::make(audio.getFileName());
+
+    if(m_current_audio == std::nullopt) {
+        qDebug() << audio.getFileName() << " doesn't exist";
         return;
     }
 
-    if(mPlaylistIndex >= mPlaylist.size() || mPlaylistIndex < 0)
-    {
-        qDebug() << "Error playlist size = " << mPlaylist.size() << " and playlistIndex = " << mPlaylistIndex;
-        mCurrentSound = Q_NULLPTR;
+    m_irrklang_sound = m_irrklang_engine->play2D(m_current_audio->absolutePath().toUtf8(), false, true);
+
+    if(!m_irrklang_sound) {
+        qDebug() << "Failed to init irrklang sound";
         return;
     }
 
-    // TODO: You can set pause to false here if you set the forth param
-
-    qDebug() << "Playing: " << mPlaylist.at(mPlaylistIndex).toUtf8();
-
-    QFile audioFile = QFile(mPlaylist.at(mPlaylistIndex));
-
-    qDebug() << "Setting title";
-    QString title = getAudioTitle(QFile(mPlaylist.at(mPlaylistIndex)));
-
-    if(title == "") {
-        title = QFileInfo(QFile(mPlaylist.at(mPlaylistIndex))).fileName();
-    }
-
-    QString artist = getAudioArtist(QFile(mPlaylist.at(mPlaylistIndex)));
-
-    if(artist == "") {
-        artist = "Unknown";
-    }
-
-    QString album = getAudioAlbum(QFile(mPlaylist.at(mPlaylistIndex)));
-
-    if(album == "") {
-        album = "Unknown";
-    }
-
-    QString albumArtLocation = "file:/home/keith/current_album_art.jpg";
-
-    QDir parentDir(mPlaylist.at(mPlaylistIndex));
-    parentDir.cdUp();
-
-    QString failurePath = frontImageForFolder(parentDir);
-
-    if(failurePath == "") {
-        failurePath = "qrc:///resources/cover.jpg";
-    } else {
-        failurePath.prepend("file:");
-    }
-
-    qDebug() << "Setting Art";
-    QString artPath = loadAlbumArtToFileIfExists(mPlaylist.at(mPlaylistIndex), albumArtLocation, failurePath);
-    qDebug() << "Art path -> " << artPath;
-
-    qDebug() << "File name -> " << title;
-
-    mCurrentAudio.setTitle(title);
-    mCurrentAudio.setArtist(artist);
-    mCurrentAudio.setArtPath(artPath);
-    qDebug() << "Done";
-
-    mCurrentSound = mEngine->play2D(mPlaylist.at(mPlaylistIndex).toUtf8(), false, true);
-    mCurrentSound->setSoundStopEventReceiver((irrklang::ISoundStopEventReceiver*) &mSoundStopEvent, this);
+    m_irrklang_sound->setSoundStopEventReceiver(reinterpret_cast<irrklang::ISoundStopEventReceiver*>(&m_sound_stop_event), this);
 
     // TODO: Introduce a delay to prevent skipping
-    mCurrentSound->setIsPaused(false);
+    m_irrklang_sound->setIsPaused(false);
+
+    qDebug() << "Made it to here!";
 
     emit isPlayingChanged(true);
-    emit songChanged();
-
-    qDebug() << "Music playing";
-}
-
-void AudioPlayer::setCurrentAudio(QString fileName)
-{
-
+    emit audioChanged(audio.getFileName());
 }
 
 void AudioPlayer::updateAudioPosition()
@@ -237,77 +63,84 @@ void AudioPlayer::updateAudioPosition()
 
 void AudioPlayer::setPlayPosition(double pPos)
 {
-    unsigned int endPos = mCurrentSound->getPlayLength();
+    unsigned int endPos = m_irrklang_sound->getPlayLength();
     unsigned int currPos = static_cast<unsigned int>(endPos * pPos);
 
-    mCurrentSound->setPlayPosition(currPos);
-
-    qDebug() << "Audio position changed to " << currPos / endPos;
+    m_irrklang_sound->setPlayPosition(currPos);
 }
 
 double AudioPlayer::getPlayPosition(void)
 {
-    if(!mCurrentSound) {
+    if(!m_irrklang_sound) {
         return 0.0;
     }
 
-    unsigned long fullLength = mCurrentSound->getPlayLength();
-    unsigned long currPos = mCurrentSound->getPlayPosition();
+    if(!getIsPlaying()) {
+        return m_saved_audio_position;
+    }
+
+    unsigned long fullLength = m_irrklang_sound->getPlayLength();
+    unsigned long currPos = m_irrklang_sound->getPlayPosition();
 
     return (double)currPos / (double)fullLength;
 }
 
-void AudioPlayer::nextSong(void)
-{
-    if((mPlaylistIndex + 1) >= mPlaylist.size())
-        return;
-
-    mPlaylistIndex++;
-    playMusic();
-    qDebug() << "nextSong invoked";
-}
-
-void AudioPlayer::prevSong(void)
-{
-    if(mPlaylistIndex - 1 < 0)
-        return;
-
-    mPlaylistIndex--;
-    playMusic();
-    qDebug() << "prevSong invoked";
-}
-
 void AudioPlayer::togglePause(void)
 {
-    if(mEngine->getSoundSourceCount() == 0 || !mCurrentSound)
+    if(m_irrklang_engine->getSoundSourceCount() == 0 || !m_irrklang_sound)
         return;
 
-    if(mCurrentSound->getIsPaused())
-        mCurrentSound->setIsPaused(false);
-    else
-        mCurrentSound->setIsPaused(true);
+//    switch(m_irrklang_sound->getIsPaused())
+//    {
+//    case true:
+//        m_saved_audio_position = getPlayPosition();
+//        m_irrklang_sound->setIsPaused(false);
+//        break;
+//    case false:
+//        m_saved_audio_position = getPlayPosition();
+//        m_irrklang_sound->setIsPaused(true);
+//        break;
+//    }
 
-    emit isPlayingChanged( ! mCurrentSound->getIsPaused() );
+    if(m_irrklang_sound->getIsPaused())
+    {
+        m_saved_audio_position = getPlayPosition();
+        m_irrklang_sound->setIsPaused(false);
+    } else
+    {
+        m_saved_audio_position = getPlayPosition();
+        m_irrklang_sound->setIsPaused(true);
+    }
 
-    qDebug() << "togglePause invoked";
+    emit isPlayingChanged( ! m_irrklang_sound->getIsPaused() );
 }
 
 bool AudioPlayer::getIsPlaying(void)
 {
-    if(!mCurrentSound)
+    if(!m_irrklang_sound)
         return false;
 
-    return !mCurrentSound->getIsPaused();
+    return !m_irrklang_sound->getIsPaused();
 }
 
-void AudioPlayer::setIsPlaying(bool pIsPlaying)
+void AudioPlayer::setPlayState(bool playing)
 {
-    if(!mCurrentSound)
+    if(!m_irrklang_sound) {
+        qDebug() << "Warning: Setting isPlaying property but no audio loaded";
         return;
-    mCurrentSound->setIsPaused(pIsPlaying);
+    }    
+
+    m_irrklang_sound->setIsPaused(!playing);
 }
 
-void AudioPlayer::stopAudio(void)
+void AudioPlayer::pauseAudio()
 {
-    qDebug() << "stopAudio invoked";
+    m_saved_audio_position = getPlayPosition();
+    setPlayState(false);
 }
+
+void AudioPlayer::resumeAudio()
+{
+    setPlayState(true);
+}
+

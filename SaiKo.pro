@@ -45,14 +45,16 @@ HEADERS += \
     $$SRC_PATH/soundstopevent.h \
     $$SRC_PATH/textparser.h
 
-# Include bin directory
-
-
 # Image Magick
 INCLUDEPATH += $$EXTERNAL_PATH
 INCLUDEPATH += $$EXTERNAL_PATH/ImageMagick-7
 
 LIBS += -L$$EXTERNAL_PATH
+
+# kpl
+DEFINES += "KPL_USE_QT=1"
+LIBS += -lkpl_static
+# kpl end
 
 LIBS += -fopenmp
 LIBS += -lMagick++-7.Q16HDRI

@@ -10,13 +10,10 @@
 #include <QFile>
 #include <QTextStream>
 
-#include "audioplayer.h"
-#include "mediaitem.h"
-#include "mediafilesystem.h"
-#include "soundstopevent.h"
+#include <kpl/filesystem.h>
 
-#include <irrKlang/irrKlang.h>
-#include <irrKlang/conio.h>
+#include "audioplayer.h"
+#include "mediafilesystem.h"
 
 int main(int argc, char *argv[])
 {
@@ -28,28 +25,33 @@ int main(int argc, char *argv[])
 
     AudioPlayer audioplayer(&engine);
 
-    QStringList libPaths;
-    QString libPath;
+    QList<kpl::filesystem::DirectoryPath> library_roots;
+    QStringList library_paths;
 
     // Load library from file..
     QFile file("../configLib.txt");
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "Failed to open file";
-        libPath = "./media";
+        library_paths << "./media";
     }else
     {
         QTextStream in(&file);
-        libPath = in.readLine();
+        library_paths << in.readLine();
 //        in >> libPath;
     }
 
-    libPaths.append(libPath);
+    for(const auto& lib_path : library_paths)
+    {
+        std::optional<kpl::filesystem::DirectoryPath> file_opt = kpl::filesystem::DirectoryPath::make(lib_path);
 
-    qDebug() << libPath;
+        if(file_opt != std::nullopt) {
+            qDebug() << "Adding library root " << lib_path;
+            library_roots.append(*file_opt);
+        }
+    }
 
-    MediaFileSystem mFileSys(libPaths, &engine);
-    mFileSys.generateMediaItems();
+    MediaFileSystem mFileSys(library_roots, &engine);
 
 //    mFileSys.purgeSaikData();
 //    mFileSys.purgeSaikFiles();
@@ -57,14 +59,15 @@ int main(int argc, char *argv[])
 //    mFileSys.createSaikIndex(false);
 
     // Connect signals to slots
-    QObject::connect(&mFileSys, &MediaFileSystem::playlistChanged, &audioplayer, &AudioPlayer::setPlaylist);
-//    QObject::connect(&audioplayer, &AudioPlayer::songChanged, &currentAudio, &AudioPlayer::setPlaylist);
+
+    // When current Audio is changed, it should be sent to audio player
+    QObject::connect(&mFileSys, &MediaFileSystem::currentAudioChanged, &audioplayer, &AudioPlayer::playAudio);
+    QObject::connect(&audioplayer, &AudioPlayer::audioCompleted, &mFileSys, &MediaFileSystem::nextTrack);
 
     engine.rootContext()->setContextProperty("AudioPlayer", QVariant::fromValue(&audioplayer));
     engine.rootContext()->setContextProperty("MFileSys", QVariant::fromValue(&mFileSys));
 
     engine.load(QUrl(QLatin1String("qrc:/ui/main.qml")));
-
 
     return app.exec();
 }

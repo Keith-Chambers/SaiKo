@@ -16,9 +16,27 @@ MediaItem::MediaItem(QString pItemPath, QString pImagePath, bool pIsPlayable, QO
     mImagePath.prepend("file:///");
 }
 
-MediaItem::~MediaItem()
+MediaItem::MediaItem(const MediaItem& copy)
+    : QObject {nullptr}
 {
-    qDebug() << "Freeing MediaItem";
+    mItemName = copy.mItemName;
+    mIsPlayable = copy.mIsPlayable;
+    mIsFolder = copy.mIsFolder;
+    mExtension = copy.mExtension;
+    mImagePath = copy.mImagePath;
+    mLocation = copy.mLocation;
+}
+
+MediaItem& MediaItem::operator=(const MediaItem& assign)
+{
+    mItemName = assign.mItemName;
+    mIsPlayable = assign.mIsPlayable;
+    mIsFolder = assign.mIsFolder;
+    mExtension = assign.mExtension;
+    mImagePath = assign.mImagePath;
+    mLocation = assign.mLocation;
+
+    return *this;
 }
 
 void MediaItem::setItemName(QString pItemName)

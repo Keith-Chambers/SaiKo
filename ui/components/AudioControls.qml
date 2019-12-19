@@ -30,13 +30,14 @@ Item
             value: 0.0
 
             onValueChanged: {
-                if(playPosSlider.pressed && AudioPlayer.isPlaying) {
-                    AudioPlayer.playPosition = value;
-                    return;
+
+                if(MFileSys.currentPlaylistIndex == -1) {
+                    value = 0.0;
                 }
 
-                if(!AudioPlayer.isPlaying) {
-                    value = 0.0;
+                if(playPosSlider.pressed) {
+                    AudioPlayer.playPosition = value;
+                    return;
                 }
             }
 
@@ -97,8 +98,8 @@ Item
             Rectangle
             {
 
-                width: 35;
-                height: 35;
+                width: 30;
+                height: 30;
                 color: "transparent"
 
                 Image
@@ -112,7 +113,7 @@ Item
                     id: audioPrevSongMouseArea;
                     anchors.fill: parent;
                     onClicked: {
-                        AudioPlayer.prevSong();
+                        MFileSys.prevTrack();
                     }
                 }
             }
@@ -146,8 +147,8 @@ Item
             Rectangle
             {
 
-                width: 35;
-                height: 35;
+                width: 30;
+                height: 30;
                 color: "transparent"
 
                 Image
@@ -161,7 +162,7 @@ Item
                     id: audioNextSongMouseArea;
                     anchors.fill: parent;
                     onClicked: {
-                        AudioPlayer.nextSong();
+                        MFileSys.nextTrack();
                     }
                 }
             }
