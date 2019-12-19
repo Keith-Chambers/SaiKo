@@ -211,7 +211,7 @@ ApplicationWindow
                             return "qrc:///resources/cover.jpg";
                         }
 
-                        return MFileSys.currentAudio.artPath;
+                        return MFileSys.currentAudio.artPath
                     }
                     anchors.fill: parent;
                 }

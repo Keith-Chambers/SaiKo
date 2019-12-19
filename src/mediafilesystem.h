@@ -81,7 +81,9 @@ public:
 
 //    Q_PROPERTY(QQmlProperty<AudioFile> musicPlaylist READ getMusicPlaylist NOTIFY musicPlaylistChanged)
     Q_PROPERTY(int currentPlaylistIndex READ getCurrentPlaylistIndex NOTIFY playlistIndexChanged)
-    Q_PROPERTY(AudioFile currentAudio READ getCurrentAudio NOTIFY currentAudioChanged)
+    Q_PROPERTY(AudioFile * currentAudio READ getCurrentAudio NOTIFY currentAudioChanged)
+
+    Q_PROPERTY(QString audioImagePath READ getAudioImagePath NOTIFY audioImagePathChanged)
 
 signals:
     void isErrorMessageChanged(bool);
@@ -94,10 +96,16 @@ signals:
     void isOngoingTaskChanged(bool);
     void ongoingTaskProgressChanged(double);
 
+    void audioImagePathChanged(QString);
+
     void musicPlaylistChanged(QList<AudioFile>);
     void playlistIndexChanged(int);
 
 public:
+
+    Q_INVOKABLE int popLibraryViewPosition();
+    Q_INVOKABLE void pushLibraryViewPosition(int pos);
+
     Q_INVOKABLE void cdUp();
 //    Q_INVOKABLE void resetErrorMessage();
     Q_INVOKABLE void cdLibraryRoot();
@@ -120,6 +128,7 @@ private:
 
     bool atRootDirectory();
 
+    QString getAudioImagePath();
     int getCurrentPlaylistIndex(){ return m_current_audio_index; }
 
     void cdDown(const QString& root_name);
@@ -135,7 +144,7 @@ private:
     // Updates m_parent_media_item with a MediaItem in the current directory
     void updateAudioFolderImagePath(QString dir_name);
 
-    AudioFile getCurrentAudio();
+    AudioFile * getCurrentAudio();
     void loadAudioList();
 
     void loadLibraryViewItemsToQmlContext();
@@ -156,6 +165,7 @@ private:
 
 //    QString                     m_album_image_path;
     i32                         m_library_index;
+    QList<int>                  m_saved_library_view_position;
 
     /*  Exposed to QML engine       */
     QList<AudioFile>            m_playlist;

@@ -32,6 +32,18 @@ MediaFileSystem::MediaFileSystem(const QList<kfs::DirectoryPath>& library_roots,
 //    loadLibraryViewContent();
 }
 
+int MediaFileSystem::popLibraryViewPosition()
+{
+    int pos = m_saved_library_view_position.back();
+    m_saved_library_view_position.pop_back();
+    return pos;
+}
+
+void MediaFileSystem::pushLibraryViewPosition(int pos)
+{
+    m_saved_library_view_position.append(pos);
+}
+
 void MediaFileSystem::nextTrack()
 {
     if(m_current_audio_index >= m_audio_list_files.size() - 1) {
@@ -104,6 +116,7 @@ void MediaFileSystem::updateAudioFolderImagePath(QString dir_name)
     }
 
     displayErrorMessage("Failed to update audio image");
+    assert(false);
 }
 
 void MediaFileSystem::cdDown(const QString& root_name)
@@ -183,6 +196,15 @@ void MediaFileSystem::loadLibraryViewItemsToQmlContext()
     m_qt_engine->rootContext()->setContextProperty(QML_LIBRARY_VIEW_NAME, QVariant::fromValue(m_library_view_qml));
 }
 
+QString MediaFileSystem::getAudioImagePath()
+{
+    if(m_audio_image_path == std::nullopt) {
+        return "qrc:///resources/cover.jpg";
+    }
+
+    return "file:/" + *m_audio_image_path;
+}
+
 QString MediaFileSystem::getLibraryViewDirectoryName()
 {
     if(m_library_view_depth == 0) {
@@ -201,13 +223,15 @@ QString MediaFileSystem::getAudioViewDirectoryName()
     return m_audio_list_directory->dirName();
 }
 
-AudioFile MediaFileSystem::getCurrentAudio()
+AudioFile* MediaFileSystem::getCurrentAudio()
 {
-    if(m_current_audio_index < 0 || m_playlist.isEmpty() || m_current_audio_index >= m_playlist.size()) {
-        return AudioFile { "", "", "", QTime(0, 0, 0, 0) };
+    if(m_current_audio_index < 0 || m_audio_list_files.isEmpty() || m_current_audio_index >= m_audio_list_files.size()) {
+        qDebug() << "Null audiofile";
+        assert(false);
+        return nullptr;
     }
 
-    return m_playlist[m_current_audio_index];
+    return &m_audio_list_files[m_current_audio_index];
 }
 
 // NEW API END
@@ -293,6 +317,18 @@ void MediaFileSystem::loadAudioList()
     QStringList audio_file_names = MediaFileSystem::audioInDir(*m_audio_list_directory);
     m_audio_list_files = AudioFile::fromFileNames(*m_audio_list_directory, audio_file_names);
 
+    for(auto& audio_file : m_audio_list_files) {
+
+        if(!audio_file.getHasArt()) {
+            assert(*m_audio_image_path != "");
+            audio_file.setArtPath( *m_audio_image_path );
+        }
+
+        assert(audio_file.getTitle() != "");
+        assert(audio_file.getArtist() != "");
+        assert(audio_file.getArtPath() != "");
+    }
+
     assert(m_audio_list_files.size() > 0);
 
     loadAudioListToQmlContext();
@@ -320,6 +356,14 @@ void MediaFileSystem::invokeFolder(QString folder_name)
 
     if(dirContainsAudio(child_dir)) {
         m_audio_list_directory = child_dir;
+
+        for(auto& item : m_library_media_items) {
+            if(item.getItemName() == folder_name) {
+                m_audio_image_path = item.getImagePath();
+                break;
+            }
+        }
+
         loadAudioList();
     } else {
         cdDown(child_path_opt.value());
