@@ -50,8 +50,6 @@ void AudioPlayer::playAudio(AudioFile audio)
     // TODO: Introduce a delay to prevent skipping
     m_irrklang_sound->setIsPaused(false);
 
-    qDebug() << "Made it to here!";
-
     emit isPlayingChanged(true);
     emit audioChanged(audio.getFileName());
 }

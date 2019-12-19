@@ -83,7 +83,7 @@ public:
     Q_PROPERTY(int currentPlaylistIndex READ getCurrentPlaylistIndex NOTIFY playlistIndexChanged)
     Q_PROPERTY(AudioFile * currentAudio READ getCurrentAudio NOTIFY currentAudioChanged)
 
-    Q_PROPERTY(QString audioImagePath READ getAudioImagePath NOTIFY audioImagePathChanged)
+//    Q_PROPERTY(QString audioImagePath READ getAudioImagePath NOTIFY audioImagePathChanged)
     Q_PROPERTY(bool restoreLibraryViewPosition READ getRestoreLibraryViewPosition WRITE setRestoreLibraryViewPosition)
 
 //    Q_PROPERTY(int libraryViewPositionIndex READ getLibraryViewPositionIndex NOTIFY libraryViewPositionIndexChanged)
@@ -138,7 +138,6 @@ private:
 
     bool atRootDirectory();
 
-    QString getAudioImagePath();
     int getCurrentPlaylistIndex(){ return m_current_audio_index; }
 
     void cdDown(const QString& root_name);

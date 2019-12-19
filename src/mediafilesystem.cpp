@@ -207,14 +207,14 @@ void MediaFileSystem::loadLibraryViewItemsToQmlContext()
     m_qt_engine->rootContext()->setContextProperty(QML_LIBRARY_VIEW_NAME, QVariant::fromValue(m_library_view_qml));
 }
 
-QString MediaFileSystem::getAudioImagePath()
-{
-    if(m_audio_image_path == std::nullopt) {
-        return "qrc:///resources/cover.jpg";
-    }
+//QString MediaFileSystem::getAudioImagePath()
+//{
+//    if(m_audio_image_path == std::nullopt) {
+//        return "qrc:///resources/cover.jpg";
+//    }
 
-    return "file:/" + *m_audio_image_path;
-}
+//    return "file:/" + *m_audio_image_path;
+//}
 
 QString MediaFileSystem::getLibraryViewDirectoryName()
 {
@@ -357,6 +357,8 @@ void MediaFileSystem::invokeFolder(QString folder_name)
     }
 
     std::optional<kfs::RelativePath> child_path_opt = kfs::RelativePath::make(folder_name);
+
+    qDebug() << "Relative Path Invoked -> " << child_path_opt.value().path();
 
     if(child_path_opt == std::nullopt) {
         displayErrorMessage("Error: Failed to cd down, invalid path");

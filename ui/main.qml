@@ -141,8 +141,9 @@ ApplicationWindow
             }
 
             width: 250
+//            color: "#333c34"
             color: "#26282b"
-            //            color: "#243D45";
+//            color: "#243D45";
 
             Column
             {
@@ -197,6 +198,7 @@ ApplicationWindow
             Rectangle
             {
                 id: nowPlayingImageRect;
+                visible: MFileSys.currentPlaylistIndex != -1;
                 anchors
                 {
                     bottom: sideMenuBackground.bottom;
