@@ -79,7 +79,10 @@ ApplicationWindow
             {
                 id: backButtonMouse
                 anchors.fill: parent;
-                onClicked: MFileSys.cdUp();
+                onClicked: {
+                    MFileSys.restoreLibraryViewPosition = true;
+                    MFileSys.cdUp();
+                }
             }
         }
 
@@ -138,7 +141,8 @@ ApplicationWindow
             }
 
             width: 250
-            color: "#243D45";
+            color: "#26282b"
+            //            color: "#243D45";
 
             Column
             {

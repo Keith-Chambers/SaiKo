@@ -84,6 +84,13 @@ public:
     Q_PROPERTY(AudioFile * currentAudio READ getCurrentAudio NOTIFY currentAudioChanged)
 
     Q_PROPERTY(QString audioImagePath READ getAudioImagePath NOTIFY audioImagePathChanged)
+    Q_PROPERTY(bool restoreLibraryViewPosition READ getRestoreLibraryViewPosition WRITE setRestoreLibraryViewPosition)
+
+//    Q_PROPERTY(int libraryViewPositionIndex READ getLibraryViewPositionIndex NOTIFY libraryViewPositionIndexChanged)
+
+    //             onCurrentIndexChanged: {
+
+//}
 
 signals:
     void isErrorMessageChanged(bool);
@@ -102,6 +109,9 @@ signals:
     void playlistIndexChanged(int);
 
 public:
+
+    int getRestoreLibraryViewPosition();
+    void setRestoreLibraryViewPosition(bool restore_position);
 
     Q_INVOKABLE int popLibraryViewPosition();
     Q_INVOKABLE void pushLibraryViewPosition(int pos);
@@ -173,6 +183,8 @@ private:
     QList<MediaItem>            m_library_media_items;
     std::optional<QString>      m_audio_image_path;
     i32                         m_current_audio_index;
+
+    bool                        m_restore_library_view_position;
 
     QObjectList                 m_library_view_qml;
 

@@ -6,6 +6,7 @@ Item {
 
     GridView
     {
+        id: libraryView
         cellWidth: 200;
         cellHeight: 200;
         clip: true;
@@ -67,6 +68,7 @@ Item {
                         onClicked:
                         {
                             console.log("Enter dir : " + model.modelData.itemName);
+                            MFileSys.pushLibraryViewPosition(index);
                             MFileSys.invokeFolder(model.modelData.itemName);
                         }
                     }
@@ -89,6 +91,19 @@ Item {
                     elide: Text.ElideRight
                 }
 
+            }
+        }
+
+        onModelChanged: {
+            console.log("Model changed!");
+
+            if(MFileSys.restoreLibraryViewPosition == true)
+            {
+                console.log("Restoring view");
+                var savedIndex = MFileSys.popLibraryViewPosition();
+                console.log("View set to " + savedIndex);
+                positionViewAtIndex(savedIndex, GridView.Center);
+                MFileSys.restoreLibraryViewPosition = false;
             }
         }
 

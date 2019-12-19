@@ -39,8 +39,19 @@ int MediaFileSystem::popLibraryViewPosition()
     return pos;
 }
 
+int MediaFileSystem::getRestoreLibraryViewPosition()
+{
+    return m_restore_library_view_position;
+}
+
+void MediaFileSystem::setRestoreLibraryViewPosition(bool restore_position)
+{
+    m_restore_library_view_position = restore_position;
+}
+
 void MediaFileSystem::pushLibraryViewPosition(int pos)
 {
+    qDebug() << "Saving restore index -> " << pos;
     m_saved_library_view_position.append(pos);
 }
 
@@ -355,6 +366,7 @@ void MediaFileSystem::invokeFolder(QString folder_name)
     QDir child_dir = makeChildDir(*m_library_view_directory, folder_name);
 
     if(dirContainsAudio(child_dir)) {
+        popLibraryViewPosition();
         m_audio_list_directory = child_dir;
 
         for(auto& item : m_library_media_items) {
