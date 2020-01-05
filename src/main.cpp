@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 
     QString user_config_path;
 
-    if(false && argc == 3 && strcmp(argv[1],"-c") == 0) {
+    if(argc == 3 && strcmp(argv[1],"-c") == 0) {
         user_config_path = argv[2];
     } else {
         user_config_path = "../configLib.txt";
