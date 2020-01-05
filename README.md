@@ -4,7 +4,7 @@ Saiko is an offline music player and and organisational tool for managing multip
 
 Furthermore, it does so while providing a pleasing interface with minimal effort from the user. Saiko will search for suitable album art and generate the best image to display.
 
-Saiko is still in development but is fully functional.
+Still in development but is fully functional.
 
 ### Requirements
 
@@ -24,8 +24,8 @@ Currently there is not a release build of Saiko, so the application has to be bu
 
 ### Setup and using Saiko
 
-    To specify your music library path, modify configLib.txt
-    If you wish to use another file, just run Saiko with -c and specify another file to parse music library paths from, like so 
+To specify your music library path, modify configLib.txt.
+If you wish to use another file, just run Saiko with -c and specify another file to parse music library paths from, like so 
 
 ```sh
     ./Saiko -c ../music_config.txt
