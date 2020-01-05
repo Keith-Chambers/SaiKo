@@ -55,6 +55,7 @@ class AudioPlayer : public QObject
 
     Q_PROPERTY(double playPosition READ getPlayPosition WRITE setPlayPosition NOTIFY playPositionChanged)
     Q_PROPERTY(bool isPlaying READ getIsPlaying WRITE setPlayState NOTIFY isPlayingChanged)
+    Q_PROPERTY(double volume READ getVolume WRITE setVolume NOTIFY volumeChanged)
 
 //    Q_PROPERTY(QQmlListProperty<AudioFrameSlice> currentAudioFrame READ getCurrentAudioFrame NOTIFY currentAudioFrameChanged)
 
@@ -65,11 +66,14 @@ public:
     Q_INVOKABLE bool getIsPlaying(void);
     Q_INVOKABLE double getPlayPosition(void);
     void updateAudioPosition();
+    double getVolume();
+    void setVolume(double volume);
 signals:
     void playPositionChanged(double);
     void audioChanged(QString name);
     void audioCompleted();
     void isPlayingChanged(bool);
+    void volumeChanged(double);
 public slots:
     Q_INVOKABLE void playAudio(AudioFile audio);
     Q_INVOKABLE void pauseAudio();
@@ -82,6 +86,7 @@ private:
     irrklang::ISound*                   m_irrklang_sound;
     SoundStopEvent                      m_sound_stop_event;
 
+    double                              m_volume;
     double                              m_saved_audio_position;
     QTimer                              m_update_audio_position_timer;
     std::optional<kfs::FileIdentifier>  m_current_audio;

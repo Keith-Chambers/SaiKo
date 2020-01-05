@@ -20,9 +20,6 @@ class MediaItem : public QObject
     Q_PROPERTY(bool isPlayable READ getIsPlayable WRITE setIsPlayable NOTIFY isPlayableChanged)
     Q_PROPERTY(QString extension READ getExtension WRITE setExtension NOTIFY extensionChanged)
 public:
-    //TODO: Remove default constructor
-    //explicit MediaItem(QObject *parent = 0);
-
     MediaItem()
         : QObject{nullptr}
     {}
@@ -76,7 +73,7 @@ public:
         while(!file.atEnd())
         {
             std::string line = file.readLine().toStdString();
-            std::cout << ".Saik Line -> '" << line << "'" << std::endl;
+//            std::cout << ".Saik Line -> '" << line << "'" << std::endl;
             ParseValue option = parseSaikoLine(line, PARSE_OPTIONS);
             applyOption(directory, option);
         }

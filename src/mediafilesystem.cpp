@@ -15,14 +15,16 @@ MediaFileSystem::MediaFileSystem(const QList<kfs::DirectoryPath>& library_roots,
         m_current_audio_index {-1},
         m_error_message {}
 {
-//    for(const auto& root_dir : m_root_library_directories) {
-//        m_library_media_items << MediaItem { root_dir.leafName(), false };
-//    }
 
-    MediaItem first { "Audio", false };
-    m_library_media_items.append(first);
+    for(const auto& root_dir : m_root_library_directories) {
+        m_library_media_items << MediaItem { root_dir.leafName(), false };
+        m_library_view_qml.append( &m_library_media_items.back() );
+    }
 
-    m_library_view_qml.append(&m_library_media_items.front());
+//    MediaItem first { "Audio", false };
+//    m_library_media_items.append(first);
+
+//    m_library_view_qml.append(&m_library_media_items.front());
 
     m_qt_engine->rootContext()->setContextProperty(QML_LIBRARY_VIEW_NAME, QVariant::fromValue(m_library_view_qml));
 
@@ -371,14 +373,22 @@ void MediaFileSystem::invokeFolder(QString folder_name)
         popLibraryViewPosition();
         m_audio_list_directory = child_dir;
 
-        for(auto& item : m_library_media_items) {
-            if(item.getItemName() == folder_name) {
+        for(auto& item : m_library_media_items)
+        {
+            if(item.getItemName() == folder_name)
+            {
                 m_audio_image_path = item.getImagePath();
+
+                if(m_audio_image_path == "") {
+                    m_audio_image_path = "qrc:///resources/cover.jpg";
+                }
+
                 break;
             }
         }
 
         loadAudioList();
+        audioViewDirChanged(m_audio_list_directory->dirName());
     } else {
         cdDown(child_path_opt.value());
     }

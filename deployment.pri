@@ -3,7 +3,8 @@ unix:!android {
         qnx {
             target.path = /tmp/$${TARGET}/bin
         } else {
-            target.path = /opt/$${TARGET}/bin
+#            target.path = /opt/$${TARGET}/bin
+            target.path = /home/keith/Code/app_development/SaiKo/bin/
         }
         export(target.path)
     }

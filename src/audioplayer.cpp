@@ -1,7 +1,11 @@
 #include "audioplayer.h"
 
 AudioPlayer::AudioPlayer(QObject *parent)
-    : QObject(parent), m_sound_stop_event(), m_update_audio_position_timer {}, m_current_audio {std::nullopt}
+    : QObject(parent),
+      m_sound_stop_event(),
+      m_volume {1.0},
+      m_update_audio_position_timer {},
+      m_current_audio {std::nullopt}
 {
     m_irrklang_sound = Q_NULLPTR;
     m_irrklang_engine = irrklang::createIrrKlangDevice();
@@ -48,6 +52,7 @@ void AudioPlayer::playAudio(AudioFile audio)
     m_irrklang_sound->setSoundStopEventReceiver(reinterpret_cast<irrklang::ISoundStopEventReceiver*>(&m_sound_stop_event), this);
 
     // TODO: Introduce a delay to prevent skipping
+    m_irrklang_sound->setVolume(m_volume);
     m_irrklang_sound->setIsPaused(false);
 
     emit isPlayingChanged(true);
@@ -119,6 +124,28 @@ bool AudioPlayer::getIsPlaying(void)
         return false;
 
     return !m_irrklang_sound->getIsPaused();
+}
+
+double AudioPlayer::getVolume()
+{
+    if(!m_irrklang_sound) {
+        return m_volume;
+    }
+
+    m_volume = m_irrklang_sound->getVolume();
+    return m_volume;
+}
+
+void AudioPlayer::setVolume(double volume)
+{
+    if(volume > 1.0 || volume < 0.0) {
+        return;
+    }
+
+    m_irrklang_sound->setVolume(volume);
+    m_volume = volume;
+
+    emit volumeChanged(volume);
 }
 
 void AudioPlayer::setPlayState(bool playing)

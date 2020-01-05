@@ -105,10 +105,11 @@ ApplicationWindow
             id: audioFolderName
             text: qsTr( MFileSys.audioViewDirName )
             color: "white"
+            elide: Text.ElideRight;
             anchors {
                 left: audioFileListView.left
                 bottom: audioFileListView.top
-                bottomMargin: 5
+                bottomMargin: 10
             }
             font.pointSize: 11
         }
@@ -116,12 +117,12 @@ ApplicationWindow
         AudioFileListView
         {
             id: audioFileListView
-            width: 300;
+            width: (MFileSys.audioViewDirName == "") ? 0 : 250;
 
             anchors
             {
                 top: backButton.bottom;
-                topMargin: 40;
+                topMargin: 45;
                 bottom: audioControls.top;
                 bottomMargin: 0;
                 right: parent.right;
@@ -140,7 +141,7 @@ ApplicationWindow
                 bottomMargin: 70;
             }
 
-            width: 250
+            width: 210
 //            color: "#333c34"
             color: "#26282b"
 //            color: "#243D45";
@@ -206,8 +207,8 @@ ApplicationWindow
                     leftMargin: 25;
                     bottomMargin: 20;
                 }
-                height: 200;
-                width: 200;
+                height: 160;
+                width: 160;
 
                 Image
                 {

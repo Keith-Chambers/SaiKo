@@ -81,6 +81,57 @@ Item
                 }
         }
 
+        Slider
+        {
+            id: volumeControlSlider
+            width: 10
+            height: 50
+            anchors {
+                right: parent.right
+                top: parent.top;
+                topMargin: 10
+                rightMargin: 20
+            }
+
+            orientation: Qt.Vertical
+//            value: AudioPlayer.volume
+
+            value: AudioPlayer.volume
+//            onValueChanged: {
+//                if(volumeControlSlider.pressed) {
+//                    AudioPlayer.volume = value;
+//                }
+//            }
+
+            style: SliderStyle {
+                    groove: Rectangle {
+                        implicitWidth: 100
+                        implicitHeight: 7
+                        color: "#4F4F4F"
+                        radius: 8
+
+                        Rectangle
+                        {
+                            id: volumeColored
+                            color: "light grey"
+                            radius: 8
+                            anchors {
+                                left: parent.left
+                                top: parent.top
+                                bottom: parent.bottom
+                            }
+                            width: volumeControlSlider.value * parent.width
+                        }
+                    }
+                    handle: Rectangle {
+//                        height: 12
+//                        width: 12
+//                        radius: 6
+//                        color: "grey"
+                    }
+                }
+        }
+
         RowLayout
         {
             id: audioControlsLayout

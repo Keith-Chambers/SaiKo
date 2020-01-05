@@ -9,6 +9,9 @@
 #include <QIcon>
 #include <QFile>
 #include <QTextStream>
+#include <QtQuickControls2/QQuickStyle>
+
+#include <iostream>
 
 #include <kpl/filesystem.h>
 
@@ -17,6 +20,7 @@
 
 int main(int argc, char *argv[])
 {
+//    QQuickStyle::setStyle("Imagine");
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
@@ -28,17 +32,25 @@ int main(int argc, char *argv[])
     QList<kpl::filesystem::DirectoryPath> library_roots;
     QStringList library_paths;
 
-    // Load library from file..
+    QString user_config_path;
+
+    if(false && argc == 3 && strcmp(argv[1],"-c") == 0) {
+        user_config_path = argv[2];
+    } else {
+        user_config_path = "../configLib.txt";
+    }
+
+    // Load library from file
     QFile file("../configLib.txt");
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "Failed to open file";
-        library_paths << "./media";
+        std::cout << "Failed to read config" << std::endl;
+        exit(EXIT_FAILURE);
+        return 0;
     }else
     {
         QTextStream in(&file);
         library_paths << in.readLine();
-//        in >> libPath;
     }
 
     for(const auto& lib_path : library_paths)
@@ -54,13 +66,7 @@ int main(int argc, char *argv[])
     MediaFileSystem mFileSys(library_roots, &engine);
 
 //    mFileSys.purgeSaikData();
-//    mFileSys.purgeSaikFiles();
 
-//    mFileSys.createSaikIndex(false);
-
-    // Connect signals to slots
-
-    // When current Audio is changed, it should be sent to audio player
     QObject::connect(&mFileSys, &MediaFileSystem::currentAudioChanged, &audioplayer, &AudioPlayer::playAudio);
     QObject::connect(&audioplayer, &AudioPlayer::audioCompleted, &mFileSys, &MediaFileSystem::nextTrack);
 

@@ -1,17 +1,10 @@
-QT += qml quick
-
-# Features to Implement
-
-# (?) gradient color for seek progress bar
-# Click now playing album art to return to mAudioFolder
-# When you go up a directory, you reload the gridview at the same position (I.e At the same artist / album, not the beginning)
-# Tile images that have low resolution
-# Playlist highlight updates on song change
-# Can use previous song to go all the way to the first song in a folder, regardless of which song was clicked
-# Update UI to fit 4 artists for 1080p screen
-
+QT += qml quick quickcontrols2
 
 CONFIG += c++17
+
+CONFIG  += qt warn_off release
+DEFINES += QT_NO_DEBUG_OUTPUT
+DEFINES += QT_NO_DEBUG
 
 SRC_PATH = $$PWD/src
 EXTERNAL_PATH = $$PWD/external
@@ -66,9 +59,16 @@ DEFINES += "MAGICKCORE_QUANTUM_DEPTH=16"
 DEFINES += "MAGICKCORE_HDRI_ENABLE=0"
 # Image Magick end
 
+external_dependencies.path = bin/
+external_dependencies.files = external/*.so
+
+INSTALLS += external_dependencies
+
 LIBS += -ltag
 LIBS += -lz
-LIBS += -lIrrKlang
+LIBS += $$EXTERNAL_PATH/libIrrKlang.so
+
+#LIBS += $$EXTERNAL_PATH/irrKlang.so
 
 LIBS += $$EXTERNAL_PATH/ikpMP3.so
 LIBS += $$EXTERNAL_PATH/ikpFlac.so
