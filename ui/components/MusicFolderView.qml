@@ -5,7 +5,7 @@ import QtQuick.Particles 2.11
 Item {
     id: root;
 
-    property int activeItemIndex: -10
+    property int activeItemIndex: -1
 
     GridView
     {
@@ -13,7 +13,6 @@ Item {
         cellWidth: 200;
         cellHeight: 200;
         clip: true;
-
 
         anchors.fill: parent;
         ScrollBar.vertical: ScrollBar {}
@@ -116,6 +115,9 @@ Item {
                         anchors.fill: parent
                         onClicked: {
                             console.log("clicked");
+
+                            MFileSys.pushLibraryViewPosition(index);
+                            MFileSys.restoreLibraryViewPosition = true;
                             MFileSys.generateSaikoInCurrentLibView(model.modelData.itemName);
                         }
                     }
