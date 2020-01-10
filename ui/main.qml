@@ -38,6 +38,60 @@ ApplicationWindow
             }
         }
 
+        Button
+        {
+            id: loadParentSaikDataButton
+            text: "Regen Parent";
+            anchors
+            {
+                left: currentFolderText.right
+                leftMargin: 20
+                top: currentFolderText.top;
+                bottom: currentFolderText.bottom
+            }
+
+            width: 100
+            onClicked: {
+                MFileSys.regenerateSaikForParentLibView();
+            }
+        }
+
+        Button
+        {
+            id: loadSaikDataButton
+            text: "Regenerate";
+            anchors
+            {
+                left: loadParentSaikDataButton.right
+                leftMargin: 20
+                top: currentFolderText.top;
+                bottom: currentFolderText.bottom
+            }
+
+            width: 100
+            onClicked: {
+                MFileSys.generateSaikForCurrentLibView();
+            }
+        }
+
+        Button
+        {
+            id: purgeSaikDataButton
+            text: "Delete";
+            anchors
+            {
+                left: loadSaikDataButton.right
+                leftMargin: 20
+                top: currentFolderText.top;
+                bottom: currentFolderText.bottom
+            }
+
+            width: 100
+            onClicked: {
+                MFileSys.purgeSaikForCurrentLibView();
+            }
+        }
+
         Rectangle
         {
             id: topDivider

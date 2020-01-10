@@ -127,6 +127,51 @@ public:
 //    QString getLibraryViewDirectoryPath();
 
     QString getAudioViewDirectoryName();
+
+    Q_INVOKABLE void regenerateSaikForParentLibView()
+    {
+        if(m_library_view_directory == std::nullopt) {
+            // TODO: Error handling
+            return;
+        }
+
+        auto parent = m_library_view_directory;
+        parent->cdUp();
+
+        // TODO: Make this better
+        generateSaikoMetaData(kfs::DirectoryPath::make(parent->absolutePath()).value(), true);
+
+        loadLibraryViewContent();
+    }
+
+    // TODO: Move to .cpp
+    Q_INVOKABLE void generateSaikForCurrentLibView()
+    {
+        if(m_library_view_directory == std::nullopt) {
+            // TODO: Error handling
+            return;
+        }
+
+        // TODO: Make this better
+        generateSaikoMetaData(kfs::DirectoryPath::make(m_library_view_directory->absolutePath()).value(), true);
+
+        loadLibraryViewContent();
+    }
+
+    Q_INVOKABLE void purgeSaikForCurrentLibView()
+    {
+        if(m_library_view_directory == std::nullopt) {
+            // TODO: Error handling
+            return;
+        }
+
+        // TODO: Make this better
+        auto current_path = kfs::DirectoryPath::make(m_library_view_directory->path());
+        purgeSaikData(current_path.value());
+
+        loadLibraryViewContent();
+    }
+
 public slots:
     Q_INVOKABLE void nextTrack();
     Q_INVOKABLE void prevTrack();

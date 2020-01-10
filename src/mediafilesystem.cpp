@@ -975,14 +975,14 @@ void MediaFileSystem::loadLibraryViewContent()
 void MediaFileSystem::generateSaikoMetaData(kfs::DirectoryPath root_dir, bool recheck)
 {
     qDebug() << "generateSaikoMetaData disabled";
-    return;
+//    return;
 
     QString path = root_dir.absolutePath();
 
     QDirIterator itr(path, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
 
     // Skip root
-    itr.next();
+//    itr.next();
 
     while(itr.hasNext())
     {
@@ -1101,7 +1101,7 @@ void MediaFileSystem::generateSaikoMetaData(kfs::DirectoryPath root_dir, bool re
 void MediaFileSystem::purgeSaikData(const kfs::DirectoryPath& path)
 {
     qDebug() << "purgeSaikData disabled";
-    return;
+//    return;
 
     QDirIterator itr(path.absolutePath(), QDir::AllDirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
 
