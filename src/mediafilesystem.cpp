@@ -610,13 +610,31 @@ QString MediaFileSystem::bestImageOf(QDir directory, QStringList images, Resolut
         return "";
     }
 
-    QString currentBest = directory.absolutePath() + "/" + images[0];
+    qDebug() << "Best image of..";
 
-    for(auto& image : images) {
-        currentBest = bestResolution(currentBest, directory.absolutePath() + "/" + image, res);
+    QString current_best = directory.absolutePath() + "/" + images[0];
+
+    qDebug() << "First path -> " << current_best;
+
+    uint16_t current_best_index = 0;
+
+    for(uint16_t i = 1; i < images.size(); i++)
+    {
+        const auto image = images[i];
+
+        qDebug() << "Compare with -> " << directory.absolutePath() + "/" + image;
+
+        if(bestResolution(current_best, directory.absolutePath() + "/" + image, res) != current_best) {
+            current_best_index = i;
+            current_best = directory.absolutePath() + "/" + images[i];
+        }
     }
 
-    return currentBest;
+//    for(auto& image : images) {
+//        currentBest = bestResolution(currentBest, directory.absolutePath() + "/" + image, res);
+//    }
+
+    return images[current_best_index];
 }
 
 std::optional<Magick::Image> MediaFileSystem::createTiledImage(QStringList sourceImagesPaths, Resolution res)
@@ -688,6 +706,29 @@ std::optional<Magick::Image> MediaFileSystem::createTiledImage(QStringList sourc
     return std::optional<Magick::Image>(tiledImage);
 }
 
+QString relativeDifference(QDir parent, QDir child)
+{
+    QStringList parent_list = parent.absolutePath().split('/');
+    QStringList child_list = child.absolutePath().split('/');
+
+    assert(parent_list.size() <= child_list.size());
+
+    if(parent_list.size() == child_list.size()) {
+        return "";
+    }
+
+    QString result;
+
+    for(uint16_t i = parent_list.size(); i < child_list.size(); i++) {
+        result.append(child_list[i] + "/");
+    }
+
+    // Remove trailing '/'
+    result.remove(result.size() - 1, 1);
+
+    return result;
+}
+
 QStringList MediaFileSystem::getBestImagesPaths(QDir directory, uint16_t numImages, Resolution res)
 {
     QStringList acceptedImageExtensions;
@@ -703,25 +744,43 @@ QStringList MediaFileSystem::getBestImagesPaths(QDir directory, uint16_t numImag
         itr.next();
         QDir currentDir(itr.filePath());
 
+        QString relativePath = relativeDifference(directory.absolutePath(), currentDir.absolutePath());
+
+        qDebug() << "Parent path -> " << directory.absolutePath();
+        qDebug() << "Current path -> " << currentDir.absolutePath();
+        qDebug() << "Relative difference -> " << relativePath;
+
         QStringList imagesInFolder = currentDir.entryList(acceptedImageExtensions, QDir::Files, QDir::Name);
 
         for(auto& image : imagesInFolder) {
-            if(!imageIsValid(currentDir.absolutePath() + "/" + image)) {
+
+            qDebug() << "Image: " << image;
+
+            image.prepend(relativePath + "/");
+
+            qDebug() << "New Image: " << image;
+
+            qDebug() << "Checking -> " << directory.absolutePath() + "/" + image;
+            if(!imageIsValid(directory.absolutePath() + "/" + image)) {
                 imagesInFolder.removeOne(image);
             }
+            qDebug() << "Valid";
         }
 
         if(imagesInFolder.size() == 0) {
             continue;
         } else if (bestImages.size() < numImages) {
-            bestImages.append(bestImageOf(currentDir, imagesInFolder, {50, 50}));
+            bestImages.append(bestImageOf(directory, imagesInFolder, {res.width,res.height}));
         } else {
 
-            QString bestImageInFolder = bestImageOf(currentDir, imagesInFolder, {50, 50});
+            qDebug() << "Getting best images in folder";
+            QString bestImageInFolder = bestImageOf(directory, imagesInFolder, {res.width, res.height});
 
             for(int i = 0; i < bestImages.size(); i++)
             {
-                if(bestResolution(bestImages[i], bestImageInFolder, res) == bestImageInFolder) {
+                qDebug() << "Checking best resolution";
+
+                if(bestResolution(directory.absolutePath() + "/" + bestImages[i], directory.absolutePath() + "/" + bestImageInFolder, res) == directory.absolutePath() + "/" + bestImageInFolder) {
                     bestImages[i] = bestImageInFolder;
                     break;
                 }
@@ -972,22 +1031,158 @@ void MediaFileSystem::loadLibraryViewContent()
 //    mEngine->rootContext()->setContextProperty("MediaList", QVariant::fromValue(mQmlMediaItems));
 //}
 
+//void getImageForAudioFolder(kfs::DirectoryPath root_dir);
+//void getImageForLibraryFolder(kfs::DirectoryPath root_dir);
+
 void MediaFileSystem::generateSaikoMetaData(kfs::DirectoryPath root_dir, bool recheck)
 {
-    qDebug() << "generateSaikoMetaData disabled";
-//    return;
+    QDir target_folder(root_dir.absolutePath());
 
+    if(!target_folder.exists()) {
+        qDebug() << "Warning: Target folder doesn't exist for generateSaikoMetaData";
+        return;
+    }
+
+    if(target_folder.exists(".saik"))
+    {
+        if(!recheck) {
+            qDebug() << ".saik folder alreay exists for : " << root_dir.absolutePath();
+            return;
+        }
+    }
+
+    bool is_audio_folder = dirContainsAudio(target_folder);
+
+    if(!is_audio_folder && !dirContainsAudioRecursive(target_folder)) {
+        qDebug() << "Not a valid directory for saik meta data " << target_folder.absolutePath();
+        return;
+    }
+
+    QStringList acceptedImageExtensions;
+    acceptedImageExtensions << "*.jpg";
+    acceptedImageExtensions << "*.png";
+
+    uint16_t targetImages = is_audio_folder ? 1 : 4;
+    QStringList imageFiles;
+
+    // TODO: Make more efficient
+    uint16_t number_sub_folders = target_folder.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name).size();
+
+    if(number_sub_folders == 1) {
+        targetImages = 1;
+    }
+
+    qDebug() << "Number sub folders -> " << number_sub_folders;
+
+    if(is_audio_folder)
+    {
+        QStringList imagesInFolder = target_folder.entryList(acceptedImageExtensions, QDir::Files, QDir::Name);
+
+        for(auto& image : imagesInFolder) {
+            if(!imageIsValid(target_folder.absolutePath() + "/" + image)) {
+                imagesInFolder.removeOne(image);
+            }
+        }
+
+        imageFiles.append(target_folder.absolutePath() + "/" + bestImageOf(target_folder, imagesInFolder, {150, 150}));
+    } else
+    {
+        assert(imageFiles.empty());
+        imageFiles.append(getBestImagesPaths(target_folder, targetImages, {150,150}));
+    }
+
+    if(imageFiles.size() == 0) {
+        qDebug() << "No suitable images found for " << target_folder.absolutePath();
+        return;
+    }
+
+    qDebug() << "At temp dir";
+
+    QDir tempDir;
+
+    if(!tempDir.exists(target_folder.absolutePath() + "/.saik")) {
+        tempDir.mkdir(target_folder.absolutePath() + "/.saik");
+        qDebug() << "Creating '" << target_folder.absolutePath() + "/.saik" << "'";
+    }
+
+    QDir saikFolder(target_folder.absolutePath() + "/.saik");
+
+    if(!saikFolder.exists("config.saik")) {
+        QFile saikFile(saikFolder.absolutePath() + "/config.saik");
+        qDebug() << "Creating '" << saikFolder.absolutePath() + "/config.saik'";
+    }
+
+    QFile saikConfigFile(saikFolder.absolutePath() + "/config.saik");
+
+    if(!saikConfigFile.open(QIODevice::ReadWrite)) {
+        qDebug() << "Failed to open " << saikConfigFile.fileName();
+        return;
+    }
+
+    QString imageLocation;
+
+    if(!is_audio_folder && imageFiles.size() != 1)
+    {
+        qDebug() << "Generating a tiled image from album art";
+
+        std::optional<Magick::Image> tiledImageOpt = createTiledImage(imageFiles, {200, 200});
+
+        qDebug() << "Image created..";
+
+        if(tiledImageOpt != std::nullopt)
+        {
+            Magick::Image tiledImage = tiledImageOpt.value();
+            tiledImage.magick("jpg");
+
+            imageLocation = target_folder.absolutePath() + "/.saik/tiled_artist_art.jpg";
+            qDebug() << "Saving image to " << imageLocation;
+            tiledImage.write(imageLocation.toUtf8().data());
+
+            imageLocation = ".saik/tiled_artist_art.jpg";
+        } else {
+            qDebug() << "ERR: Failed to create tiled image";
+            saikConfigFile.close();
+            return;
+        }
+    } else {
+        imageLocation = imageFiles[0];
+    }
+
+    qDebug() << "Image location -> " << imageLocation;
+
+    QTextStream out(&saikConfigFile);
+    out << "front_cover:" << imageLocation << endl;
+
+    out.flush();
+    saikConfigFile.close();
+
+    qDebug() << "Written to file";
+}
+
+void MediaFileSystem::generateSaikoMetaDataRecursive(kfs::DirectoryPath root_dir, bool recheck)
+{
     QString path = root_dir.absolutePath();
-
     QDirIterator itr(path, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-
-    // Skip root
-//    itr.next();
 
     while(itr.hasNext())
     {
         itr.next();
         QDir currentDir(itr.filePath());
+
+        std::optional<kfs::DirectoryPath> current_dir_opt = kfs::DirectoryPath::make(itr.path());
+
+        if(current_dir_opt == std::nullopt) {
+            qDebug() << "Failed to create path from " << itr.path();
+            return;
+        }
+
+        qDebug() << "Generating..";
+
+        generateSaikoMetaData(current_dir_opt.value(), recheck);
+        continue;
+
+
+
 
         if(currentDir.exists(".saik"))
         {
@@ -998,9 +1193,9 @@ void MediaFileSystem::generateSaikoMetaData(kfs::DirectoryPath root_dir, bool re
             }
         }
 
-        bool isAudioFolder = dirContainsAudio(currentDir);
+        bool is_audio_folder = dirContainsAudio(currentDir);
 
-        if(!isAudioFolder && !dirContainsAudioRecursive(currentDir)) {
+        if(!is_audio_folder && !dirContainsAudioRecursive(currentDir)) {
             qDebug() << "Skipping " << currentDir.absolutePath();
             continue;
         }
@@ -1009,10 +1204,10 @@ void MediaFileSystem::generateSaikoMetaData(kfs::DirectoryPath root_dir, bool re
         acceptedImageExtensions << "*.jpg";
         acceptedImageExtensions << "*.png";
 
-        uint16_t targetImages = isAudioFolder ? 1 : 4;
+        uint16_t targetImages = is_audio_folder ? 1 : 4;
         QStringList imageFiles;
 
-        if(isAudioFolder)
+        if(is_audio_folder)
         {
             QStringList imagesInFolder = currentDir.entryList(acceptedImageExtensions, QDir::Files, QDir::Name);
 
@@ -1057,7 +1252,7 @@ void MediaFileSystem::generateSaikoMetaData(kfs::DirectoryPath root_dir, bool re
 
         QString imageLocation;
 
-        if(!isAudioFolder)
+        if(!is_audio_folder)
         {
             qDebug() << "Generating a tiled image from album art";
 

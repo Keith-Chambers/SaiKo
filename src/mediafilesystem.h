@@ -139,7 +139,7 @@ public:
         parent->cdUp();
 
         // TODO: Make this better
-        generateSaikoMetaData(kfs::DirectoryPath::make(parent->absolutePath()).value(), true);
+        generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(parent->absolutePath()).value(), true);
 
         loadLibraryViewContent();
     }
@@ -147,13 +147,18 @@ public:
     // TODO: Move to .cpp
     Q_INVOKABLE void generateSaikForCurrentLibView()
     {
+        qDebug() << "Generating Saik for current lib view";
+
         if(m_library_view_directory == std::nullopt) {
             // TODO: Error handling
+            qDebug() << "Invalid library view";
             return;
         }
 
         // TODO: Make this better
-        generateSaikoMetaData(kfs::DirectoryPath::make(m_library_view_directory->absolutePath()).value(), true);
+        generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(m_library_view_directory->absolutePath()).value(), true);
+
+        qDebug() << "Reloading library";
 
         loadLibraryViewContent();
     }
@@ -190,6 +195,7 @@ private:
     void appendTrackToPlaylist(kfs::FileIdentifier file);
     void makeCurrentFolderPlaylist();
 
+    void generateSaikoMetaDataRecursive(kfs::DirectoryPath root_dir, bool recheck);
     void generateSaikoMetaData(kfs::DirectoryPath root_dir, bool recheck);
     void purgeSaikData(const kfs::DirectoryPath& path);
 
