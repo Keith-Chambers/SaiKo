@@ -195,6 +195,10 @@ public:
         loadLibraryViewContent();
     }
 
+    void generateSaikoMetaDataRecursive(kfs::DirectoryPath root_dir, bool recheck);
+    void generateSaikoMetaData(kfs::DirectoryPath root_dir, bool recheck);
+    void purgeSaikData(const kfs::DirectoryPath& path);
+
 public slots:
     Q_INVOKABLE void nextTrack();
     Q_INVOKABLE void prevTrack();
@@ -212,10 +216,6 @@ private:
     void cdDown(const kfs::RelativePath& dir);
     void appendTrackToPlaylist(kfs::FileIdentifier file);
     void makeCurrentFolderPlaylist();
-
-    void generateSaikoMetaDataRecursive(kfs::DirectoryPath root_dir, bool recheck);
-    void generateSaikoMetaData(kfs::DirectoryPath root_dir, bool recheck);
-    void purgeSaikData(const kfs::DirectoryPath& path);
 
     void loadLibraryViewContent();
 
@@ -281,7 +281,7 @@ private:
     static QStringList getBestImagesPaths(QDir directory, uint16_t numImages, Resolution res);
     static QString bestResolution(QString first, QString second, Resolution targetRes);
     static QString bestImageOf(QDir directory, QStringList images, Resolution res);
-    static std::optional<Magick::Image> createTiledImage(QStringList sourceImagesPaths, Resolution res);
+    static std::optional<Magick::Image> createTiledImage(const kfs::DirectoryPath& root_dir, QStringList sourceImagesPaths, Resolution res);
 };
 
 #endif // MEDIAFILESYSTEM_H

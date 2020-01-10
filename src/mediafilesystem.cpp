@@ -637,7 +637,7 @@ QString MediaFileSystem::bestImageOf(QDir directory, QStringList images, Resolut
     return images[current_best_index];
 }
 
-std::optional<Magick::Image> MediaFileSystem::createTiledImage(QStringList sourceImagesPaths, Resolution res)
+std::optional<Magick::Image> MediaFileSystem::createTiledImage(const kfs::DirectoryPath& root_dir, QStringList sourceImagesPaths, Resolution res)
 {
     if(sourceImagesPaths.size() == 0) {
         return std::nullopt;
@@ -668,7 +668,8 @@ std::optional<Magick::Image> MediaFileSystem::createTiledImage(QStringList sourc
     std::vector<Magick::Image> sourceImages;
 
     for(int i = 0; i < sourceImagesPaths.size(); i++) {
-        sourceImages.push_back(Magick::Image(sourceImagesPaths[i].toUtf8().data()));
+        QString absolute_path = root_dir.absolutePath() + "/" + sourceImagesPaths[i];
+        sourceImages.push_back(Magick::Image(absolute_path.toUtf8().data()));
         sourceImages.back().resize(subImageGeometry);
     }
 
@@ -1043,12 +1044,10 @@ void MediaFileSystem::generateSaikoMetaData(kfs::DirectoryPath root_dir, bool re
         return;
     }
 
-    if(target_folder.exists(".saik"))
+    if(target_folder.exists(".saik") && recheck == false)
     {
-        if(!recheck) {
-            qDebug() << ".saik folder alreay exists for : " << root_dir.absolutePath();
-            return;
-        }
+        qDebug() << ".saik folder alreay exists for : " << root_dir.absolutePath();
+        return;
     }
 
     bool is_audio_folder = dirContainsAudio(target_folder);
@@ -1125,7 +1124,7 @@ void MediaFileSystem::generateSaikoMetaData(kfs::DirectoryPath root_dir, bool re
     {
         qDebug() << "Generating a tiled image from album art";
 
-        std::optional<Magick::Image> tiledImageOpt = createTiledImage(imageFiles, {200, 200});
+        std::optional<Magick::Image> tiledImageOpt = createTiledImage(root_dir, imageFiles, {200, 200});
 
         qDebug() << "Image created..";
 
@@ -1256,7 +1255,7 @@ void MediaFileSystem::generateSaikoMetaDataRecursive(kfs::DirectoryPath root_dir
         {
             qDebug() << "Generating a tiled image from album art";
 
-            std::optional<Magick::Image> tiledImageOpt = createTiledImage(imageFiles, {200, 200});
+            std::optional<Magick::Image> tiledImageOpt = createTiledImage(root_dir, imageFiles, {200, 200});
 
             qDebug() << "Image created..";
 
