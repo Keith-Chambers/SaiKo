@@ -144,6 +144,24 @@ public:
         loadLibraryViewContent();
     }
 
+    Q_INVOKABLE void generateSaikoInCurrentLibView(QString item_name)
+    {
+        qDebug() << "Generating Saik for " << item_name << " in current lib view";
+
+        if(m_library_view_directory == std::nullopt) {
+            // TODO: Error handling
+            qDebug() << "Invalid library view";
+            return;
+        }
+
+        // TODO: Make this better
+        generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(m_library_view_directory->absolutePath() + "/" + item_name).value(), true);
+
+        qDebug() << "Reloading library";
+
+        loadLibraryViewContent();
+    }
+
     // TODO: Move to .cpp
     Q_INVOKABLE void generateSaikForCurrentLibView()
     {

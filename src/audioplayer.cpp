@@ -22,6 +22,7 @@ AudioPlayer::AudioPlayer(QObject *parent)
 
 AudioPlayer::~AudioPlayer()
 {
+    // TODO: This is seg faulting on shutdown
     m_irrklang_sound->drop();
     m_irrklang_engine->drop();
 }
