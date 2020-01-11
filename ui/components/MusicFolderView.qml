@@ -94,11 +94,11 @@ Item {
 
                 Rectangle
                 {
-                    id: editSaikoData
+                    id: regenSaikoData
                     visible: activeItemIndex === index;
                     width: 30
                     height: 30
-                    color: "black"
+                    color: "transparent"
                     z:1
                     anchors {
                         left: musicFolderRect.right
@@ -110,6 +110,17 @@ Item {
                         visible = false;
                     }
 
+                    Image
+                    {
+                        id: reloadSaikoImage
+                        anchors.fill: parent
+                        sourceSize.width: 30
+                        sourceSize.height: 30
+                        smooth: false
+
+                        source: "qrc:///resources/2x/sharp_loop_white_18dp.png"
+                    }
+
                     MouseArea
                     {
                         anchors.fill: parent
@@ -119,6 +130,44 @@ Item {
                             MFileSys.pushLibraryViewPosition(index);
                             MFileSys.restoreLibraryViewPosition = true;
                             MFileSys.generateSaikoInCurrentLibView(model.modelData.itemName);
+                        }
+                    }
+                }
+
+                Rectangle
+                {
+                    id: editSaikoData
+                    visible: activeItemIndex === index;
+                    width: 28
+                    height: 28
+                    color: "transparent"
+                    z:1
+                    anchors {
+                        left: musicFolderRect.right
+                        leftMargin: 2
+                        top: regenSaikoData.bottom
+                        topMargin: 5
+                    }
+
+                    Image
+                    {
+                        id: editSaikoImage
+                        anchors.fill: parent
+                        sourceSize.width: 28
+                        sourceSize.height: 28
+                        smooth: false
+                        source: "qrc:///resources/2x/sharp_create_white_18dp.png"
+                    }
+
+                    MouseArea
+                    {
+                        anchors.fill: parent
+                        onClicked: {
+                            console.log("clicked edit");
+
+//                            MFileSys.pushLibraryViewPosition(index);
+//                            MFileSys.restoreLibraryViewPosition = true;
+//                            MFileSys.generateSaikoInCurrentLibView(model.modelData.itemName);
                         }
                     }
                 }
@@ -212,8 +261,8 @@ Item {
 
                         hoverEnabled: true;
                         onHoveredChanged: {
-                            if(editSaikoData.visible === false && containsMouse === true) {
-//                                editSaikoData.visible = true;
+                            if(regenSaikoData.visible === false && containsMouse === true) {
+//                                regenSaikoData.visible = true;
                                 activeItemIndex = index
                             }
                         }

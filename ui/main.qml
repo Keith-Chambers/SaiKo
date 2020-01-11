@@ -38,6 +38,37 @@ ApplicationWindow
             }
         }
 
+        Rectangle
+        {
+            id: closeFileViewContainer
+            height: 20
+            width: 20
+            visible: MFileSys.audioViewDirName != ""
+            anchors {
+                right: parent.right
+                rightMargin: 5
+//                bottom: audioFolderName.bottom
+                verticalCenter: audioFolderName.verticalCenter
+            }
+
+            color: "transparent"
+
+            Image
+            {
+                id: closeFileViewButtonImage
+                anchors.fill: parent
+                source: "qrc:///resources/2x/sharp_close_white_18dp.png"
+            }
+
+            MouseArea
+            {
+                anchors.fill: parent
+                onClicked: {
+                    console.log("Close clicked");
+                }
+            }
+        }
+
         Button
         {
             id: loadParentSaikDataButton
@@ -126,7 +157,7 @@ ApplicationWindow
             Image
             {
                 anchors.fill: parent
-                source: "qrc:///resources/back.png";
+                source: "qrc:///resources/2x/sharp_arrow_back_white_18dp.png";
             }
 
             MouseArea
@@ -176,7 +207,7 @@ ApplicationWindow
             anchors
             {
                 top: backButton.bottom;
-                topMargin: 45;
+                topMargin: 75;
                 bottom: audioControls.top;
                 bottomMargin: 0;
                 right: parent.right;

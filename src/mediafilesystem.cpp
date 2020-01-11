@@ -1083,7 +1083,7 @@ void MediaFileSystem::generateSaikoMetaData(kfs::DirectoryPath root_dir, bool re
             }
         }
 
-        imageFiles.append(target_folder.absolutePath() + "/" + bestImageOf(target_folder, imagesInFolder, {150, 150}));
+        imageFiles.append(bestImageOf(target_folder, imagesInFolder, {150, 150}));
     } else
     {
         assert(imageFiles.empty());
@@ -1105,6 +1105,8 @@ void MediaFileSystem::generateSaikoMetaData(kfs::DirectoryPath root_dir, bool re
     }
 
     QDir saikFolder(target_folder.absolutePath() + "/.saik");
+
+    qDebug() << "Target folder -> " << target_folder.absolutePath() + "/.saik";
 
     if(!saikFolder.exists("config.saik")) {
         QFile saikFile(saikFolder.absolutePath() + "/config.saik");
@@ -1163,6 +1165,8 @@ void MediaFileSystem::generateSaikoMetaDataRecursive(kfs::DirectoryPath root_dir
     QString path = root_dir.absolutePath();
     QDirIterator itr(path, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
 
+    qDebug() << "Looping through folders to generate saiko data for path " << path;
+
     while(itr.hasNext())
     {
         itr.next();
@@ -1175,13 +1179,10 @@ void MediaFileSystem::generateSaikoMetaDataRecursive(kfs::DirectoryPath root_dir
             return;
         }
 
-        qDebug() << "Generating..";
+        qDebug() << "Generating for " << currentDir.absolutePath();
 
         generateSaikoMetaData(current_dir_opt.value(), recheck);
         continue;
-
-
-
 
         if(currentDir.exists(".saik"))
         {

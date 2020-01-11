@@ -157,7 +157,7 @@ Item
                 {
                     id: audioPreviousImage;
                     anchors.fill: parent
-                    source: "qrc:///resources/back.png";
+                    source: "qrc:///resources/2x/sharp_skip_previous_white_18dp.png";
                 }
 
                 MouseArea {
@@ -180,7 +180,7 @@ Item
                     id: audioTogglePlayImage;
                     anchors.fill: parent;
                     fillMode: Image.Stretch;
-                    source: (AudioPlayer.isPlaying) ? "qrc:///resources/pause.png" : "qrc:///resources/play.png";
+                    source: (AudioPlayer.isPlaying) ? "qrc:///resources/2x/sharp_pause_white_18dp.png" : "qrc:///resources/2x/sharp_play_arrow_white_18dp.png";
 
                     MouseArea
                     {
@@ -206,7 +206,7 @@ Item
                 {
                     id: audioNextImage;
                     anchors.fill: parent
-                    source: "qrc:///resources/forward.png";
+                    source: "qrc:///resources/2x/sharp_skip_next_white_18dp.png";
                 }
 
                 MouseArea {

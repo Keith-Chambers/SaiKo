@@ -155,6 +155,7 @@ public:
         }
 
         // TODO: Make this better
+        generateSaikoMetaData(kfs::DirectoryPath::make(m_library_view_directory->absolutePath() + "/" + item_name).value(), true);
         generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(m_library_view_directory->absolutePath() + "/" + item_name).value(), true);
 
         qDebug() << "Reloading library";
@@ -176,7 +177,7 @@ public:
         // TODO: Make this better
         generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(m_library_view_directory->absolutePath()).value(), true);
 
-        qDebug() << "Reloading library";
+        qDebug() << "Reloading library @ " << m_library_view_directory->absolutePath();
 
         loadLibraryViewContent();
     }
