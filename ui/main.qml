@@ -127,7 +127,7 @@ ApplicationWindow
             anchors
             {
                 top: topDivider.bottom;
-                topMargin: 5;
+                topMargin: 10;
                 leftMargin: 50;
                 rightMargin: 10;
                 bottom: audioControls.top;
@@ -165,7 +165,7 @@ ApplicationWindow
                 bottom: audioControls.top;
                 bottomMargin: 0;
                 right: parent.right;
-                rightMargin: 10;
+                rightMargin: 15;
             }
         }
 

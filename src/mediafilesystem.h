@@ -72,6 +72,8 @@ public:
 //    Q_PROPERTY(QString audioViewDirPath READ getAudioViewDirPath NOTIFY audioViewDirChanged)
     Q_PROPERTY(QString audioViewDirName READ getAudioViewDirectoryName NOTIFY audioViewDirChanged)
 
+    Q_PROPERTY(int numberItemsLibraryView READ getNumberItemsLibraryView NOTIFY numberItemsLibraryViewChanged)
+
 //    Q_PROPERTY(QString backendErrorMessage READ getErrorMessage)
 //    Q_PROPERTY(bool isErrorMessage READ getIsErrorMessage NOTIFY isErrorMessageChanged)
 
@@ -107,6 +109,7 @@ signals:
 
     void musicPlaylistChanged(QList<AudioFile>);
     void playlistIndexChanged(int);
+    void numberItemsLibraryViewChanged(int);
 
 public:
 
@@ -199,6 +202,11 @@ public:
     void generateSaikoMetaDataRecursive(kfs::DirectoryPath root_dir, bool recheck);
     void generateSaikoMetaData(kfs::DirectoryPath root_dir, bool recheck);
     void purgeSaikData(const kfs::DirectoryPath& path);
+
+    Q_INVOKABLE int getNumberItemsLibraryView()
+    {
+        return m_library_media_items.size();
+    }
 
 public slots:
     Q_INVOKABLE void nextTrack();
