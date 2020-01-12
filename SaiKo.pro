@@ -2,9 +2,9 @@ QT += qml quick quickcontrols2
 
 CONFIG += c++17
 
-CONFIG  += qt warn_off release
-DEFINES += QT_NO_DEBUG_OUTPUT
-DEFINES += QT_NO_DEBUG
+#CONFIG  += qt warn_off release
+#DEFINES += QT_NO_DEBUG_OUTPUT
+#DEFINES += QT_NO_DEBUG
 
 SRC_PATH = $$PWD/src
 EXTERNAL_PATH = $$PWD/external

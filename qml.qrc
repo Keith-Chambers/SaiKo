@@ -16,5 +16,14 @@
         <file>ui/components/AudioControls.qml</file>
         <file>ui/components/AudioFileListView.qml</file>
         <file>ui/components/AudioVisualization.qml</file>
+        <file>resources/2x/sharp_skip_next_white_18dp.png</file>
+        <file>resources/2x/sharp_play_arrow_white_18dp.png</file>
+        <file>resources/2x/sharp_skip_previous_white_18dp.png</file>
+        <file>resources/2x/sharp_pause_white_18dp.png</file>
+        <file>resources/2x/sharp_arrow_back_white_18dp.png</file>
+        <file>resources/2x/sharp_loop_white_18dp.png</file>
+        <file>resources/2x/sharp_close_white_18dp.png</file>
+        <file>resources/2x/sharp_create_white_18dp.png</file>
+        <file>resources/2x/sharp_arrow_drop_down_white_18dp.png</file>
     </qresource>
 </RCC>

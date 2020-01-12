@@ -127,6 +127,79 @@ public:
 //    QString getLibraryViewDirectoryPath();
 
     QString getAudioViewDirectoryName();
+
+    Q_INVOKABLE void regenerateSaikForParentLibView()
+    {
+        if(m_library_view_directory == std::nullopt) {
+            // TODO: Error handling
+            return;
+        }
+
+        auto parent = m_library_view_directory;
+        parent->cdUp();
+
+        // TODO: Make this better
+        generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(parent->absolutePath()).value(), true);
+
+        loadLibraryViewContent();
+    }
+
+    Q_INVOKABLE void generateSaikoInCurrentLibView(QString item_name)
+    {
+        qDebug() << "Generating Saik for " << item_name << " in current lib view";
+
+        if(m_library_view_directory == std::nullopt) {
+            // TODO: Error handling
+            qDebug() << "Invalid library view";
+            return;
+        }
+
+        // TODO: Make this better
+        generateSaikoMetaData(kfs::DirectoryPath::make(m_library_view_directory->absolutePath() + "/" + item_name).value(), true);
+        generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(m_library_view_directory->absolutePath() + "/" + item_name).value(), true);
+
+        qDebug() << "Reloading library";
+
+        loadLibraryViewContent();
+    }
+
+    // TODO: Move to .cpp
+    Q_INVOKABLE void generateSaikForCurrentLibView()
+    {
+        qDebug() << "Generating Saik for current lib view";
+
+        if(m_library_view_directory == std::nullopt) {
+            // TODO: Error handling
+            qDebug() << "Invalid library view";
+            return;
+        }
+
+        // TODO: Make this better
+        generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(m_library_view_directory->absolutePath()).value(), true);
+
+        qDebug() << "Reloading library @ " << m_library_view_directory->absolutePath();
+
+        loadLibraryViewContent();
+    }
+
+    Q_INVOKABLE void purgeSaikForCurrentLibView()
+    {
+        if(m_library_view_directory == std::nullopt) {
+            // TODO: Error handling
+            return;
+        }
+
+        // TODO: Make this better
+        auto current_path = kfs::DirectoryPath::make(m_library_view_directory->path());
+        purgeSaikData(current_path.value());
+
+        loadLibraryViewContent();
+    }
+
+    void generateSaikoMetaDataRecursive(kfs::DirectoryPath root_dir, bool recheck);
+    void generateSaikoMetaData(kfs::DirectoryPath root_dir, bool recheck);
+    void purgeSaikData(const kfs::DirectoryPath& path);
+
 public slots:
     Q_INVOKABLE void nextTrack();
     Q_INVOKABLE void prevTrack();
@@ -144,9 +217,6 @@ private:
     void cdDown(const kfs::RelativePath& dir);
     void appendTrackToPlaylist(kfs::FileIdentifier file);
     void makeCurrentFolderPlaylist();
-
-    void generateSaikoMetaData(kfs::DirectoryPath root_dir, bool recheck);
-    void purgeSaikData(const kfs::DirectoryPath& path);
 
     void loadLibraryViewContent();
 
@@ -212,7 +282,7 @@ private:
     static QStringList getBestImagesPaths(QDir directory, uint16_t numImages, Resolution res);
     static QString bestResolution(QString first, QString second, Resolution targetRes);
     static QString bestImageOf(QDir directory, QStringList images, Resolution res);
-    static std::optional<Magick::Image> createTiledImage(QStringList sourceImagesPaths, Resolution res);
+    static std::optional<Magick::Image> createTiledImage(const kfs::DirectoryPath& root_dir, QStringList sourceImagesPaths, Resolution res);
 };
 
 #endif // MEDIAFILESYSTEM_H
