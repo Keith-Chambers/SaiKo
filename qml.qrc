@@ -24,5 +24,6 @@
         <file>resources/2x/sharp_loop_white_18dp.png</file>
         <file>resources/2x/sharp_close_white_18dp.png</file>
         <file>resources/2x/sharp_create_white_18dp.png</file>
+        <file>resources/2x/sharp_arrow_drop_down_white_18dp.png</file>
     </qresource>
 </RCC>

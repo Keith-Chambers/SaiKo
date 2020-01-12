@@ -17,6 +17,8 @@ ApplicationWindow
     minimumWidth: 800
     title: qsTr("Saiko");
 
+    property bool showFolderView: true
+
     Rectangle
     {
         id: displayRoot
@@ -32,17 +34,18 @@ ApplicationWindow
 
             anchors {
                 left: musicFolderView.left
-                leftMargin: 20
-                bottom: topDivider.top
-                bottomMargin: 0;
+                leftMargin: 0
+//                bottom: topDivider.top
+                bottomMargin: 10;
+                bottom: musicFolderView.top
             }
         }
 
         Rectangle
         {
             id: closeFileViewContainer
-            height: 20
-            width: 20
+            height: 25
+            width: 25
             visible: MFileSys.audioViewDirName != ""
             anchors {
                 right: parent.right
@@ -57,7 +60,7 @@ ApplicationWindow
             {
                 id: closeFileViewButtonImage
                 anchors.fill: parent
-                source: "qrc:///resources/2x/sharp_close_white_18dp.png"
+                source: "qrc:///resources/2x/sharp_arrow_drop_down_white_18dp.png"
             }
 
             MouseArea
@@ -65,61 +68,8 @@ ApplicationWindow
                 anchors.fill: parent
                 onClicked: {
                     console.log("Close clicked");
+                    showFolderView = !showFolderView;
                 }
-            }
-        }
-
-        Button
-        {
-            id: loadParentSaikDataButton
-            text: "Regen Parent";
-            anchors
-            {
-                left: currentFolderText.right
-                leftMargin: 20
-                top: currentFolderText.top;
-                bottom: currentFolderText.bottom
-            }
-
-            width: 100
-            onClicked: {
-                MFileSys.regenerateSaikForParentLibView();
-            }
-        }
-
-        Button
-        {
-            id: loadSaikDataButton
-            text: "Regenerate";
-            anchors
-            {
-                left: loadParentSaikDataButton.right
-                leftMargin: 20
-                top: currentFolderText.top;
-                bottom: currentFolderText.bottom
-            }
-
-            width: 100
-            onClicked: {
-                MFileSys.generateSaikForCurrentLibView();
-            }
-        }
-
-        Button
-        {
-            id: purgeSaikDataButton
-            text: "Delete";
-            anchors
-            {
-                left: loadSaikDataButton.right
-                leftMargin: 20
-                top: currentFolderText.top;
-                bottom: currentFolderText.bottom
-            }
-
-            width: 100
-            onClicked: {
-                MFileSys.purgeSaikForCurrentLibView();
             }
         }
 
@@ -128,11 +78,11 @@ ApplicationWindow
             id: topDivider
             visible: false;
             height: 1
-            color: "white"
+            color: "grey"
             anchors {
                 left: sideMenuBackground.right
                 top: backButton.bottom;
-                topMargin: 20;
+                topMargin: 35;
                 leftMargin: 50
 //                rightMargin: 50
                 right: audioFileListView.left
@@ -177,7 +127,7 @@ ApplicationWindow
             anchors
             {
                 top: topDivider.bottom;
-                topMargin: 20;
+                topMargin: 5;
                 leftMargin: 50;
                 rightMargin: 10;
                 bottom: audioControls.top;
@@ -186,28 +136,32 @@ ApplicationWindow
             }
         }
 
-        Text {
+        Text
+        {
             id: audioFolderName
             text: qsTr( MFileSys.audioViewDirName )
             color: "white"
             elide: Text.ElideRight;
+//            width: 225
             anchors {
-                left: audioFileListView.left
-                bottom: audioFileListView.top
-                bottomMargin: 10
+                top: backButton.bottom;
+                topMargin: 10;
+                right: closeFileViewContainer.left
+                rightMargin: 5
             }
             font.pointSize: 11
+//            font.bold: true
         }
 
         AudioFileListView
         {
             id: audioFileListView
-            width: (MFileSys.audioViewDirName == "") ? 0 : 250;
+            width: (MFileSys.audioViewDirName == "" || showFolderView == false) ? 0 : 250;
 
             anchors
             {
                 top: backButton.bottom;
-                topMargin: 75;
+                topMargin: 40;
                 bottom: audioControls.top;
                 bottomMargin: 0;
                 right: parent.right;

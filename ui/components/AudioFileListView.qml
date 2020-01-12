@@ -27,6 +27,7 @@ Item {
             anchors.topMargin: 1
             interactive: true;
             currentIndex: MFileSys.currentPlaylistIndex
+            clip: true
 
             Component
             {
