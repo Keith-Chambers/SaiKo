@@ -36,7 +36,7 @@ ApplicationWindow
                 left: musicFolderView.left
                 leftMargin: 0
 //                bottom: topDivider.top
-                bottomMargin: 10;
+                bottomMargin: 15;
                 bottom: musicFolderView.top
             }
         }
@@ -76,13 +76,13 @@ ApplicationWindow
         Rectangle
         {
             id: topDivider
-            visible: false;
+//            visible: false;
             height: 1
             color: "grey"
             anchors {
                 left: sideMenuBackground.right
-                top: backButton.bottom;
-                topMargin: 35;
+                top: parent.top
+                topMargin: 80
                 leftMargin: 50
 //                rightMargin: 50
                 right: audioFileListView.left
@@ -129,7 +129,7 @@ ApplicationWindow
                 top: topDivider.bottom;
                 topMargin: 10;
                 leftMargin: 50;
-                rightMargin: 10;
+                rightMargin: 0;
                 bottom: audioControls.top;
                 left: sideMenuBackground.right;
                 right: audioFileListView.left
@@ -144,8 +144,8 @@ ApplicationWindow
             elide: Text.ElideRight;
 //            width: 225
             anchors {
-                top: backButton.bottom;
-                topMargin: 10;
+                bottom: topDivider.top
+                bottomMargin: 5
                 right: closeFileViewContainer.left
                 rightMargin: 5
             }
@@ -160,8 +160,8 @@ ApplicationWindow
 
             anchors
             {
-                top: backButton.bottom;
-                topMargin: 40;
+                top: topDivider.bottom;
+                topMargin: -1;
                 bottom: audioControls.top;
                 bottomMargin: 0;
                 right: parent.right;

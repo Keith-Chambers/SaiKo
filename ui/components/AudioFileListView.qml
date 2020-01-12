@@ -11,7 +11,7 @@ Item {
         {
             id: beginDividerLine
             height: 1
-            color: "light grey"
+            color: "grey"
             anchors
             {
                 left: parent.left
@@ -48,7 +48,7 @@ Item {
                     {
                         id: dividerLine
                         height: 1
-                        color: "light grey"
+                        color: "grey"
                         anchors {
                             left: parent.left
                             right: parent.right
