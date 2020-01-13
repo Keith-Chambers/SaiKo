@@ -87,14 +87,17 @@ public:
     Q_PROPERTY(QString currentAudioImagePath READ getCurrentAudioImagePath NOTIFY audioImagePathChanged)
     Q_PROPERTY(bool audioFolderViewIsCurrent READ getAudioFolderViewIsCurrent NOTIFY audioFolderViewIsCurrentChanged)
 
+    Q_PROPERTY(bool editMode READ getEditMode WRITE setEditMode NOTIFY editModeChanged)
+
+    // TODO: move to .cpp
     bool getAudioFolderViewIsCurrent() {
-        qDebug() << "Audio list dir == Playlist dir ?? " << (m_audio_list_directory->directory() == m_playlist_directory->directory());
         return m_audio_list_directory->directory() == m_playlist_directory->directory();
     }
 
 signals:
     void isErrorMessageChanged(bool);
     void libraryViewDirChanged();
+    void editModeChanged(bool);
 
     void audioFolderViewIsCurrentChanged(bool);
 
@@ -112,6 +115,10 @@ signals:
     void numberItemsLibraryViewChanged(int);
 
 public:
+
+    // TODO: Move to .cpp
+    void setEditMode(bool edit_mode){ m_edit_mode_enabled = edit_mode; emit editModeChanged(m_edit_mode_enabled); }
+    bool getEditMode() const { return m_edit_mode_enabled; }
 
     int getRestoreLibraryViewPosition();
     void setRestoreLibraryViewPosition(bool restore_position);
@@ -222,6 +229,7 @@ private:
     i32                         m_current_audio_index;
 
     bool                        m_restore_library_view_position;
+    bool                        m_edit_mode_enabled = false;
 
     // TODO: This shouldn't be needed
     QObjectList                 m_library_view_qml;

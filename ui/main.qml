@@ -25,21 +25,99 @@ ApplicationWindow
         anchors.fill: parent;
         color: "#404040";
 
+        ListModel
+        {
+            id: optionsModel
+            ListElement
+            {
+                description: "Enable edit mode"
+                optionID: 0
+                iconPath: "qrc:///resources/2x/sharp_build_white_18dp.png"
+            }
 
+            ListElement
+            {
+                description: "Show tooltips"
+                optionID: 1
+                iconPath: "qrc:///resources/2x/sharp_info_white_18dp.png"
+            }
+        }
+
+        ListView
+        {
+            id: optionsTopBar
+            orientation: ListView.Horizontal
+            model: optionsModel
+            height: 25
+            spacing: 10
+            anchors {
+                top: parent.top
+                topMargin: 10
+                left: currentFolderText.right
+                right: parent.right
+                leftMargin: 20
+                rightMargin: 40
+            }
+
+            delegate: Rectangle
+            {
+                id: optionButtonContainer
+                width: 25
+                height: 25
+                radius: 3
+                color: (MFileSys.editMode) ? "#26282b" : "transparent"
+
+                ToolTip
+                {
+                    parent: optionButtonContainer
+                    visible: optionMouseArea.containsMouse
+                    text: description
+                }
+
+                Image
+                {
+                    id: optionIcon
+                    anchors.centerIn: parent
+                    sourceSize.height: 20
+                    sourceSize.width: 20
+                    source: iconPath
+                }
+
+                MouseArea
+                {
+                    id: optionMouseArea
+                    hoverEnabled: true
+                    anchors.fill: parent
+                    onClicked: {
+                        MFileSys.editMode = !MFileSys.editMode
+                    }
+
+                    onHoveredChanged: {
+                        if(MFileSys.editMode || containsMouse) {
+                            optionButtonContainer.color = "#26282b"
+                        } else {
+                            optionButtonContainer.color = "transparent"
+                        }
+                    }
+                }
+            }
+        }
 
         Text
         {
             id: currentFolderText
             color: "white"
             text: MFileSys.libraryViewDirName
-            font.pointSize: 14;
+            font.pointSize: 12;
+
+//            horizontalAlignment: Text.AlignHCenter
+            width: 250
+//            height: 40
 
             anchors {
                 left: musicFolderView.left
-                leftMargin: 0
-//                bottom: topDivider.top
-                bottomMargin: 15;
-                bottom: musicFolderView.top
+                verticalCenter: optionsTopBar.verticalCenter
+//                bottom: optionsTopBar.bottom
             }
         }
 
@@ -96,18 +174,20 @@ ApplicationWindow
             id: backButton;
             anchors
             {
-                right: parent.right;
+                left: sideMenuBackground.right
                 top: parent.top;
-                rightMargin: 10
+                leftMargin: 5
                 topMargin: 10
             }
 
-            width: 30;
-            height: 30
+            width: 25;
+            height: 25
             color: "transparent";
 
             Image
             {
+                sourceSize.height: 25;
+                sourceSize.width: 25;
                 anchors.fill: parent
                 source: "qrc:///resources/2x/sharp_arrow_back_white_18dp.png";
             }
@@ -128,7 +208,7 @@ ApplicationWindow
             id: musicFolderView
             anchors
             {
-                top: topDivider.bottom;
+                top: currentFolderText.bottom;
                 topMargin: 10;
                 leftMargin: 50;
                 rightMargin: 0;
@@ -144,15 +224,15 @@ ApplicationWindow
             text: qsTr( MFileSys.audioViewDirName )
             color: "white"
             elide: Text.ElideRight;
-//            width: 225
-            anchors {
-                bottom: topDivider.top
-                bottomMargin: 5
+            horizontalAlignment: Text.AlignRight
+            width: 150
+            anchors
+            {
+                verticalCenter: optionsTopBar.verticalCenter
                 right: closeFileViewContainer.left
                 rightMargin: 5
             }
             font.pointSize: 11
-//            font.bold: true
         }
 
         AudioFileListView
@@ -162,12 +242,12 @@ ApplicationWindow
 
             anchors
             {
-                top: topDivider.bottom;
-                topMargin: -1;
+                top: audioFolderName.bottom
+                topMargin: 10
                 bottom: audioControls.top;
                 bottomMargin: 0;
                 right: parent.right;
-                rightMargin: 15;
+                rightMargin: (MFileSys.audioViewDirName == "" || showFolderView == false) ? 0 : 15;
             }
         }
 
@@ -239,12 +319,12 @@ ApplicationWindow
                             bottom: parent.bottom
                             right: parent.right
                             bottomMargin: 1
-                            rightMargin: 3
+                            rightMargin: 4
                         }
 
                         font.pointSize: 9
                         color: "White"
-                        text: numberTracks
+                        text: (numberTracks !== 0) ? numberTracks : "-"
                     }
 
                     MouseArea
@@ -348,16 +428,20 @@ ApplicationWindow
             }
         }
 
-        Image
-        {
-            id: logoImg
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.topMargin: 20;
-            anchors.leftMargin: 50;
-            height: 30
-            width: 100
-            source: "qrc:///resources/saiko.png"
-        }
+//        Image
+//        {
+//            id: logoImg
+//            anchors.left: parent.left
+//            anchors.top: parent.top
+//            anchors.topMargin: 20;
+//            anchors.leftMargin: 50;
+
+//            width: 100
+//            height: 70
+//            sourceSize.width: 100;
+//            sourceSize.height: 70
+
+//            source: "qrc:///resources/saiko_logo.png"
+//        }
     }
 }

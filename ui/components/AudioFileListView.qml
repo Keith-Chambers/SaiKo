@@ -78,20 +78,23 @@ Item {
                         visible: activeItemIndex === index;
                         color: "transparent"
                         opacity: 1.0
-                        height: 30
-                        width: 30
+                        width: 20
+                        radius: 10
                         anchors {
                             right: parent.right
                             top: parent.top
                             rightMargin: 5
+                            bottom: parent.bottom
+                            topMargin: 5
+                            bottomMargin: 5
                         }
 
                         Image
                         {
                             id: addToPlaylistPlusIcon
                             anchors.fill: parent
-                            sourceSize.width: 30
-                            sourceSize.height: 30
+                            sourceSize.width: 20
+                            sourceSize.height: 20
                             smooth: false
                             source: "qrc:///resources/2x/sharp_add_white_18dp.png"
                         }
