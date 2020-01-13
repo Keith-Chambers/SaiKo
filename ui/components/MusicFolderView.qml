@@ -2,17 +2,53 @@ import QtQuick 2.0
 import QtQuick.Controls 2.4
 import QtQuick.Particles 2.11
 
+
+
 Item {
     id: root;
 
     property int activeItemIndex: -1
 
+    function calculateCellWidth()
+    {
+        var viewWidth = libraryView.width;
+
+        if(MFileSys.getNumberItemsLibraryView() < (viewWidth / 200)) {
+            return 200;
+        }
+
+        var itemsPerLine = viewWidth / 200;
+
+        itemsPerLine = Math.floor(itemsPerLine);
+
+        console.log("Width -> " + viewWidth);
+
+        if(viewWidth % 200 > 0) {
+            itemsPerLine++;
+        }
+
+        var resultCellWidth = Math.floor(viewWidth / itemsPerLine);
+
+        console.log("Items per line -> " + itemsPerLine);
+
+        console.log("Grid cell width -> " + resultCellWidth);
+
+        return resultCellWidth;
+    }
+
     GridView
     {
         id: libraryView
-        cellWidth: 200;
-        cellHeight: 200;
+//        cellWidth: 200;
+//        cellHeight: 200;
+        cellWidth: 200
+        cellHeight: libraryView.cellWidth
+
         clip: true;
+
+        onWidthChanged: {
+            cellWidth = calculateCellWidth();
+        }
 
         anchors.fill: parent;
         ScrollBar.vertical: ScrollBar {}
@@ -24,8 +60,8 @@ Item {
             Item
             {
                 id: musicFolderItemContainer
-                width: 190;
-                height: 190;
+                width: libraryView.cellWidth - 20;
+                height: libraryView.cellHeight - 20;
 
                 Rectangle {
                     anchors.fill: parent
@@ -175,8 +211,8 @@ Item {
                 Rectangle
                 {
                     id: musicFolderRect
-                    height: 150;
-                    width: 150;
+                    height: libraryView.cellHeight - 50;
+                    width: libraryView.cellWidth - 50;
                     anchors {
                         left: parent.left
 //                        right: parent.right
@@ -185,35 +221,6 @@ Item {
                         top: parent.top
                         topMargin: 20
 
-                    }
-
-                    Canvas
-                    {
-                        id: saikoOptions
-                        visible: false
-                        z: 1
-                        anchors {
-                            left: parent.left
-                            top: parent.top
-                        }
-
-                        height: 40
-                        width: 40
-
-                        onPaint: {
-                            var context = getContext("2d");
-
-                            // the triangle
-                            context.beginPath();
-                            context.moveTo(0, 0);
-                            context.lineTo(40, 0);
-                            context.lineTo(0, 40);
-                            context.closePath();
-
-                            // the fill color
-                            context.fillStyle = "black";
-                            context.fill();
-                        }
                     }
 
                     color: "grey"
@@ -229,8 +236,8 @@ Item {
                         height: parent.height
 
                         asynchronous: true
-                        sourceSize.width: 150
-                        sourceSize.height: 150
+                        sourceSize.width: parent.width
+                        sourceSize.height: parent.height
                         smooth: false
 
                         source:
@@ -276,7 +283,7 @@ Item {
                         horizontalCenter: musicFolderRect.horizontalCenter
                         topMargin: 5;
                     }
-                    width: 150
+                    width: parent.width
 
                     color: "white";
                     verticalAlignment: Text.AlignVCenter
@@ -290,6 +297,8 @@ Item {
 
         onModelChanged: {
             console.log("Model changed!");
+
+            libraryView.cellWidth = calculateCellWidth();
 
             if(MFileSys.restoreLibraryViewPosition == true)
             {

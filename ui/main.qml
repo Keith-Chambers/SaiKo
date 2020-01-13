@@ -25,6 +25,8 @@ ApplicationWindow
         anchors.fill: parent;
         color: "#404040";
 
+
+
         Text
         {
             id: currentFolderText
@@ -36,7 +38,7 @@ ApplicationWindow
                 left: musicFolderView.left
                 leftMargin: 0
 //                bottom: topDivider.top
-                bottomMargin: 10;
+                bottomMargin: 15;
                 bottom: musicFolderView.top
             }
         }
@@ -49,7 +51,7 @@ ApplicationWindow
             visible: MFileSys.audioViewDirName != ""
             anchors {
                 right: parent.right
-                rightMargin: 5
+                rightMargin: 15
 //                bottom: audioFolderName.bottom
                 verticalCenter: audioFolderName.verticalCenter
             }
@@ -81,8 +83,8 @@ ApplicationWindow
             color: "grey"
             anchors {
                 left: sideMenuBackground.right
-                top: backButton.bottom;
-                topMargin: 35;
+                top: parent.top
+                topMargin: 80
                 leftMargin: 50
 //                rightMargin: 50
                 right: audioFileListView.left
@@ -127,9 +129,9 @@ ApplicationWindow
             anchors
             {
                 top: topDivider.bottom;
-                topMargin: 5;
+                topMargin: 10;
                 leftMargin: 50;
-                rightMargin: 10;
+                rightMargin: 0;
                 bottom: audioControls.top;
                 left: sideMenuBackground.right;
                 right: audioFileListView.left
@@ -144,8 +146,8 @@ ApplicationWindow
             elide: Text.ElideRight;
 //            width: 225
             anchors {
-                top: backButton.bottom;
-                topMargin: 10;
+                bottom: topDivider.top
+                bottomMargin: 5
                 right: closeFileViewContainer.left
                 rightMargin: 5
             }
@@ -160,12 +162,12 @@ ApplicationWindow
 
             anchors
             {
-                top: backButton.bottom;
-                topMargin: 40;
+                top: topDivider.bottom;
+                topMargin: -1;
                 bottom: audioControls.top;
                 bottomMargin: 0;
                 right: parent.right;
-                rightMargin: 10;
+                rightMargin: 15;
             }
         }
 
@@ -185,8 +187,83 @@ ApplicationWindow
             color: "#26282b"
 //            color: "#243D45";
 
+            // Playlist Widget
+            GridView
+            {
+                id: playlistGridView
+//                model: playlistModel
+                model: Playlists
+                cellWidth: (nowPlayingImageRect.width / 4)
+                cellHeight: 40 // cellWidth
+
+                width: 180 // (sideMenuBackground.width / 2) - (10 * 2)
+                height: 50
+                interactive: false
+
+                anchors {
+                    left: nowPlayingImageRect.left
+                    bottom: sideMenuBackground.bottom
+                    bottomMargin: 0
+                }
+
+                delegate: Rectangle
+                {
+                    id: playlistDelegate
+                    width: 35
+                    height: 35
+                    border {
+                        width: 1
+                        color: "black"
+                    }
+
+                    color: "#404040"
+
+                    Text
+                    {
+//                        anchors {
+//                            top: parent.top
+//                            left: parent.left
+//                            topMargin: 5
+//                            leftMargin: 7
+//                        }
+
+                        anchors.centerIn: parent
+                        color: "White"
+//                        font.bold: true
+                        text: name
+                    }
+
+                    Text
+                    {
+                        anchors {
+                            bottom: parent.bottom
+                            right: parent.right
+                            bottomMargin: 1
+                            rightMargin: 3
+                        }
+
+                        font.pointSize: 9
+                        color: "White"
+                        text: numberTracks
+                    }
+
+                    MouseArea
+                    {
+                        id: playlistItemMouseArea
+                        anchors.fill: parent
+                        onClicked: {
+//                            MFileSys.pushLibraryViewPosition();
+                            MFileSys.invokePlaylist(index);
+                        }
+                    }
+                }
+
+                z: 1
+            }
+
             Column
             {
+                id: nowPlayingColumn
                 anchors
                 {
                     bottom: nowPlayingImageRect.top;
@@ -241,10 +318,10 @@ ApplicationWindow
                 visible: MFileSys.currentPlaylistIndex != -1;
                 anchors
                 {
-                    bottom: sideMenuBackground.bottom;
+                    bottom: playlistGridView.top;
                     left: parent.left;
                     leftMargin: 25;
-                    bottomMargin: 20;
+                    bottomMargin: 15;
                 }
                 height: 160;
                 width: 160;
@@ -252,13 +329,7 @@ ApplicationWindow
                 Image
                 {
                     id: currentlyPlayingImage
-                    source: {
-                        if(MFileSys.currentPlaylistIndex == -1) {
-                            return "qrc:///resources/cover.jpg";
-                        }
-
-                        return MFileSys.currentAudio.artPath
-                    }
+                    source: MFileSys.currentAudioImagePath
                     anchors.fill: parent;
                 }
             }
