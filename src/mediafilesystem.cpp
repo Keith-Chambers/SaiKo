@@ -11,7 +11,7 @@ MediaFileSystem::MediaFileSystem(const QList<kfs::DirectoryPath>& library_roots,
         m_playlist {},
         m_audio_list_files {},
         m_library_media_items {},
-        m_audio_image_path {std::nullopt},
+//        m_audio_image_path {std::nullopt},
         m_current_audio_index {-1},
         m_error_message {}
 {
@@ -41,6 +41,78 @@ int MediaFileSystem::popLibraryViewPosition()
     return pos;
 }
 
+void MediaFileSystem::regenerateSaikForParentLibView()
+{
+    if(m_library_view_directory == std::nullopt) {
+        // TODO: Error handling
+        return;
+    }
+
+    auto parent = m_library_view_directory;
+    parent->cdUp();
+
+    // TODO: Make this better
+    generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(parent->absolutePath()).value(), true);
+
+    loadLibraryViewContent();
+}
+
+void MediaFileSystem::generateSaikoInCurrentLibView(QString item_name)
+{
+    qDebug() << "Generating Saik for " << item_name << " in current lib view";
+
+    if(m_library_view_directory == std::nullopt) {
+        // TODO: Error handling
+        qDebug() << "Invalid library view";
+        return;
+    }
+
+    // TODO: Make this better
+    generateSaikoMetaData(kfs::DirectoryPath::make(m_library_view_directory->absolutePath() + "/" + item_name).value(), true);
+    generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(m_library_view_directory->absolutePath() + "/" + item_name).value(), true);
+
+    qDebug() << "Reloading library";
+
+    loadLibraryViewContent();
+}
+
+void MediaFileSystem::generateSaikForCurrentLibView()
+{
+    qDebug() << "Generating Saik for current lib view";
+
+    if(m_library_view_directory == std::nullopt) {
+        // TODO: Error handling
+        qDebug() << "Invalid library view";
+        return;
+    }
+
+    // TODO: Make this better
+    generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(m_library_view_directory->absolutePath()).value(), true);
+
+    qDebug() << "Reloading library @ " << m_library_view_directory->absolutePath();
+
+    loadLibraryViewContent();
+}
+
+void MediaFileSystem::purgeSaikForCurrentLibView()
+{
+    if(m_library_view_directory == std::nullopt) {
+        // TODO: Error handling
+        return;
+    }
+
+    // TODO: Make this better
+    auto current_path = kfs::DirectoryPath::make(m_library_view_directory->path());
+    purgeSaikData(current_path.value());
+
+    loadLibraryViewContent();
+}
+
+Q_INVOKABLE int MediaFileSystem::getNumberItemsLibraryView()
+{
+    return m_library_media_items.size();
+}
+
 int MediaFileSystem::getRestoreLibraryViewPosition()
 {
     return m_restore_library_view_position;
@@ -66,7 +138,7 @@ void MediaFileSystem::nextTrack()
     m_current_audio_index++;
 
     emit playlistIndexChanged(m_current_audio_index);
-    emit currentAudioChanged(m_audio_list_files[m_current_audio_index]);
+    emit currentAudioChanged(m_playlist[m_current_audio_index]);
 }
 
 void MediaFileSystem::prevTrack()
@@ -78,7 +150,7 @@ void MediaFileSystem::prevTrack()
     m_current_audio_index--;
 
     emit playlistIndexChanged(m_current_audio_index);
-    emit currentAudioChanged(m_audio_list_files[m_current_audio_index]);
+    emit currentAudioChanged(m_playlist[m_current_audio_index]);
 }
 
 // NEW API BEGIN
@@ -114,22 +186,8 @@ void MediaFileSystem::cdDown(const kfs::RelativePath& dir)
     }
 
     m_library_view_depth++;
-    updateAudioFolderImagePath(dir.path());
     loadLibraryViewContent();
     emit libraryViewDirChanged();
-}
-
-void MediaFileSystem::updateAudioFolderImagePath(QString dir_name)
-{
-    for(auto& item : m_library_media_items) {
-        if(item.getItemName() == dir_name) {
-            m_audio_image_path = item.getImagePath();
-            return;
-        }
-    }
-
-    displayErrorMessage("Failed to update audio image");
-    assert(false);
 }
 
 void MediaFileSystem::cdDown(const QString& root_name)
@@ -190,8 +248,6 @@ void MediaFileSystem::loadAudioListToQmlContext()
         audio_list_qml.append(&audio);
     }
 
-    qDebug() << "here..";
-
     m_qt_engine->rootContext()->setContextProperty(QML_AUDIO_VIEW_NAME, QVariant::fromValue(audio_list_qml));
 //    mEngine->rootContext()->setContextProperty(QML_AUDIO_VIEW_NAME, &m_playlist.front());
 
@@ -209,15 +265,6 @@ void MediaFileSystem::loadLibraryViewItemsToQmlContext()
     m_qt_engine->rootContext()->setContextProperty(QML_LIBRARY_VIEW_NAME, QVariant::fromValue(m_library_view_qml));
 }
 
-//QString MediaFileSystem::getAudioImagePath()
-//{
-//    if(m_audio_image_path == std::nullopt) {
-//        return "qrc:///resources/cover.jpg";
-//    }
-
-//    return "file:/" + *m_audio_image_path;
-//}
-
 QString MediaFileSystem::getLibraryViewDirectoryName()
 {
     if(m_library_view_depth == 0) {
@@ -233,18 +280,18 @@ QString MediaFileSystem::getAudioViewDirectoryName()
         return "";
     }
 
-    return m_audio_list_directory->dirName();
+    return m_audio_list_directory->directory().dirName();
 }
 
 AudioFile* MediaFileSystem::getCurrentAudio()
 {
-    if(m_current_audio_index < 0 || m_audio_list_files.isEmpty() || m_current_audio_index >= m_audio_list_files.size()) {
+    if(m_current_audio_index < 0 || m_playlist.isEmpty() || m_current_audio_index >= m_playlist.size()) {
         qDebug() << "Null audiofile";
         assert(false);
         return nullptr;
     }
 
-    return &m_audio_list_files[m_current_audio_index];
+    return &m_playlist[m_current_audio_index];
 }
 
 // NEW API END
@@ -327,20 +374,20 @@ void MediaFileSystem::loadAudioList()
         return;
     }
 
-    QStringList audio_file_names = MediaFileSystem::audioInDir(*m_audio_list_directory);
-    m_audio_list_files = AudioFile::fromFileNames(*m_audio_list_directory, audio_file_names);
+    QStringList audio_file_names = MediaFileSystem::audioInDir(m_audio_list_directory->directory());
+    m_audio_list_files = AudioFile::fromFileNames(m_audio_list_directory->directory(), audio_file_names);
 
-    for(auto& audio_file : m_audio_list_files) {
+//    for(auto& audio_file : m_audio_list_files) {
 
-        if(!audio_file.getHasArt()) {
-            assert(*m_audio_image_path != "");
-            audio_file.setArtPath( *m_audio_image_path );
-        }
+//        if(!audio_file.getHasArt()) {
+//            assert(*m_audio_image_path != "");
+//            audio_file.setArtPath( *m_audio_image_path );
+//        }
 
-        assert(audio_file.getTitle() != "");
-        assert(audio_file.getArtist() != "");
-        assert(audio_file.getArtPath() != "");
-    }
+//        assert(audio_file.getTitle() != "");
+//        assert(audio_file.getArtist() != "");
+//        assert(audio_file.getArtPath() != "");
+//    }
 
     assert(m_audio_list_files.size() > 0);
 
@@ -369,87 +416,29 @@ void MediaFileSystem::invokeFolder(QString folder_name)
 
     QDir child_dir = makeChildDir(*m_library_view_directory, folder_name);
 
-    if(dirContainsAudio(child_dir)) {
+    // IF: Is audio folder ELSE: Has more folders
+    if(dirContainsAudio(child_dir))
+    {
         popLibraryViewPosition();
-        m_audio_list_directory = child_dir;
+
+        QString image_path = "qrc:///resources/cover.jpg";
 
         for(auto& item : m_library_media_items)
         {
-            if(item.getItemName() == folder_name)
-            {
-                m_audio_image_path = item.getImagePath();
-
-                if(m_audio_image_path == "") {
-                    m_audio_image_path = "qrc:///resources/cover.jpg";
-                }
-
+            if(item.getItemName() == folder_name) {
+                image_path = item.getImagePath();
                 break;
             }
         }
 
+        m_audio_list_directory = {child_dir, image_path};
+
         loadAudioList();
-        audioViewDirChanged(m_audio_list_directory->dirName());
+        audioViewDirChanged(m_audio_list_directory->directory().dirName());
     } else {
         cdDown(child_path_opt.value());
     }
-
-
-//    if(m_library_view_directory == std::nullopt) {
-//        for(const auto& root : m_root_library_directories) {
-//            if(root.leafName() == folder_name) {
-//                qDebug() << "Entering root dir " << root.absolutePath();
-//                m_library_view_directory = root.absolutePath();
-//                loadLibraryViewItemsToQmlContext();
-//                return;
-//            }
-//        }
-//    } else if (dirContainsAudioRecursive(makeChildDir(*m_library_view_directory, folder_name))) {
-//        qDebug() << "cdDown";
-//        cdDown(folder_name);
-//    }
-
-//    qDebug() << "Here";
-
-//    if(dirContainsAudio(makeChildDir(*m_library_view_directory, folder_name)))
-//    {
-//        qDebug() << "Contains audio";
-//        m_audio_list_directory = makeChildDir(*m_library_view_directory, folder_name);
-
-//        QStringList audio_file_names = MediaFileSystem::audioInDir(*m_audio_list_directory);
-//        m_audio_list_files = AudioFile::fromFileNames(*m_library_view_directory, audio_file_names);
-//        loadAudioListToQmlContext();
-
-//        libraryViewDirChanged();
-//    }
 }
-
-//void MediaFileSystem::invokeMediaItem(QString pFileName, QString pExtension)
-//{
-//    qDebug() << "Invoking media item";
-
-//    if(!mCurrentDir || !mCurrentDir->exists())
-//    {
-//        downDir(pFileName);
-//        return;
-//    }
-
-//    if(pExtension != "") {
-//        generatePlaylist(pFileName + "." + pExtension);
-//    } else {
-
-//        if(hasAudioContainingSubFolders(makeChildDir(*mCurrentDir, pFileName))) {
-//            downDir(pFileName);
-//        }
-
-//        if(isFolderContainingAudio(makeChildDir(*mCurrentDir, pFileName))) {
-//            qDebug() << "Loading audio files";
-
-//            mAudioFolder = makeChildDir(*mCurrentDir, pFileName);
-//            loadAudioFromFolder(makeChildDir(*mCurrentDir, pFileName));
-//            currentAudioFolderChanged();
-//        }
-//    }
-//}
 
 void MediaFileSystem::invokeAudioListing(int audio_index)
 {
@@ -460,52 +449,15 @@ void MediaFileSystem::invokeAudioListing(int audio_index)
         return;
     }
 
+    m_playlist_directory = m_audio_list_directory;
+
     m_current_audio_index = audio_index;
+    m_playlist = m_audio_list_files;
 
-    emit currentAudioChanged(m_audio_list_files[m_current_audio_index]);
+    emit currentAudioChanged(m_playlist[m_current_audio_index]);
     emit playlistIndexChanged(m_current_audio_index);
+    emit audioImagePathChanged(m_playlist_directory->imagePath());
 }
-
-//void MediaFileSystem::playFromCurrentAudioSelection(unsigned long index)
-//{
-//    if(mAudioFolder == std::nullopt) {
-//        qDebug() << "No audio folder set";
-//        return;
-//    }
-
-//    // TODO:
-////    QDir temp = *mCurrentDir;
-////    qDebug() << "Getting images for " << temp.absolutePath();
-////    QStringList selectedImages = getBestImagesPaths(temp, 4, {50,50});
-
-////    std::optional<Magick::Image> tiledImageOpt = createTiledImage(selectedImages, {200, 200});
-
-////    if(tiledImageOpt != std::nullopt)
-////    {
-////        Magick::Image tiledImage = tiledImageOpt.value();
-////        tiledImage.magick("jpg");
-
-////        if(!QDir(mCurrentDir->absolutePath() + "/.saik").exists()) {
-////            QDir().mkdir(mCurrentDir->absolutePath() + "/.saik");
-////        }
-
-////        QString saveLocation = mCurrentDir->absolutePath() + "/.saik/tiled_artist_art.jpg";
-////        tiledImage.write(saveLocation.toUtf8().data());
-
-////        qDebug() << "Saving image to " << saveLocation;
-////    } else {
-////        qDebug() << "Failed to create tiled image";
-////    }
-
-//    mPlaylist.clear();
-
-//    for(unsigned long i = index; i < mCurrentFolderAudioFiles.size(); i++) {
-//        assert(mCurrentFolderAudioFiles[i].getFileName() != "");
-//        mPlaylist.append(mAudioFolder.value().absolutePath() + "/" + mCurrentFolderAudioFiles[i].getFileName());
-//    }
-
-//    emit playlistChanged(mPlaylist);
-//}
 
 QString MediaFileSystem::getNameFromPath(QString pPath)
 {
@@ -900,7 +852,6 @@ void MediaFileSystem::loadLibraryViewContent()
     qDebug() << "Loaded non-root folder";
     QDirIterator itr(m_library_view_directory->absolutePath(), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
 
-//    itr.next();
 
     while(itr.hasNext())
     {
@@ -912,128 +863,6 @@ void MediaFileSystem::loadLibraryViewContent()
 
     loadLibraryViewItemsToQmlContext();
 }
-
-// *NOTE: We're assuming that the root folders only contain more folders atm
-//void MediaFileSystem::generateMediaItemsFromRoot()
-//{
-//    MediaItem *next;
-//    mQmlMediaItems.clear();
-//    QStringList directories;
-
-//    qDebug() << "libraryAbsPaths size : " << mLibraryAbsPaths.size();
-
-//    for(int i = 0; i < mLibraryAbsPaths.size(); i++)
-//    {
-//        // TODO: Is there a reason for this..?
-//        QDir *rootDir = new QDir(mLibraryAbsPaths.at(i));
-//        if(!rootDir->exists())
-//        {
-//            qDebug() << mLibraryAbsPaths.at(i) << " doesn't exist";
-//            delete rootDir;
-//            continue;
-//        }
-
-//        directories = rootDir->entryList(QDir::AllDirs | QDir::NoDotAndDotDot, QDir::Name);
-
-//        for(int libIndex = 0; libIndex < directories.size(); libIndex++)
-//        {
-//            QString dirFullPath = mLibraryAbsPaths.at(i) + "/" + directories.at(libIndex);
-//            QDir currDir(dirFullPath);
-//            if(!currDir.exists())
-//            {
-//                qDebug() << directories.at(libIndex) << " doesn't exist?";
-//                continue;
-//            }
-
-//            QString dirName = getNameFromPath(dirFullPath);
-//            QString imagePath = dirFullPath + "/" + dirName + "_art.jpg";
-//            if(!currDir.exists(imagePath))
-//            {
-//                next = new MediaItem(dirFullPath, false);
-//            }else
-//            {
-//                qDebug() << "Found Image: " << imagePath;
-//                next = new MediaItem(dirFullPath, imagePath, false);
-//            }
-
-//            mQmlMediaItems.append(next);
-//        }
-//    }
-
-//    mEngine->rootContext()->setContextProperty("MediaList", QVariant::fromValue(mQmlMediaItems));
-//    qDebug() << "Root Media Items loaded successfuly";
-//}
-
-//void MediaFileSystem::generateMediaItems()
-//{
-//    qDebug() << "Generating media items..";
-
-//    QStringList directories;
-//    QStringList files;
-//    MediaItem *next;
-//    mQmlMediaItems.clear();
-
-//    if(!mCurrentDir || !mCurrentDir->exists())
-//    {
-//        qDebug() << "Generating from root";
-//        generateMediaItemsFromRoot();
-//        return;
-//    }
-
-//    directories = mCurrentDir->entryList(QDir::AllDirs | QDir::NoDotAndDotDot, QDir::Name);
-
-//    if(directories.size() <= 0)
-//    {
-//        qDebug() << "No directories found in current folder";
-//        files = mCurrentDir->entryList(mFilters, QDir::Files, QDir::Name);
-
-//        for(int i = 0; i < files.size(); i++)
-//        {
-//            qDebug() << "F: " << files.at(i) << " found";
-//            next = new MediaItem(files.at(i), true);
-
-//            mQmlMediaItems.append((QObject *)next);
-//        }
-//    }
-
-//    for(int i = 0; i < directories.size(); i++)
-//    {
-//        qDebug() << "D: " << directories.at(i) << " found";
-
-//        //QString folderPath = mLibraryAbsPaths.at(mCurrentLibraryIndex) + directories.at(i) + "/";
-//        QString folderPath = mCurrentDir->absolutePath() + "/" + directories.at(i) + "/";
-//        QStringList imageNameList = extractFolderImagePaths(folderPath);
-//        QString imagePath;
-
-//        for(int i = 0; i < imageNameList.size(); i++)
-//        {
-//            QDir folderDir(folderPath);
-//            if(folderDir.exists(imageNameList.at(i)))
-//            {
-//                imagePath = folderPath + "/" + imageNameList.at(i);
-//                qDebug() << imagePath + " exists";
-//            }
-//        }
-
-//        if(imagePath.size() != 0)
-//        {
-//            next = new MediaItem(directories.at(i), imagePath, false);
-//        }else
-//        {
-//            next = new MediaItem(directories.at(i), false);
-//        }
-
-//        qDebug() << "Applying options to folder -> " << folderPath;
-//        next->applyFolderOptions(QDir(folderPath));
-
-//        mQmlMediaItems.append((QObject *)next);
-//    }
-
-//    mEngine->rootContext()->setContextProperty("MediaList", QVariant::fromValue(mQmlMediaItems));
-//}
-
-//void getImageForAudioFolder(kfs::DirectoryPath root_dir);
-//void getImageForLibraryFolder(kfs::DirectoryPath root_dir);
 
 void MediaFileSystem::generateSaikoMetaData(kfs::DirectoryPath root_dir, bool recheck)
 {
@@ -1293,6 +1122,7 @@ void MediaFileSystem::generateSaikoMetaDataRecursive(kfs::DirectoryPath root_dir
     qDebug() << "Successfully created all saik files";
 }
 
+// TODO: remove
 void MediaFileSystem::purgeSaikData(const kfs::DirectoryPath& path)
 {
     qDebug() << "purgeSaikData disabled";

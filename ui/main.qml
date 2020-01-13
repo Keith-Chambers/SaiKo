@@ -25,6 +25,8 @@ ApplicationWindow
         anchors.fill: parent;
         color: "#404040";
 
+
+
         Text
         {
             id: currentFolderText
@@ -49,7 +51,7 @@ ApplicationWindow
             visible: MFileSys.audioViewDirName != ""
             anchors {
                 right: parent.right
-                rightMargin: 5
+                rightMargin: 15
 //                bottom: audioFolderName.bottom
                 verticalCenter: audioFolderName.verticalCenter
             }
@@ -185,8 +187,74 @@ ApplicationWindow
             color: "#26282b"
 //            color: "#243D45";
 
+            ListModel {
+                id: playlistModel
+
+                ListElement {
+                    name: "A"
+                }
+                ListElement {
+                    name: "B"
+                }
+                ListElement {
+                    name: "C"
+                }
+                ListElement {
+                    name: "D"
+                }
+            }
+
+            // Playlist Widget
+            GridView
+            {
+                id: playlistGridView
+                model: playlistModel
+                cellWidth: (nowPlayingImageRect.width / 4)
+                cellHeight: 40 // cellWidth
+
+                width: 180 // (sideMenuBackground.width / 2) - (10 * 2)
+                height: 50
+                interactive: false
+
+                anchors {
+                    left: nowPlayingImageRect.left
+//                    leftMargin: 20
+    //                top: logoImg.bottom
+    //                topMargin: 70
+                    bottom: sideMenuBackground.bottom
+                    bottomMargin: 0
+                }
+
+                delegate: Rectangle
+                {
+                    id: playlistDelegate
+    //                width: 60 // (parent.width / 4) - 10
+    //                height: playlistDelegate.width
+    //                anchors.centerIn: parent
+    //                anchors.fill: parent
+                    width: 35
+                    height: 35
+                    border {
+                        width: 1
+                        color: "black"
+                    }
+
+                    color: "dark grey"
+
+                    Text
+                    {
+                        anchors.centerIn: parent
+                        color: "black"
+                        text: name
+                    }
+                }
+
+                z: 1
+            }
+
             Column
             {
+                id: nowPlayingColumn
                 anchors
                 {
                     bottom: nowPlayingImageRect.top;
@@ -241,10 +309,10 @@ ApplicationWindow
                 visible: MFileSys.currentPlaylistIndex != -1;
                 anchors
                 {
-                    bottom: sideMenuBackground.bottom;
+                    bottom: playlistGridView.top;
                     left: parent.left;
                     leftMargin: 25;
-                    bottomMargin: 20;
+                    bottomMargin: 15;
                 }
                 height: 160;
                 width: 160;
@@ -252,13 +320,7 @@ ApplicationWindow
                 Image
                 {
                     id: currentlyPlayingImage
-                    source: {
-                        if(MFileSys.currentPlaylistIndex == -1) {
-                            return "qrc:///resources/cover.jpg";
-                        }
-
-                        return MFileSys.currentAudio.artPath
-                    }
+                    source: MFileSys.currentAudioImagePath
                     anchors.fill: parent;
                 }
             }

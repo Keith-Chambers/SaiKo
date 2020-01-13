@@ -34,6 +34,8 @@
 #include <kpl/filesystem.h>
 #include <kpl/audiofile.h>
 
+#include <mediadirectory.h>
+
 namespace kfs = kpl::filesystem;
 
 #include "mediaitem.h"
@@ -61,11 +63,6 @@ class MediaFileSystem : public QObject
 
 public:
 
-//    Q_PROPERTY(QString currentFolderName READ getCurrentFolderName NOTIFY directoryChanged)
-//    Q_PROPERTY(QString currentAudioFolderName READ getCurrentAudioFolderName NOTIFY currentAudioFolderChanged)
-
-    // NEW API BEGIN
-
 //    Q_PROPERTY(QString libraryViewDirPath READ getLibraryViewDirectoryPath NOTIFY libraryViewDirChanged)
     Q_PROPERTY(QString libraryViewDirName READ getLibraryViewDirectoryName NOTIFY libraryViewDirChanged)
 
@@ -81,18 +78,11 @@ public:
 //    Q_PROPERTY(bool isOngoingTask READ getIsOngoingTask NOTIFY isOngoingTaskChanged)
 //    Q_PROPERTY(double ongoingTaskProgress READ getOngoingTaskProgress NOTIFY ongoingTaskProgressChanged)
 
-//    Q_PROPERTY(QQmlProperty<AudioFile> musicPlaylist READ getMusicPlaylist NOTIFY musicPlaylistChanged)
     Q_PROPERTY(int currentPlaylistIndex READ getCurrentPlaylistIndex NOTIFY playlistIndexChanged)
     Q_PROPERTY(AudioFile * currentAudio READ getCurrentAudio NOTIFY currentAudioChanged)
 
-//    Q_PROPERTY(QString audioImagePath READ getAudioImagePath NOTIFY audioImagePathChanged)
     Q_PROPERTY(bool restoreLibraryViewPosition READ getRestoreLibraryViewPosition WRITE setRestoreLibraryViewPosition)
-
-//    Q_PROPERTY(int libraryViewPositionIndex READ getLibraryViewPositionIndex NOTIFY libraryViewPositionIndexChanged)
-
-    //             onCurrentIndexChanged: {
-
-//}
+    Q_PROPERTY(QString currentAudioImagePath READ getCurrentAudioImagePath NOTIFY audioImagePathChanged)
 
 signals:
     void isErrorMessageChanged(bool);
@@ -116,6 +106,9 @@ public:
     int getRestoreLibraryViewPosition();
     void setRestoreLibraryViewPosition(bool restore_position);
 
+//    Q_INVOKABLE void addTrackToPlaylist(int playlist_index, int track_index);
+//    Q_INVOKABLE void removeTrackFromPlaylist(int playlist_index, int track_index);
+
     Q_INVOKABLE int popLibraryViewPosition();
     Q_INVOKABLE void pushLibraryViewPosition(int pos);
 
@@ -131,81 +124,23 @@ public:
 
     QString getAudioViewDirectoryName();
 
-    Q_INVOKABLE void regenerateSaikForParentLibView()
-    {
-        if(m_library_view_directory == std::nullopt) {
-            // TODO: Error handling
-            return;
-        }
-
-        auto parent = m_library_view_directory;
-        parent->cdUp();
-
-        // TODO: Make this better
-        generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(parent->absolutePath()).value(), true);
-
-        loadLibraryViewContent();
-    }
-
-    Q_INVOKABLE void generateSaikoInCurrentLibView(QString item_name)
-    {
-        qDebug() << "Generating Saik for " << item_name << " in current lib view";
-
-        if(m_library_view_directory == std::nullopt) {
-            // TODO: Error handling
-            qDebug() << "Invalid library view";
-            return;
-        }
-
-        // TODO: Make this better
-        generateSaikoMetaData(kfs::DirectoryPath::make(m_library_view_directory->absolutePath() + "/" + item_name).value(), true);
-        generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(m_library_view_directory->absolutePath() + "/" + item_name).value(), true);
-
-        qDebug() << "Reloading library";
-
-        loadLibraryViewContent();
-    }
-
-    // TODO: Move to .cpp
-    Q_INVOKABLE void generateSaikForCurrentLibView()
-    {
-        qDebug() << "Generating Saik for current lib view";
-
-        if(m_library_view_directory == std::nullopt) {
-            // TODO: Error handling
-            qDebug() << "Invalid library view";
-            return;
-        }
-
-        // TODO: Make this better
-        generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(m_library_view_directory->absolutePath()).value(), true);
-
-        qDebug() << "Reloading library @ " << m_library_view_directory->absolutePath();
-
-        loadLibraryViewContent();
-    }
-
-    Q_INVOKABLE void purgeSaikForCurrentLibView()
-    {
-        if(m_library_view_directory == std::nullopt) {
-            // TODO: Error handling
-            return;
-        }
-
-        // TODO: Make this better
-        auto current_path = kfs::DirectoryPath::make(m_library_view_directory->path());
-        purgeSaikData(current_path.value());
-
-        loadLibraryViewContent();
-    }
+    Q_INVOKABLE void regenerateSaikForParentLibView();
+    Q_INVOKABLE void generateSaikoInCurrentLibView(QString item_name);
+    Q_INVOKABLE void generateSaikForCurrentLibView();
+    Q_INVOKABLE void purgeSaikForCurrentLibView();
 
     void generateSaikoMetaDataRecursive(kfs::DirectoryPath root_dir, bool recheck);
     void generateSaikoMetaData(kfs::DirectoryPath root_dir, bool recheck);
     void purgeSaikData(const kfs::DirectoryPath& path);
 
-    Q_INVOKABLE int getNumberItemsLibraryView()
-    {
-        return m_library_media_items.size();
+    Q_INVOKABLE int getNumberItemsLibraryView();
+    Q_INVOKABLE QString getCurrentAudioImagePath() {
+
+        if(m_playlist_directory == std::nullopt || m_playlist_directory->imagePath() == "") {
+            return "qrc:///resources/cover.jpg";
+        }
+
+        return m_playlist_directory->imagePath();
     }
 
 public slots:
@@ -228,9 +163,6 @@ private:
 
     void loadLibraryViewContent();
 
-    // Updates m_parent_media_item with a MediaItem in the current directory
-    void updateAudioFolderImagePath(QString dir_name);
-
     AudioFile * getCurrentAudio();
     void loadAudioList();
 
@@ -243,12 +175,19 @@ private:
     static bool dirContainsAudioRecursive(const QDir& dir);
     static QStringList audioInDirRecursive(const QDir& dir);
 
+    /* Member Variables */
+
     QQmlApplicationEngine *     m_qt_engine;
     QList<kfs::DirectoryPath>   m_root_library_directories;
 
     std::optional<QDir>         m_library_view_directory;
+
+//    std::array<AudioFile, 4>    m_playlists;
+
     u32                         m_library_view_depth;
-    std::optional<QDir>         m_audio_list_directory;
+
+    std::optional<MediaDirectory>   m_audio_list_directory;
+    std::optional<MediaDirectory>   m_playlist_directory;
 
 //    QString                     m_album_image_path;
     i32                         m_library_index;
@@ -258,11 +197,13 @@ private:
     QList<AudioFile>            m_playlist;
     QList<AudioFile>            m_audio_list_files;
     QList<MediaItem>            m_library_media_items;
-    std::optional<QString>      m_audio_image_path;
+
+//    std::optional<QString>      m_audio_image_path;
     i32                         m_current_audio_index;
 
     bool                        m_restore_library_view_position;
 
+    // TODO: This shouldn't be needed
     QObjectList                 m_library_view_qml;
 
 //    QStringList                 m_supported_audio_extensions;
@@ -274,15 +215,12 @@ private:
 public:
     MediaFileSystem(const QList<kfs::DirectoryPath>& library_roots, QQmlApplicationEngine *engine, QObject *parent = nullptr);
 
-//    void generateMediaItems();
-//    void generateMediaItemsFromRoot();
-
-    void purgeSaikData();
-
     // TODO: Move to util class
     static QDir makeChildDir(const QDir& parent, const QString& childName);
 
 private:
+
+    // TODO: Remove to utility layer
     static QString loadAlbumArtToFileIfExists(QString filePath, QString successPath, QString failurePath);
     QString getNameFromPath(QString pPath);
     QStringList extractFolderImagePaths(QString pCurrentAbsPath);

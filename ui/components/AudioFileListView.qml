@@ -26,7 +26,13 @@ Item {
             anchors.fill: parent;
             anchors.topMargin: 1
             interactive: true;
-            currentIndex: MFileSys.currentPlaylistIndex
+            currentIndex: {
+                if(MFileSys.libraryViewDirName !== MFileSys.audioViewDirName) {
+                    return -1;
+                }
+
+                return MFileSys.currentPlaylistIndex
+            }
             clip: true
 
             Component

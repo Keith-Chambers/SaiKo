@@ -16,7 +16,8 @@ SOURCES +=  $$SRC_PATH/main.cpp \
             $$SRC_PATH/mediaitem.cpp \
             $$SRC_PATH/mediafilesystem.cpp \
             $$SRC_PATH/soundstopevent.cpp \
-            $$SRC_PATH/textparser.cpp
+            $$SRC_PATH/textparser.cpp \
+            src/mediadirectory.cpp
 
 RESOURCES += \
     qml.qrc
@@ -36,7 +37,8 @@ HEADERS += \
     $$SRC_PATH/mediaitem.h \
     $$SRC_PATH/mediafilesystem.h \
     $$SRC_PATH/soundstopevent.h \
-    $$SRC_PATH/textparser.h
+    $$SRC_PATH/textparser.h \
+    src/mediadirectory.h
 
 # Image Magick
 INCLUDEPATH += $$EXTERNAL_PATH
