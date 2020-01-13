@@ -21,7 +21,7 @@ void AudioPlaylist::setName(QString name)
     m_name = name;
 }
 
-const QList<AudioFile>& AudioPlaylist::getTracks()
+QList<AudioFile>& AudioPlaylist::getTracks()
 {
     return m_audio_files;
 }

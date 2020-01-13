@@ -57,6 +57,7 @@ typedef QStringList AbsoluteFilePathList;
 constexpr const char * QML_PLAYLIST_VIEW_NAME = "PlaylistView";
 constexpr const char * QML_AUDIO_VIEW_NAME = "AudioView";
 constexpr const char * QML_LIBRARY_VIEW_NAME = "LibraryView";
+constexpr const char * QML_PLAYLISTS_NAME = "Playlists";
 
 class MediaFileSystem : public QObject
 {
@@ -116,42 +117,11 @@ public:
     void setRestoreLibraryViewPosition(bool restore_position);
 
     // TODO: Tell QML so that it can update the model
-    Q_INVOKABLE void addTrackToPlaylist(int playlist_index, int track_index)
-    {
-        if(playlist_index > 3 || playlist_index < 0) {
-            qDebug() << "Invalid playlist index";
-            return;
-        }
+    Q_INVOKABLE void addTrackToPlaylist(int playlist_index, int track_index);
+    Q_INVOKABLE void removeTrackFromPlaylist(int playlist_index, int track_index);
+    Q_INVOKABLE void invokePlaylist(int playlist_index);
 
-        m_playlists[playlist_index].addTrack(m_audio_list_files[track_index]);
-    }
-
-    Q_INVOKABLE void removeTrackFromPlaylist(int playlist_index, int track_index)
-    {
-        if(playlist_index > 3 || playlist_index < 0) {
-            qDebug() << "Invalid playlist index";
-            return;
-        }
-
-        m_playlists[playlist_index].removeTrack(track_index);
-    }
-
-    Q_INVOKABLE void invokePlaylist(int playlist_index)
-    {
-        if(playlist_index > 3 || playlist_index < 0) {
-            qDebug() << "Invalid playlist index";
-            return;
-        }
-
-        m_playlist_index = playlist_index;
-        m_audio_list_files = m_playlists[playlist_index].getTracks();
-        m_audio_list_directory = { {"Playlist 1"}, "" };
-
-        emit audioViewDirChanged("Playlist 1");
-        emit audioFolderViewIsCurrentChanged( getAudioFolderViewIsCurrent() );
-
-        loadAudioListToQmlContext();
-    }
+    void loadPlaylistsToQML();
 
     Q_INVOKABLE int popLibraryViewPosition();
     Q_INVOKABLE void pushLibraryViewPosition(int pos);
@@ -179,6 +149,11 @@ public:
 
     Q_INVOKABLE int getNumberItemsLibraryView();
     Q_INVOKABLE QString getCurrentAudioImagePath() {
+
+        if(m_playlist_index != -1) {
+            qDebug() << "Image Path -> " << m_playlists[m_playlist_index].getTracks()[m_current_audio_index].m_art_path;
+            return m_playlists[m_playlist_index].getTracks()[m_current_audio_index].m_art_path;
+        }
 
         if(m_playlist_directory == std::nullopt || m_playlist_directory->imagePath() == "") {
             return "qrc:///resources/cover.jpg";
@@ -227,7 +202,7 @@ private:
     std::optional<QDir>         m_library_view_directory;
 
     std::array<AudioPlaylist, 4>    m_playlists;
-    u32                             m_playlist_index = -1;
+    i32                             m_playlist_index = -1;
 
     u32                         m_library_view_depth;
 

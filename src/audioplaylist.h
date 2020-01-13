@@ -18,7 +18,7 @@ public:
     int getNumberTracks();
     QString getName();
     void setName(QString name);
-    const QList<AudioFile>& getTracks();
+    QList<AudioFile>& getTracks();
 
     void addTrack(const AudioFile& audio);
     void removeTrack(int index);

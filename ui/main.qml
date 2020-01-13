@@ -78,7 +78,7 @@ ApplicationWindow
         Rectangle
         {
             id: topDivider
-//            visible: false;
+            visible: false;
             height: 1
             color: "grey"
             anchors {
@@ -187,28 +187,12 @@ ApplicationWindow
             color: "#26282b"
 //            color: "#243D45";
 
-            ListModel {
-                id: playlistModel
-
-                ListElement {
-                    name: "A"
-                }
-                ListElement {
-                    name: "B"
-                }
-                ListElement {
-                    name: "C"
-                }
-                ListElement {
-                    name: "D"
-                }
-            }
-
             // Playlist Widget
             GridView
             {
                 id: playlistGridView
-                model: playlistModel
+//                model: playlistModel
+                model: Playlists
                 cellWidth: (nowPlayingImageRect.width / 4)
                 cellHeight: 40 // cellWidth
 
@@ -232,13 +216,35 @@ ApplicationWindow
                         color: "black"
                     }
 
-                    color: "dark grey"
+                    color: "#404040"
 
                     Text
                     {
+//                        anchors {
+//                            top: parent.top
+//                            left: parent.left
+//                            topMargin: 5
+//                            leftMargin: 7
+//                        }
+
                         anchors.centerIn: parent
-                        color: "black"
+                        color: "White"
+//                        font.bold: true
                         text: name
+                    }
+
+                    Text
+                    {
+                        anchors {
+                            bottom: parent.bottom
+                            right: parent.right
+                            bottomMargin: 1
+                            rightMargin: 3
+                        }
+
+                        font.pointSize: 9
+                        color: "White"
+                        text: numberTracks
                     }
 
                     MouseArea

@@ -8,8 +8,8 @@ class MediaDirectory
 public:
     MediaDirectory(const QDir& directory, const QString& image_path);
 
-    const QDir& directory(){ return m_directory; }
-    const QString& imagePath(){ return m_image_path; }
+    const QDir& directory() const { return m_directory; }
+    const QString& imagePath() const { return m_image_path; }
 
 private:
     QDir m_directory;

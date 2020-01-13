@@ -47,7 +47,7 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         onHoveredChanged: {
-                            if(containsMouse === false) {
+                            if(containsMouse === false && addToPlaylistMouseArea.containsMouse === false) {
                                 activeItemIndex = -1;
                             } else {
                                 activeItemIndex = index;
@@ -77,6 +77,7 @@ Item {
                         id: addToPlaylistContainer
                         visible: activeItemIndex === index;
                         color: "transparent"
+                        opacity: 1.0
                         height: 30
                         width: 30
                         anchors {
@@ -99,6 +100,27 @@ Item {
                         {
                             id: addToPlaylistMouseArea
                             anchors.fill: parent
+                            hoverEnabled: true
+//                            preventStealing: true
+
+                            onPressed: {
+                                addToPlaylistContainer.color = "light grey";
+                            }
+
+                            onReleased: {
+                                addToPlaylistContainer.color = "Transparent";
+                            }
+
+                            onHoveredChanged: {
+                                if(addToPlaylistMouseArea.containsMouse) {
+                                    addToPlaylistContainer.color = "dark grey"
+                                } else {
+                                    addToPlaylistContainer.color = "transparent"
+                                }
+                            }
+
+                            z: 2
+
                             onClicked:
                             {
                                 MFileSys.addTrackToPlaylist(0, index);

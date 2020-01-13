@@ -30,6 +30,7 @@ MediaFileSystem::MediaFileSystem(const QList<kfs::DirectoryPath>& library_roots,
     m_qt_engine->rootContext()->setContextProperty(QML_LIBRARY_VIEW_NAME, QVariant::fromValue(m_library_view_qml));
 
     loadAudioListToQmlContext();
+    loadPlaylistsToQML();
 
     emit playlistIndexChanged(m_current_audio_index);
 //    loadLibraryViewContent();
@@ -130,6 +131,55 @@ void MediaFileSystem::pushLibraryViewPosition(int pos)
     m_saved_library_view_position.append(pos);
 }
 
+void MediaFileSystem::addTrackToPlaylist(int playlist_index, int track_index)
+{
+    if(playlist_index > 3 || playlist_index < 0) {
+        qDebug() << "Invalid playlist index";
+        return;
+    }
+
+    // Add to playlists / audio work space
+    m_playlists[playlist_index].addTrack(m_audio_list_files[track_index]);
+
+    // Append to playing playlist
+    m_playlist.append(m_playlists[playlist_index].getTracks().back());
+
+    QString image_path = m_audio_list_directory->imagePath();
+    m_playlists[playlist_index].getTracks().back().m_art_path = image_path;
+
+    loadPlaylistsToQML();
+}
+
+void MediaFileSystem::removeTrackFromPlaylist(int playlist_index, int track_index)
+{
+    if(playlist_index > 3 || playlist_index < 0) {
+        qDebug() << "Invalid playlist index";
+        return;
+    }
+
+    m_playlists[playlist_index].removeTrack(track_index);
+    m_playlist.removeAt(track_index);
+
+    loadPlaylistsToQML();
+}
+
+void MediaFileSystem::invokePlaylist(int playlist_index)
+{
+    if(playlist_index > 3 || playlist_index < 0) {
+        qDebug() << "Invalid playlist index";
+        return;
+    }
+
+    m_playlist_index = playlist_index;
+    m_audio_list_files = m_playlists[playlist_index].getTracks();
+    m_audio_list_directory = { {"Playlist 1"}, "" };
+
+    emit audioViewDirChanged("Playlist 1");
+    emit audioFolderViewIsCurrentChanged( getAudioFolderViewIsCurrent() );
+
+    loadAudioListToQmlContext();
+}
+
 void MediaFileSystem::nextTrack()
 {
     if(m_current_audio_index >= m_playlist.size() - 1) {
@@ -137,6 +187,10 @@ void MediaFileSystem::nextTrack()
     }
 
     m_current_audio_index++;
+
+    if(m_playlist_index != -1) {
+        emit audioImagePathChanged(m_playlists[m_playlist_index].getTracks()[m_current_audio_index].getArtPath());
+    }
 
     emit playlistIndexChanged(m_current_audio_index);
     emit currentAudioChanged(m_playlist[m_current_audio_index]);
@@ -149,6 +203,10 @@ void MediaFileSystem::prevTrack()
     }
 
     m_current_audio_index--;
+
+    if(m_playlist_index != -1) {
+        emit audioImagePathChanged(m_playlists[m_playlist_index].getTracks()[m_current_audio_index].getArtPath());
+    }
 
     emit playlistIndexChanged(m_current_audio_index);
     emit currentAudioChanged(m_playlist[m_current_audio_index]);
@@ -237,12 +295,19 @@ void MediaFileSystem::makeCurrentFolderPlaylist()
 //    loadAudioListToQmlContext();
 }
 
+void MediaFileSystem::loadPlaylistsToQML()
+{
+    QObjectList playlists_qml;
+
+    for(auto& playlist : m_playlists) {
+        playlists_qml.append(&playlist);
+    }
+
+    m_qt_engine->rootContext()->setContextProperty(QML_PLAYLISTS_NAME, QVariant::fromValue(playlists_qml));
+}
+
 void MediaFileSystem::loadAudioListToQmlContext()
 {
-//    if(m_audio_list_files.isEmpty()) {
-//        return;
-//    }
-
     QObjectList audio_list_qml;
 
     for(auto& audio : m_audio_list_files) {
