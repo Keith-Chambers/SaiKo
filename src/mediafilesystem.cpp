@@ -5,6 +5,7 @@ MediaFileSystem::MediaFileSystem(const QList<kfs::DirectoryPath>& library_roots,
         m_qt_engine {engine},
         m_root_library_directories {library_roots},
         m_library_view_directory {std::nullopt},
+        m_playlists { QString("A"), QString("B"), QString("C"), QString("D") },
         m_library_view_depth {0},
         m_audio_list_directory {std::nullopt},
         m_library_index {-1},
@@ -131,7 +132,7 @@ void MediaFileSystem::pushLibraryViewPosition(int pos)
 
 void MediaFileSystem::nextTrack()
 {
-    if(m_current_audio_index >= m_audio_list_files.size() - 1) {
+    if(m_current_audio_index >= m_playlist.size() - 1) {
         return;
     }
 
@@ -276,6 +277,20 @@ QString MediaFileSystem::getLibraryViewDirectoryName()
 
 QString MediaFileSystem::getAudioViewDirectoryName()
 {
+    switch(m_playlist_index)
+    {
+        case 0:
+            return "Playlist 1";
+        case 1:
+            return "Playlist 2";
+        case 2:
+            return "Playlist 3";
+        case 3:
+            return "Playlist 4";
+        default:
+            break;
+    }
+
     if(m_audio_list_directory == std::nullopt) {
         return "";
     }
@@ -377,18 +392,6 @@ void MediaFileSystem::loadAudioList()
     QStringList audio_file_names = MediaFileSystem::audioInDir(m_audio_list_directory->directory());
     m_audio_list_files = AudioFile::fromFileNames(m_audio_list_directory->directory(), audio_file_names);
 
-//    for(auto& audio_file : m_audio_list_files) {
-
-//        if(!audio_file.getHasArt()) {
-//            assert(*m_audio_image_path != "");
-//            audio_file.setArtPath( *m_audio_image_path );
-//        }
-
-//        assert(audio_file.getTitle() != "");
-//        assert(audio_file.getArtist() != "");
-//        assert(audio_file.getArtPath() != "");
-//    }
-
     assert(m_audio_list_files.size() > 0);
 
     loadAudioListToQmlContext();
@@ -399,6 +402,8 @@ void MediaFileSystem::loadAudioList()
 void MediaFileSystem::invokeFolder(QString folder_name)
 {
     qDebug() << "Invoking D:" << folder_name;
+
+    m_playlist_index = -1;
 
     if(m_library_view_directory == std::nullopt) {
         cdDown(folder_name);
@@ -457,6 +462,8 @@ void MediaFileSystem::invokeAudioListing(int audio_index)
     emit currentAudioChanged(m_playlist[m_current_audio_index]);
     emit playlistIndexChanged(m_current_audio_index);
     emit audioImagePathChanged(m_playlist_directory->imagePath());
+    emit audioFolderViewIsCurrentChanged( getAudioFolderViewIsCurrent() );
+//    emit audioFolderViewIsCurrentChanged(true);
 }
 
 QString MediaFileSystem::getNameFromPath(QString pPath)

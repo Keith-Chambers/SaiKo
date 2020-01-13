@@ -17,6 +17,7 @@ SOURCES +=  $$SRC_PATH/main.cpp \
             $$SRC_PATH/mediafilesystem.cpp \
             $$SRC_PATH/soundstopevent.cpp \
             $$SRC_PATH/textparser.cpp \
+            src/audioplaylist.cpp \
             src/mediadirectory.cpp
 
 RESOURCES += \
@@ -38,6 +39,7 @@ HEADERS += \
     $$SRC_PATH/mediafilesystem.h \
     $$SRC_PATH/soundstopevent.h \
     $$SRC_PATH/textparser.h \
+    src/audioplaylist.h \
     src/mediadirectory.h
 
 # Image Magick

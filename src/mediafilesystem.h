@@ -35,6 +35,7 @@
 #include <kpl/audiofile.h>
 
 #include <mediadirectory.h>
+#include <audioplaylist.h>
 
 namespace kfs = kpl::filesystem;
 
@@ -83,10 +84,18 @@ public:
 
     Q_PROPERTY(bool restoreLibraryViewPosition READ getRestoreLibraryViewPosition WRITE setRestoreLibraryViewPosition)
     Q_PROPERTY(QString currentAudioImagePath READ getCurrentAudioImagePath NOTIFY audioImagePathChanged)
+    Q_PROPERTY(bool audioFolderViewIsCurrent READ getAudioFolderViewIsCurrent NOTIFY audioFolderViewIsCurrentChanged)
+
+    bool getAudioFolderViewIsCurrent() {
+        qDebug() << "Audio list dir == Playlist dir ?? " << (m_audio_list_directory->directory() == m_playlist_directory->directory());
+        return m_audio_list_directory->directory() == m_playlist_directory->directory();
+    }
 
 signals:
     void isErrorMessageChanged(bool);
     void libraryViewDirChanged();
+
+    void audioFolderViewIsCurrentChanged(bool);
 
     void audioViewDirChanged(QString);
     void currentAudioChanged(AudioFile);
@@ -106,8 +115,43 @@ public:
     int getRestoreLibraryViewPosition();
     void setRestoreLibraryViewPosition(bool restore_position);
 
-//    Q_INVOKABLE void addTrackToPlaylist(int playlist_index, int track_index);
-//    Q_INVOKABLE void removeTrackFromPlaylist(int playlist_index, int track_index);
+    // TODO: Tell QML so that it can update the model
+    Q_INVOKABLE void addTrackToPlaylist(int playlist_index, int track_index)
+    {
+        if(playlist_index > 3 || playlist_index < 0) {
+            qDebug() << "Invalid playlist index";
+            return;
+        }
+
+        m_playlists[playlist_index].addTrack(m_audio_list_files[track_index]);
+    }
+
+    Q_INVOKABLE void removeTrackFromPlaylist(int playlist_index, int track_index)
+    {
+        if(playlist_index > 3 || playlist_index < 0) {
+            qDebug() << "Invalid playlist index";
+            return;
+        }
+
+        m_playlists[playlist_index].removeTrack(track_index);
+    }
+
+    Q_INVOKABLE void invokePlaylist(int playlist_index)
+    {
+        if(playlist_index > 3 || playlist_index < 0) {
+            qDebug() << "Invalid playlist index";
+            return;
+        }
+
+        m_playlist_index = playlist_index;
+        m_audio_list_files = m_playlists[playlist_index].getTracks();
+        m_audio_list_directory = { {"Playlist 1"}, "" };
+
+        emit audioViewDirChanged("Playlist 1");
+        emit audioFolderViewIsCurrentChanged( getAudioFolderViewIsCurrent() );
+
+        loadAudioListToQmlContext();
+    }
 
     Q_INVOKABLE int popLibraryViewPosition();
     Q_INVOKABLE void pushLibraryViewPosition(int pos);
@@ -182,7 +226,8 @@ private:
 
     std::optional<QDir>         m_library_view_directory;
 
-//    std::array<AudioFile, 4>    m_playlists;
+    std::array<AudioPlaylist, 4>    m_playlists;
+    u32                             m_playlist_index = -1;
 
     u32                         m_library_view_depth;
 

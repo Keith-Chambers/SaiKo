@@ -223,35 +223,6 @@ Item {
 
                     }
 
-                    Canvas
-                    {
-                        id: saikoOptions
-                        visible: false
-                        z: 1
-                        anchors {
-                            left: parent.left
-                            top: parent.top
-                        }
-
-                        height: 40
-                        width: 40
-
-                        onPaint: {
-                            var context = getContext("2d");
-
-                            // the triangle
-                            context.beginPath();
-                            context.moveTo(0, 0);
-                            context.lineTo(40, 0);
-                            context.lineTo(0, 40);
-                            context.closePath();
-
-                            // the fill color
-                            context.fillStyle = "black";
-                            context.fill();
-                        }
-                    }
-
                     color: "grey"
 
                     Image

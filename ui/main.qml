@@ -218,9 +218,6 @@ ApplicationWindow
 
                 anchors {
                     left: nowPlayingImageRect.left
-//                    leftMargin: 20
-    //                top: logoImg.bottom
-    //                topMargin: 70
                     bottom: sideMenuBackground.bottom
                     bottomMargin: 0
                 }
@@ -228,10 +225,6 @@ ApplicationWindow
                 delegate: Rectangle
                 {
                     id: playlistDelegate
-    //                width: 60 // (parent.width / 4) - 10
-    //                height: playlistDelegate.width
-    //                anchors.centerIn: parent
-    //                anchors.fill: parent
                     width: 35
                     height: 35
                     border {
@@ -246,6 +239,16 @@ ApplicationWindow
                         anchors.centerIn: parent
                         color: "black"
                         text: name
+                    }
+
+                    MouseArea
+                    {
+                        id: playlistItemMouseArea
+                        anchors.fill: parent
+                        onClicked: {
+//                            MFileSys.pushLibraryViewPosition();
+                            MFileSys.invokePlaylist(index);
+                        }
                     }
                 }
 
