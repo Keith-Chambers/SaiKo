@@ -24,6 +24,8 @@ class AudioFile : public QObject
     Q_PROPERTY(QTime duration READ getDuration)
     Q_PROPERTY(bool hasArt READ getHasArt NOTIFY hasArtChanged)
 
+    Q_PROPERTY(QString audioLength READ getAudioLength)
+
 public:
 
     AudioFile(){}
@@ -37,6 +39,8 @@ public:
     AudioFile(const AudioFile& copy);
     AudioFile(AudioFile&& audioFile);
     AudioFile& operator=(const AudioFile& copy);
+
+    Q_INVOKABLE QString getAudioLength(){ return m_duration.toString("mm:ss"); }
 
     static std::optional<AudioFile> fromFileName(const kfs::FileIdentifier& file);
     static QList<AudioFile> fromFileNames(const QList<kfs::FileIdentifier>& file_names);

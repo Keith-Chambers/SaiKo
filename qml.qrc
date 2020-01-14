@@ -9,7 +9,6 @@
         <file>resources/back.png</file>
         <file>resources/forward.png</file>
         <file>resources/pause.png</file>
-        <file>resources/music.ico</file>
         <file>resources/record.png</file>
         <file>ui/components/MusicFolderView.qml</file>
         <file>ui/main.qml</file>
@@ -26,5 +25,12 @@
         <file>resources/2x/sharp_create_white_18dp.png</file>
         <file>resources/2x/sharp_arrow_drop_down_white_18dp.png</file>
         <file>resources/2x/sharp_add_white_18dp.png</file>
+        <file>resources/2x/sharp_edit_white_18dp.png</file>
+        <file>resources/2x/sharp_build_white_18dp.png</file>
+        <file>resources/saiko_logo.png</file>
+        <file>resources/saiko_logo.ico</file>
+        <file>resources/saiko_logo.svg</file>
+        <file>resources/2x/sharp_info_white_18dp.png</file>
+        <file>ui/components/BinaryOption.qml</file>
     </qresource>
 </RCC>

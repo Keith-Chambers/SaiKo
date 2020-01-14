@@ -25,21 +25,92 @@ ApplicationWindow
         anchors.fill: parent;
         color: "#404040";
 
+        ListModel
+        {
+            id: optionsModel
+            ListElement
+            {
+                description: "Enable edit mode"
+                optionID: 0
+                iconPath: "qrc:///resources/2x/sharp_build_white_18dp.png"
+            }
 
+            ListElement
+            {
+                description: "Show tooltips"
+                optionID: 1
+                iconPath: "qrc:///resources/2x/sharp_info_white_18dp.png"
+            }
+        }
+
+        Row
+        {
+            id: optionsRow
+            spacing: 10
+            height: 25
+            anchors {
+                top: parent.top
+                topMargin: 10
+                left: currentFolderText.right
+                right: parent.right
+                leftMargin: 20
+                rightMargin: 40
+            }
+
+            BinaryOption
+            {
+                id: editModeOption
+
+                Binding {
+                    target: editModeOption
+                    property: "enabled"
+                    value: MFileSys.editMode
+                }
+
+                width: 30
+                height: 30
+
+                iconPath: "qrc:///resources/2x/sharp_build_white_18dp.png";
+                tooltipDescription: MFileSys.toolTipsEnabled ? "Enable Edit Mode" : "";
+
+                function onInvoked() {
+                    MFileSys.editMode = !MFileSys.editMode;
+                }
+            }
+
+            BinaryOption
+            {
+                id: enableToolTipsOption
+
+                Binding {
+                    target: enableToolTipsOption
+                    property: "enabled"
+                    value: MFileSys.toolTipsEnabled;
+                }
+
+                width: 30
+                height: 30
+
+                iconPath: "qrc:///resources/2x/sharp_info_white_18dp.png";
+                tooltipDescription: "Enable Tool Tips";
+
+                function onInvoked() {
+                    MFileSys.toolTipsEnabled = !MFileSys.toolTipsEnabled;
+                }
+            }
+        }
 
         Text
         {
             id: currentFolderText
             color: "white"
             text: MFileSys.libraryViewDirName
-            font.pointSize: 14;
+            font.pointSize: 12;
+            width: 250
 
             anchors {
                 left: musicFolderView.left
-                leftMargin: 0
-//                bottom: topDivider.top
-                bottomMargin: 15;
-                bottom: musicFolderView.top
+                verticalCenter: optionsRow.verticalCenter
             }
         }
 
@@ -52,7 +123,6 @@ ApplicationWindow
             anchors {
                 right: parent.right
                 rightMargin: 15
-//                bottom: audioFolderName.bottom
                 verticalCenter: audioFolderName.verticalCenter
             }
 
@@ -86,7 +156,6 @@ ApplicationWindow
                 top: parent.top
                 topMargin: 80
                 leftMargin: 50
-//                rightMargin: 50
                 right: audioFileListView.left
             }
         }
@@ -96,18 +165,20 @@ ApplicationWindow
             id: backButton;
             anchors
             {
-                right: parent.right;
+                left: sideMenuBackground.right
                 top: parent.top;
-                rightMargin: 10
+                leftMargin: 5
                 topMargin: 10
             }
 
-            width: 30;
-            height: 30
+            width: 25;
+            height: 25
             color: "transparent";
 
             Image
             {
+                sourceSize.height: 25;
+                sourceSize.width: 25;
                 anchors.fill: parent
                 source: "qrc:///resources/2x/sharp_arrow_back_white_18dp.png";
             }
@@ -128,7 +199,7 @@ ApplicationWindow
             id: musicFolderView
             anchors
             {
-                top: topDivider.bottom;
+                top: currentFolderText.bottom;
                 topMargin: 10;
                 leftMargin: 50;
                 rightMargin: 0;
@@ -144,15 +215,15 @@ ApplicationWindow
             text: qsTr( MFileSys.audioViewDirName )
             color: "white"
             elide: Text.ElideRight;
-//            width: 225
-            anchors {
-                bottom: topDivider.top
-                bottomMargin: 5
+            horizontalAlignment: Text.AlignRight
+            width: 300
+            anchors
+            {
+                verticalCenter: optionsRow.verticalCenter
                 right: closeFileViewContainer.left
                 rightMargin: 5
             }
             font.pointSize: 11
-//            font.bold: true
         }
 
         AudioFileListView
@@ -162,12 +233,12 @@ ApplicationWindow
 
             anchors
             {
-                top: topDivider.bottom;
-                topMargin: -1;
+                top: audioFolderName.bottom
+                topMargin: 10
                 bottom: audioControls.top;
                 bottomMargin: 0;
                 right: parent.right;
-                rightMargin: 15;
+                rightMargin: (MFileSys.audioViewDirName == "" || showFolderView == false) ? 0 : 15;
             }
         }
 
@@ -220,16 +291,8 @@ ApplicationWindow
 
                     Text
                     {
-//                        anchors {
-//                            top: parent.top
-//                            left: parent.left
-//                            topMargin: 5
-//                            leftMargin: 7
-//                        }
-
                         anchors.centerIn: parent
                         color: "White"
-//                        font.bold: true
                         text: name
                     }
 
@@ -239,12 +302,12 @@ ApplicationWindow
                             bottom: parent.bottom
                             right: parent.right
                             bottomMargin: 1
-                            rightMargin: 3
+                            rightMargin: 4
                         }
 
                         font.pointSize: 9
                         color: "White"
-                        text: numberTracks
+                        text: (numberTracks !== 0) ? numberTracks : "-"
                     }
 
                     MouseArea
@@ -252,7 +315,6 @@ ApplicationWindow
                         id: playlistItemMouseArea
                         anchors.fill: parent
                         onClicked: {
-//                            MFileSys.pushLibraryViewPosition();
                             MFileSys.invokePlaylist(index);
                         }
                     }
@@ -348,16 +410,20 @@ ApplicationWindow
             }
         }
 
-        Image
-        {
-            id: logoImg
-            anchors.left: parent.left
-            anchors.top: parent.top
-            anchors.topMargin: 20;
-            anchors.leftMargin: 50;
-            height: 30
-            width: 100
-            source: "qrc:///resources/saiko.png"
-        }
+//        Image
+//        {
+//            id: logoImg
+//            anchors.left: parent.left
+//            anchors.top: parent.top
+//            anchors.topMargin: 20;
+//            anchors.leftMargin: 50;
+
+//            width: 100
+//            height: 70
+//            sourceSize.width: 100;
+//            sourceSize.height: 70
+
+//            source: "qrc:///resources/saiko_logo.png"
+//        }
     }
 }

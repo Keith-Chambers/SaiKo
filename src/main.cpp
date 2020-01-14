@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
-    app.setWindowIcon(QIcon(":/resources/music.ico"));
+    app.setWindowIcon(QIcon(":/resources/saiko_logo.ico"));
     QQmlApplicationEngine engine;
 
     AudioPlayer audioplayer(&engine);

@@ -17,7 +17,6 @@ AudioPlayer::AudioPlayer(QObject *parent)
     }
 
     connect(&m_update_audio_position_timer, &QTimer::timeout, this, &AudioPlayer::updateAudioPosition);
-    m_update_audio_position_timer.start(250);
 }
 
 AudioPlayer::~AudioPlayer()
@@ -29,6 +28,8 @@ AudioPlayer::~AudioPlayer()
 
 void AudioPlayer::playAudio(AudioFile audio)
 {
+    m_update_audio_position_timer.start(250);
+
     if(m_irrklang_sound) {
         qDebug() << "Stopping current sound";
         m_irrklang_sound->stop();
@@ -52,17 +53,53 @@ void AudioPlayer::playAudio(AudioFile audio)
 
     m_irrklang_sound->setSoundStopEventReceiver(reinterpret_cast<irrklang::ISoundStopEventReceiver*>(&m_sound_stop_event), this);
 
-    // TODO: Introduce a delay to prevent skipping
     m_irrklang_sound->setVolume(m_volume);
     m_irrklang_sound->setIsPaused(false);
 
     emit isPlayingChanged(true);
     emit audioChanged(audio.getFileName());
+    emit playPositionTimeChanged(getPlayPositionTime());
 }
 
 void AudioPlayer::updateAudioPosition()
 {
-    emit playPositionChanged( getPlayPosition() );
+    double play_position = getPlayPosition();
+    emit playPositionChanged(play_position);
+
+    if(m_irrklang_sound == nullptr) {
+        return;
+    }
+
+    emit playPositionTimeChanged(getPlayPositionTime());
+}
+
+QString AudioPlayer::getPlayPositionTime()
+{
+    double play_position = getPlayPosition();
+
+    if(m_irrklang_sound == nullptr) {
+        return "";
+    }
+
+    i32 seconds = m_irrklang_sound->getPlayLength();
+
+    if(seconds == -1) {
+        return "";
+    }
+
+    seconds /= 1000;
+    seconds = seconds * play_position;
+
+    i32 minutes = 0;
+
+    while(seconds >= 60) {
+        minutes++;
+        seconds = seconds - 60;
+    }
+
+    QTime time(0, minutes, seconds, 0);
+
+    return time.toString("mm:ss");
 }
 
 void AudioPlayer::setPlayPosition(double pPos)
@@ -94,18 +131,6 @@ void AudioPlayer::togglePause(void)
     if(m_irrklang_engine->getSoundSourceCount() == 0 || !m_irrklang_sound)
         return;
 
-//    switch(m_irrklang_sound->getIsPaused())
-//    {
-//    case true:
-//        m_saved_audio_position = getPlayPosition();
-//        m_irrklang_sound->setIsPaused(false);
-//        break;
-//    case false:
-//        m_saved_audio_position = getPlayPosition();
-//        m_irrklang_sound->setIsPaused(true);
-//        break;
-//    }
-
     if(m_irrklang_sound->getIsPaused())
     {
         m_saved_audio_position = getPlayPosition();
@@ -130,10 +155,13 @@ bool AudioPlayer::getIsPlaying(void)
 double AudioPlayer::getVolume()
 {
     if(!m_irrklang_sound) {
-        return m_volume;
+        return 0.01;
     }
 
     m_volume = m_irrklang_sound->getVolume();
+
+    qDebug() << "Volume -> " << m_volume;
+
     return m_volume;
 }
 

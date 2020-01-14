@@ -2,9 +2,8 @@ import QtQuick 2.0
 import QtQuick.Controls 2.4
 import QtQuick.Particles 2.11
 
-
-
-Item {
+Item
+{
     id: root;
 
     property int activeItemIndex: -1
@@ -39,8 +38,6 @@ Item {
     GridView
     {
         id: libraryView
-//        cellWidth: 200;
-//        cellHeight: 200;
         cellWidth: 200
         cellHeight: libraryView.cellWidth
 
@@ -83,55 +80,10 @@ Item {
                     }
                 }
 
-                Popup {
-                        id: popup
-                        x: 0
-                        y: 0
-
-                        dim: false
-
-                        bottomInset: 0;
-                        topInset: 0;
-                        leftInset: 0;
-                        rightInset: 0;
-
-                        padding: 0;
-                        margins: 0;
-
-                        width: 200
-                        height: 100
-                        modal: true
-                        focus: true
-                        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
-
-                        Rectangle {
-                            id: container
-                            anchors.fill: parent;
-                            color: "grey"
-
-                            Column
-                            {
-                                id: menuColumn
-                                anchors.fill: parent
-
-                                Text {
-                                    text: "Edit"
-                                    color: "white"
-                                }
-
-
-                                Text {
-                                    text: "Else"
-                                    color: "white"
-                                }
-                            }
-                        }
-                    }
-
                 Rectangle
                 {
                     id: regenSaikoData
-                    visible: activeItemIndex === index;
+                    visible: MFileSys.editMode && activeItemIndex === index;
                     width: 30
                     height: 30
                     color: "transparent"
@@ -173,7 +125,7 @@ Item {
                 Rectangle
                 {
                     id: editSaikoData
-                    visible: activeItemIndex === index;
+                    visible: MFileSys.editMode && activeItemIndex === index;
                     width: 28
                     height: 28
                     color: "transparent"
