@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
     MediaFileSystem mFileSys(library_roots, &engine);
 
-//    mFileSys.generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(library_roots.front().absolutePath()).value(), false);
+    mFileSys.generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(library_roots.front().absolutePath()).value(), false);
 
 //    mFileSys.purgeSaikData();
 

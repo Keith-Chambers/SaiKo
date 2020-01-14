@@ -101,6 +101,7 @@ public:
 
     Q_PROPERTY(bool editMode READ getEditMode WRITE setEditMode NOTIFY editModeChanged)
     Q_PROPERTY(bool toolTipsEnabled READ getToolTipsEnabled WRITE setToolTipsEnabled NOTIFY toolTipsEnabledChanged)
+    Q_PROPERTY(bool isHomeDirectory READ atRootDirectory NOTIFY isHomeDirectoryChanged)
 
     // TODO: move to .cpp
     bool getAudioFolderViewIsCurrent() {
@@ -112,6 +113,7 @@ signals:
     void libraryViewDirChanged();
     void editModeChanged(bool);
     void toolTipsEnabledChanged(bool);
+    void isHomeDirectoryChanged(bool);
 
     void audioFolderViewIsCurrentChanged(bool);
 
@@ -139,6 +141,13 @@ public:
 
     int getRestoreLibraryViewPosition();
     void setRestoreLibraryViewPosition(bool restore_position);
+
+    // TODO: Implement properly and move to .cpp
+    Q_INVOKABLE void addLibraryRootPath(QString path){
+        m_root_library_directories.append( *kfs::DirectoryPath::make(path.right(path.size() - 7)) );
+        loadLibraryViewContent();
+        qDebug() << "Complete!";
+    }
 
     // TODO: Tell QML so that it can update the model
     Q_INVOKABLE void addTrackToPlaylist(int playlist_index, int track_index);

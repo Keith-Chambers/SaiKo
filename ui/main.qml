@@ -13,7 +13,7 @@ ApplicationWindow
     id: root;
     width: 1100
     height: 600
-    minimumHeight: 600
+    minimumHeight: 400
     minimumWidth: 800
     title: qsTr("Saiko");
 

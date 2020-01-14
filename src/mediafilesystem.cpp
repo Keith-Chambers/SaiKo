@@ -17,23 +17,33 @@ MediaFileSystem::MediaFileSystem(const QList<kfs::DirectoryPath>& library_roots,
         m_error_message {}
 {
 
-    for(const auto& root_dir : m_root_library_directories) {
-        m_library_media_items << MediaItem { root_dir.leafName(), false };
-        m_library_view_qml.append( &m_library_media_items.back() );
-    }
+//    for(const auto& root_dir : m_root_library_directories) {
+//        m_library_media_items << MediaItem { root_dir.leafName(), false };
+//        m_library_view_qml.append( &m_library_media_items.back() );
+//    }
 
-    m_qt_engine->rootContext()->setContextProperty(QML_LIBRARY_VIEW_NAME, QVariant::fromValue(m_library_view_qml));
+//    m_qt_engine->rootContext()->setContextProperty(QML_LIBRARY_VIEW_NAME, QVariant::fromValue(m_library_view_qml));
 
     loadAudioListToQmlContext();
     loadPlaylistsToQML();
+    loadLibraryViewContent();
 
     emit playlistIndexChanged(m_current_audio_index);
 }
 
 int MediaFileSystem::popLibraryViewPosition()
 {
+    qDebug() << "Popping Lib View position";
+
+
     int pos = m_saved_library_view_position.back();
     m_saved_library_view_position.pop_back();
+
+    qDebug() << "Remaining - " << m_saved_library_view_position.size();
+    for(const auto& pos : m_saved_library_view_position) {
+        qDebug() << "- " << pos;
+    }
+
     return pos;
 }
 
@@ -111,11 +121,13 @@ Q_INVOKABLE int MediaFileSystem::getNumberItemsLibraryView()
 
 int MediaFileSystem::getRestoreLibraryViewPosition()
 {
+    qDebug() << "Restore Library View? " << m_restore_library_view_position;
     return m_restore_library_view_position;
 }
 
 void MediaFileSystem::setRestoreLibraryViewPosition(bool restore_position)
 {
+    qDebug() << "Setting Restore Library View -> " << restore_position;
     m_restore_library_view_position = restore_position;
 }
 
@@ -436,6 +448,12 @@ void MediaFileSystem::cdUp()
 
     qDebug() << "New Depth -> " << m_library_view_depth;
 
+    if(atRootDirectory()) {
+        m_saved_library_view_position.clear();
+        m_restore_library_view_position = false;
+        emit isHomeDirectoryChanged(true);
+    }
+
     emit libraryViewDirChanged();
 
 //    m_library_media_items
@@ -496,7 +514,6 @@ void MediaFileSystem::invokeFolder(QString folder_name)
         }
 
         m_audio_list_directory = {child_dir, image_path};
-
         loadAudioList();
         audioViewDirChanged(m_audio_list_directory->directory().dirName());
     } else {
@@ -905,11 +922,13 @@ void MediaFileSystem::loadLibraryViewContent()
 
     if(m_library_view_depth == 0)
     {
-        m_library_media_items.reserve( m_root_library_directories.size() );
+        m_library_media_items.reserve( m_root_library_directories.size() + 1);
 
         for(const auto& root : m_root_library_directories) {
             m_library_media_items << MediaItem { root.leafName(), false };
         }
+
+        m_library_media_items << MediaItem { "", "qrc:///resources/2x/sharp_add_white_36dp.png", false };
 
         loadLibraryViewItemsToQmlContext();
         return;

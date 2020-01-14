@@ -40,8 +40,8 @@ public:
         switch(option.optionType)
         {
         case SaikOption::FRONT_COVER:
-            qDebug() << "Setting from cover to " << directory.path() + "/" + QString::fromStdString(option.value);
-            mImagePath = QString("file:/") + directory.path() + "/" + QString::fromStdString(option.value);
+//            qDebug() << "Setting front cover to " << directory.path() + "/" + QString::fromStdString(option.value);
+            mImagePath = QString("file:///") + directory.path() + "/" + QString::fromStdString(option.value);
             break;
         case SaikOption::BACK_COVER:
             // TODO: Implement front and back cover
