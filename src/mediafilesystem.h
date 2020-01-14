@@ -102,6 +102,7 @@ public:
     Q_PROPERTY(bool editMode READ getEditMode WRITE setEditMode NOTIFY editModeChanged)
     Q_PROPERTY(bool toolTipsEnabled READ getToolTipsEnabled WRITE setToolTipsEnabled NOTIFY toolTipsEnabledChanged)
     Q_PROPERTY(bool isHomeDirectory READ atRootDirectory NOTIFY isHomeDirectoryChanged)
+    Q_PROPERTY(bool audioListTrayOpen READ isAudioListTrayOpen WRITE setIsAudioListTrayOpen NOTIFY isAudioListTrayOpenChanged)
 
     // TODO: move to .cpp
     bool getAudioFolderViewIsCurrent() {
@@ -114,6 +115,7 @@ signals:
     void editModeChanged(bool);
     void toolTipsEnabledChanged(bool);
     void isHomeDirectoryChanged(bool);
+    void isAudioListTrayOpenChanged(bool);
 
     void audioFolderViewIsCurrentChanged(bool);
 
@@ -132,6 +134,13 @@ signals:
 
 public:
 
+    void setIsAudioListTrayOpen(bool is_open){
+        m_audio_tray_open = is_open;
+        emit isAudioListTrayOpenChanged(is_open);
+    }
+
+    bool isAudioListTrayOpen(){ return m_audio_tray_open; }
+
     // TODO: Move to .cpp
     void setEditMode(bool edit_mode){ m_edit_mode_enabled = edit_mode; emit editModeChanged(m_edit_mode_enabled); }
     bool getEditMode() const { return m_edit_mode_enabled; }
@@ -144,7 +153,16 @@ public:
 
     // TODO: Implement properly and move to .cpp
     Q_INVOKABLE void addLibraryRootPath(QString path){
-        m_root_library_directories.append( *kfs::DirectoryPath::make(path.right(path.size() - 7)) );
+        path = path.right(path.size() - 7);
+
+        m_root_library_directories.append( *kfs::DirectoryPath::make(path) );
+
+        if(!dirContainsAudioRecursive(path)) {
+            displayErrorMessage("Library root path contains no audio");
+            m_root_library_directories.pop_back();
+            return;
+        }
+
         loadLibraryViewContent();
         qDebug() << "Complete!";
     }
@@ -257,6 +275,7 @@ private:
     bool                        m_restore_library_view_position;
     bool                        m_edit_mode_enabled = false;
     bool                        m_tool_tips_enabled = false;
+    bool                        m_audio_tray_open = false;
 
     // TODO: This shouldn't be needed
     QObjectList                 m_library_view_qml;

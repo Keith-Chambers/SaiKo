@@ -516,6 +516,9 @@ void MediaFileSystem::invokeFolder(QString folder_name)
         m_audio_list_directory = {child_dir, image_path};
         loadAudioList();
         audioViewDirChanged(m_audio_list_directory->directory().dirName());
+
+        setIsAudioListTrayOpen(true);
+
     } else {
         cdDown(child_path_opt.value());
     }

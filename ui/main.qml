@@ -17,8 +17,6 @@ ApplicationWindow
     minimumWidth: 800
     title: qsTr("Saiko");
 
-    property bool showFolderView: true
-
     Rectangle
     {
         id: displayRoot
@@ -140,7 +138,7 @@ ApplicationWindow
                 anchors.fill: parent
                 onClicked: {
                     console.log("Close clicked");
-                    showFolderView = !showFolderView;
+                    MFileSys.audioListTrayOpen = ! MFileSys.audioListTrayOpen;
                 }
             }
         }
@@ -229,7 +227,7 @@ ApplicationWindow
         AudioFileListView
         {
             id: audioFileListView
-            width: (MFileSys.audioViewDirName == "" || showFolderView == false) ? 0 : 250;
+            width: (MFileSys.audioViewDirName == "" || MFileSys.audioListTrayOpen == false) ? 0 : 250;
 
             anchors
             {
@@ -238,7 +236,7 @@ ApplicationWindow
                 bottom: audioControls.top;
                 bottomMargin: 0;
                 right: parent.right;
-                rightMargin: (MFileSys.audioViewDirName == "" || showFolderView == false) ? 0 : 15;
+                rightMargin: (MFileSys.audioViewDirName == "" || MFileSys.audioListTrayOpen == false) ? 0 : 15;
             }
         }
 
