@@ -111,7 +111,7 @@ public:
 
 signals:
     void isErrorMessageChanged(bool);
-    void libraryViewDirChanged();
+    void libraryViewDirChanged(QString);
     void editModeChanged(bool);
     void toolTipsEnabledChanged(bool);
     void isHomeDirectoryChanged(bool);

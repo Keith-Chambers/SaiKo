@@ -13,10 +13,37 @@
 
 #include <iostream>
 
+#include <rapidjson/document.h>
+
 #include <kpl/filesystem.h>
+#include <kpl/kfile.h>
 
 #include "audioplayer.h"
 #include "mediafilesystem.h"
+
+struct Options
+{
+    QStringList library_paths;
+    bool enable_tooltips;
+    bool enabled_edit_mode;
+};
+
+Options loadOptions(std::string config_path)
+{
+    Options options;
+    std::string json = kpl::loadTextFile(config_path);
+    rapidjson::Document document;
+
+    document.Parse(json.c_str());
+
+    assert(document.IsObject());
+
+    for(u32 i = 0; i < document["library_paths"].Size(); i++) {
+        options.library_paths += document["library_paths"][i].GetString();
+    }
+
+    return options;
+}
 
 int main(int argc, char *argv[])
 {
@@ -32,40 +59,15 @@ int main(int argc, char *argv[])
     QList<kpl::filesystem::DirectoryPath> library_roots;
     QStringList library_paths;
 
-    QString user_config_path;
+    Options options = loadOptions("../settings.json");
 
-    if(argc == 3 && strcmp(argv[1],"-c") == 0) {
-        user_config_path = argv[2];
-    } else {
-        user_config_path = "../configLib.txt";
-    }
-
-    // Load library from file
-    QFile file("../configLib.txt");
-    if(!file.open(QIODevice::ReadOnly))
-    {
-        std::cout << "Failed to read config" << std::endl;
-        exit(EXIT_FAILURE);
-        return 0;
-    }else
-    {
-        QTextStream in(&file);
-        library_paths << in.readLine();
-    }
-
-    for(const auto& lib_path : library_paths)
-    {
-        std::optional<kpl::filesystem::DirectoryPath> file_opt = kpl::filesystem::DirectoryPath::make(lib_path);
-
-        if(file_opt != std::nullopt) {
-            qDebug() << "Adding library root " << lib_path;
-            library_roots.append(*file_opt);
-        }
+    for(const auto& lib_path : options.library_paths) {
+        library_roots += *kfs::DirectoryPath::make(lib_path);
     }
 
     MediaFileSystem mFileSys(library_roots, &engine);
 
-    mFileSys.generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(library_roots.front().absolutePath()).value(), false);
+//    mFileSys.generateSaikoMetaDataRecursive(kfs::DirectoryPath::make(library_roots.front().absolutePath()).value(), false);
 
 //    mFileSys.purgeSaikData();
 

@@ -16,14 +16,6 @@ MediaFileSystem::MediaFileSystem(const QList<kfs::DirectoryPath>& library_roots,
         m_current_audio_index {-1},
         m_error_message {}
 {
-
-//    for(const auto& root_dir : m_root_library_directories) {
-//        m_library_media_items << MediaItem { root_dir.leafName(), false };
-//        m_library_view_qml.append( &m_library_media_items.back() );
-//    }
-
-//    m_qt_engine->rootContext()->setContextProperty(QML_LIBRARY_VIEW_NAME, QVariant::fromValue(m_library_view_qml));
-
     loadAudioListToQmlContext();
     loadPlaylistsToQML();
     loadLibraryViewContent();
@@ -33,16 +25,8 @@ MediaFileSystem::MediaFileSystem(const QList<kfs::DirectoryPath>& library_roots,
 
 int MediaFileSystem::popLibraryViewPosition()
 {
-    qDebug() << "Popping Lib View position";
-
-
     int pos = m_saved_library_view_position.back();
     m_saved_library_view_position.pop_back();
-
-    qDebug() << "Remaining - " << m_saved_library_view_position.size();
-    for(const auto& pos : m_saved_library_view_position) {
-        qDebug() << "- " << pos;
-    }
 
     return pos;
 }
@@ -121,19 +105,16 @@ Q_INVOKABLE int MediaFileSystem::getNumberItemsLibraryView()
 
 int MediaFileSystem::getRestoreLibraryViewPosition()
 {
-    qDebug() << "Restore Library View? " << m_restore_library_view_position;
     return m_restore_library_view_position;
 }
 
 void MediaFileSystem::setRestoreLibraryViewPosition(bool restore_position)
 {
-    qDebug() << "Setting Restore Library View -> " << restore_position;
     m_restore_library_view_position = restore_position;
 }
 
 void MediaFileSystem::pushLibraryViewPosition(int pos)
 {
-    qDebug() << "Saving restore index -> " << pos;
     m_saved_library_view_position.append(pos);
 }
 
@@ -238,7 +219,7 @@ void MediaFileSystem::cdLibraryRoot()
     m_library_view_depth = 0;
     m_library_view_directory = std::nullopt;
 
-    emit libraryViewDirChanged();
+    emit libraryViewDirChanged( getLibraryViewDirectoryName() );
 }
 
 void MediaFileSystem::cdDown(const kfs::RelativePath& dir)
@@ -252,7 +233,7 @@ void MediaFileSystem::cdDown(const kfs::RelativePath& dir)
 
     m_library_view_depth++;
     loadLibraryViewContent();
-    emit libraryViewDirChanged();
+    emit libraryViewDirChanged( getLibraryViewDirectoryName() );
 }
 
 void MediaFileSystem::cdDown(const QString& root_name)
@@ -348,6 +329,7 @@ QString MediaFileSystem::getLibraryViewDirectoryName()
 
 QString MediaFileSystem::getAudioViewDirectoryName()
 {
+    // TODO: Maybe move this into model data
     switch(m_playlist_index)
     {
         case 0:
@@ -454,9 +436,7 @@ void MediaFileSystem::cdUp()
         emit isHomeDirectoryChanged(true);
     }
 
-    emit libraryViewDirChanged();
-
-//    m_library_media_items
+    emit libraryViewDirChanged( getLibraryViewDirectoryName() );
 }
 
 void MediaFileSystem::loadAudioList()
@@ -484,6 +464,8 @@ void MediaFileSystem::invokeFolder(QString folder_name)
 
     if(m_library_view_directory == std::nullopt) {
         cdDown(folder_name);
+        emit libraryViewDirChanged( getLibraryViewDirectoryName() );
+        emit isHomeDirectoryChanged(false);
         return;
     }
 
@@ -521,6 +503,8 @@ void MediaFileSystem::invokeFolder(QString folder_name)
 
     } else {
         cdDown(child_path_opt.value());
+        emit isHomeDirectoryChanged(false);
+        emit libraryViewDirChanged( getLibraryViewDirectoryName() );
     }
 }
 

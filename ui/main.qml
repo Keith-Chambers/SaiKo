@@ -161,6 +161,7 @@ ApplicationWindow
         Rectangle
         {
             id: backButton;
+            visible: !MFileSys.isHomeDirectory
             anchors
             {
                 left: sideMenuBackground.right
