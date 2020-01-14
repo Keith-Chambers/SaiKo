@@ -56,12 +56,16 @@ class AudioPlayer : public QObject
     Q_PROPERTY(double playPosition READ getPlayPosition WRITE setPlayPosition NOTIFY playPositionChanged)
     Q_PROPERTY(bool isPlaying READ getIsPlaying WRITE setPlayState NOTIFY isPlayingChanged)
     Q_PROPERTY(double volume READ getVolume WRITE setVolume NOTIFY volumeChanged)
+    Q_PROPERTY(QString playPositionTime READ getPlayPositionTime NOTIFY playPositionTimeChanged)
 
 //    Q_PROPERTY(QQmlListProperty<AudioFrameSlice> currentAudioFrame READ getCurrentAudioFrame NOTIFY currentAudioFrameChanged)
 
 public:
     explicit AudioPlayer(QObject *parent = nullptr);
     ~AudioPlayer();
+
+
+    QString getPlayPositionTime();
 
     Q_INVOKABLE bool getIsPlaying(void);
     Q_INVOKABLE double getPlayPosition(void);
@@ -74,6 +78,7 @@ signals:
     void audioCompleted();
     void isPlayingChanged(bool);
     void volumeChanged(double);
+    void playPositionTimeChanged(QString);
 public slots:
     Q_INVOKABLE void playAudio(AudioFile audio);
     Q_INVOKABLE void pauseAudio();

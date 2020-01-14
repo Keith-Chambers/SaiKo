@@ -43,13 +43,11 @@ ApplicationWindow
             }
         }
 
-        ListView
+        Row
         {
-            id: optionsTopBar
-            orientation: ListView.Horizontal
-            model: optionsModel
-            height: 25
+            id: optionsRow
             spacing: 10
+            height: 25
             anchors {
                 top: parent.top
                 topMargin: 10
@@ -59,46 +57,45 @@ ApplicationWindow
                 rightMargin: 40
             }
 
-            delegate: Rectangle
+            BinaryOption
             {
-                id: optionButtonContainer
-                width: 25
-                height: 25
-                radius: 3
-                color: (MFileSys.editMode) ? "#26282b" : "transparent"
+                id: editModeOption
 
-                ToolTip
-                {
-                    parent: optionButtonContainer
-                    visible: optionMouseArea.containsMouse
-                    text: description
+                Binding {
+                    target: editModeOption
+                    property: "enabled"
+                    value: MFileSys.editMode
                 }
 
-                Image
-                {
-                    id: optionIcon
-                    anchors.centerIn: parent
-                    sourceSize.height: 20
-                    sourceSize.width: 20
-                    source: iconPath
+                width: 30
+                height: 30
+
+                iconPath: "qrc:///resources/2x/sharp_build_white_18dp.png";
+                tooltipDescription: MFileSys.toolTipsEnabled ? "Enable Edit Mode" : "";
+
+                function onInvoked() {
+                    MFileSys.editMode = !MFileSys.editMode;
+                }
+            }
+
+            BinaryOption
+            {
+                id: enableToolTipsOption
+
+                Binding {
+                    target: enableToolTipsOption
+                    property: "enabled"
+                    value: MFileSys.toolTipsEnabled;
                 }
 
-                MouseArea
-                {
-                    id: optionMouseArea
-                    hoverEnabled: true
-                    anchors.fill: parent
-                    onClicked: {
-                        MFileSys.editMode = !MFileSys.editMode
-                    }
+                width: 30
+                height: 30
 
-                    onHoveredChanged: {
-                        if(MFileSys.editMode || containsMouse) {
-                            optionButtonContainer.color = "#26282b"
-                        } else {
-                            optionButtonContainer.color = "transparent"
-                        }
-                    }
+                iconPath: "qrc:///resources/2x/sharp_info_white_18dp.png";
+                tooltipDescription: "Enable Tool Tips";
+
+                function onInvoked() {
+                    MFileSys.toolTipsEnabled = !MFileSys.toolTipsEnabled;
                 }
             }
         }
@@ -109,15 +106,11 @@ ApplicationWindow
             color: "white"
             text: MFileSys.libraryViewDirName
             font.pointSize: 12;
-
-//            horizontalAlignment: Text.AlignHCenter
             width: 250
-//            height: 40
 
             anchors {
                 left: musicFolderView.left
-                verticalCenter: optionsTopBar.verticalCenter
-//                bottom: optionsTopBar.bottom
+                verticalCenter: optionsRow.verticalCenter
             }
         }
 
@@ -130,7 +123,6 @@ ApplicationWindow
             anchors {
                 right: parent.right
                 rightMargin: 15
-//                bottom: audioFolderName.bottom
                 verticalCenter: audioFolderName.verticalCenter
             }
 
@@ -164,7 +156,6 @@ ApplicationWindow
                 top: parent.top
                 topMargin: 80
                 leftMargin: 50
-//                rightMargin: 50
                 right: audioFileListView.left
             }
         }
@@ -225,10 +216,10 @@ ApplicationWindow
             color: "white"
             elide: Text.ElideRight;
             horizontalAlignment: Text.AlignRight
-            width: 150
+            width: 300
             anchors
             {
-                verticalCenter: optionsTopBar.verticalCenter
+                verticalCenter: optionsRow.verticalCenter
                 right: closeFileViewContainer.left
                 rightMargin: 5
             }
@@ -300,16 +291,8 @@ ApplicationWindow
 
                     Text
                     {
-//                        anchors {
-//                            top: parent.top
-//                            left: parent.left
-//                            topMargin: 5
-//                            leftMargin: 7
-//                        }
-
                         anchors.centerIn: parent
                         color: "White"
-//                        font.bold: true
                         text: name
                     }
 
@@ -332,7 +315,6 @@ ApplicationWindow
                         id: playlistItemMouseArea
                         anchors.fill: parent
                         onClicked: {
-//                            MFileSys.pushLibraryViewPosition();
                             MFileSys.invokePlaylist(index);
                         }
                     }

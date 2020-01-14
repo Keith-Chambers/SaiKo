@@ -59,6 +59,18 @@ constexpr const char * QML_AUDIO_VIEW_NAME = "AudioView";
 constexpr const char * QML_LIBRARY_VIEW_NAME = "LibraryView";
 constexpr const char * QML_PLAYLISTS_NAME = "Playlists";
 
+class Option : public QObject
+{
+    Q_OBJECT
+public:
+
+
+private:
+    QString m_description;
+    QString m_icon_path;
+    bool    m_enabled;
+};
+
 class MediaFileSystem : public QObject
 {
     Q_OBJECT
@@ -88,6 +100,7 @@ public:
     Q_PROPERTY(bool audioFolderViewIsCurrent READ getAudioFolderViewIsCurrent NOTIFY audioFolderViewIsCurrentChanged)
 
     Q_PROPERTY(bool editMode READ getEditMode WRITE setEditMode NOTIFY editModeChanged)
+    Q_PROPERTY(bool toolTipsEnabled READ getToolTipsEnabled WRITE setToolTipsEnabled NOTIFY toolTipsEnabledChanged)
 
     // TODO: move to .cpp
     bool getAudioFolderViewIsCurrent() {
@@ -98,6 +111,7 @@ signals:
     void isErrorMessageChanged(bool);
     void libraryViewDirChanged();
     void editModeChanged(bool);
+    void toolTipsEnabledChanged(bool);
 
     void audioFolderViewIsCurrentChanged(bool);
 
@@ -119,6 +133,9 @@ public:
     // TODO: Move to .cpp
     void setEditMode(bool edit_mode){ m_edit_mode_enabled = edit_mode; emit editModeChanged(m_edit_mode_enabled); }
     bool getEditMode() const { return m_edit_mode_enabled; }
+
+    void setToolTipsEnabled(bool enabled){ m_tool_tips_enabled = enabled; emit toolTipsEnabledChanged(enabled); }
+    bool getToolTipsEnabled(){ return m_tool_tips_enabled; }
 
     int getRestoreLibraryViewPosition();
     void setRestoreLibraryViewPosition(bool restore_position);
@@ -230,6 +247,7 @@ private:
 
     bool                        m_restore_library_view_position;
     bool                        m_edit_mode_enabled = false;
+    bool                        m_tool_tips_enabled = false;
 
     // TODO: This shouldn't be needed
     QObjectList                 m_library_view_qml;

@@ -15,6 +15,30 @@ Item
 
         color: "#363636";
 
+        Text
+        {
+            id: trackDuration
+            text: (MFileSys.currentPlaylistIndex != -1) ? MFileSys.currentAudio.getAudioLength() : "";
+            anchors {
+                left: playPosSlider.right
+                leftMargin: 10
+                verticalCenter: playPosSlider.verticalCenter
+            }
+            color: "white"
+        }
+
+        Text
+        {
+            id: trackCurrentTimePosition
+            text: AudioPlayer.playPositionTime;
+            anchors {
+                right: playPosSlider.left
+                rightMargin: 10
+                verticalCenter: playPosSlider.verticalCenter
+            }
+            color: "white"
+        }
+
         Slider
         {
             id: playPosSlider
@@ -81,6 +105,12 @@ Item
                 }
         }
 
+//        Binding {
+//            target: volumeControlSlider
+//            property: "value"
+//            value: AudioPlayer.volume
+//        }
+
         Slider
         {
             id: volumeControlSlider
@@ -94,14 +124,13 @@ Item
             }
 
             orientation: Qt.Vertical
-//            value: AudioPlayer.volume
+            value: 0.0
 
-            value: AudioPlayer.volume
-//            onValueChanged: {
-//                if(volumeControlSlider.pressed) {
-//                    AudioPlayer.volume = value;
-//                }
-//            }
+            onValueChanged: {
+                if(volumeControlSlider.pressed) {
+                    AudioPlayer.volume = value;
+                }
+            }
 
             style: SliderStyle {
                     groove: Rectangle {

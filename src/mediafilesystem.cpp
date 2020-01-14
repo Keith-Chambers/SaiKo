@@ -22,18 +22,12 @@ MediaFileSystem::MediaFileSystem(const QList<kfs::DirectoryPath>& library_roots,
         m_library_view_qml.append( &m_library_media_items.back() );
     }
 
-//    MediaItem first { "Audio", false };
-//    m_library_media_items.append(first);
-
-//    m_library_view_qml.append(&m_library_media_items.front());
-
     m_qt_engine->rootContext()->setContextProperty(QML_LIBRARY_VIEW_NAME, QVariant::fromValue(m_library_view_qml));
 
     loadAudioListToQmlContext();
     loadPlaylistsToQML();
 
     emit playlistIndexChanged(m_current_audio_index);
-//    loadLibraryViewContent();
 }
 
 int MediaFileSystem::popLibraryViewPosition()
@@ -345,13 +339,13 @@ QString MediaFileSystem::getAudioViewDirectoryName()
     switch(m_playlist_index)
     {
         case 0:
-            return "Playlist 1";
+            return "Playlist A";
         case 1:
-            return "Playlist 2";
+            return "Playlist B";
         case 2:
-            return "Playlist 3";
+            return "Playlist C";
         case 3:
-            return "Playlist 4";
+            return "Playlist D";
         default:
             break;
     }
@@ -1194,12 +1188,8 @@ void MediaFileSystem::generateSaikoMetaDataRecursive(kfs::DirectoryPath root_dir
     qDebug() << "Successfully created all saik files";
 }
 
-// TODO: remove
 void MediaFileSystem::purgeSaikData(const kfs::DirectoryPath& path)
 {
-    qDebug() << "purgeSaikData disabled";
-//    return;
-
     QDirIterator itr(path.absolutePath(), QDir::AllDirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
 
     while(itr.hasNext())
