@@ -101,6 +101,8 @@ public:
 
     Q_PROPERTY(bool editMode READ getEditMode WRITE setEditMode NOTIFY editModeChanged)
     Q_PROPERTY(bool toolTipsEnabled READ getToolTipsEnabled WRITE setToolTipsEnabled NOTIFY toolTipsEnabledChanged)
+    Q_PROPERTY(bool isHomeDirectory READ atRootDirectory NOTIFY isHomeDirectoryChanged)
+    Q_PROPERTY(bool audioListTrayOpen READ isAudioListTrayOpen WRITE setIsAudioListTrayOpen NOTIFY isAudioListTrayOpenChanged)
 
     // TODO: move to .cpp
     bool getAudioFolderViewIsCurrent() {
@@ -109,9 +111,11 @@ public:
 
 signals:
     void isErrorMessageChanged(bool);
-    void libraryViewDirChanged();
+    void libraryViewDirChanged(QString);
     void editModeChanged(bool);
     void toolTipsEnabledChanged(bool);
+    void isHomeDirectoryChanged(bool);
+    void isAudioListTrayOpenChanged(bool);
 
     void audioFolderViewIsCurrentChanged(bool);
 
@@ -130,6 +134,13 @@ signals:
 
 public:
 
+    void setIsAudioListTrayOpen(bool is_open){
+        m_audio_tray_open = is_open;
+        emit isAudioListTrayOpenChanged(is_open);
+    }
+
+    bool isAudioListTrayOpen(){ return m_audio_tray_open; }
+
     // TODO: Move to .cpp
     void setEditMode(bool edit_mode){ m_edit_mode_enabled = edit_mode; emit editModeChanged(m_edit_mode_enabled); }
     bool getEditMode() const { return m_edit_mode_enabled; }
@@ -139,6 +150,22 @@ public:
 
     int getRestoreLibraryViewPosition();
     void setRestoreLibraryViewPosition(bool restore_position);
+
+    // TODO: Implement properly and move to .cpp
+    Q_INVOKABLE void addLibraryRootPath(QString path){
+        path = path.right(path.size() - 7);
+
+        m_root_library_directories.append( *kfs::DirectoryPath::make(path) );
+
+        if(!dirContainsAudioRecursive(path)) {
+            displayErrorMessage("Library root path contains no audio");
+            m_root_library_directories.pop_back();
+            return;
+        }
+
+        loadLibraryViewContent();
+        qDebug() << "Complete!";
+    }
 
     // TODO: Tell QML so that it can update the model
     Q_INVOKABLE void addTrackToPlaylist(int playlist_index, int track_index);
@@ -248,6 +275,7 @@ private:
     bool                        m_restore_library_view_position;
     bool                        m_edit_mode_enabled = false;
     bool                        m_tool_tips_enabled = false;
+    bool                        m_audio_tray_open = false;
 
     // TODO: This shouldn't be needed
     QObjectList                 m_library_view_qml;

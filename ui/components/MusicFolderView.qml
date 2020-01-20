@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.4
 import QtQuick.Particles 2.11
+import QtQuick.Dialogs 1.3
 
 Item
 {
@@ -33,6 +34,21 @@ Item
         console.log("Grid cell width -> " + resultCellWidth);
 
         return resultCellWidth;
+    }
+
+    FileDialog
+    {
+        id: selectLibraryFolderDialog
+        title: "Please choose a file"
+        folder: "/"
+        selectFolder: true
+        selectMultiple: false
+
+        onAccepted:
+        {
+            console.log("You chose: " + selectLibraryFolderDialog.fileUrls)
+            MFileSys.addLibraryRootPath(selectLibraryFolderDialog.fileUrls[0]);
+        }
     }
 
     GridView
@@ -167,15 +183,11 @@ Item
                     width: libraryView.cellWidth - 50;
                     anchors {
                         left: parent.left
-//                        right: parent.right
-//                        leftMargin: 20;
-//                        rightMargin: 20;
                         top: parent.top
                         topMargin: 20
-
                     }
 
-                    color: "grey"
+                    color: "transparent"
 
                     Image
                     {
@@ -210,18 +222,30 @@ Item
 
                         onClicked:
                         {
+                            // TODO: Fix hack
+                            if(MFileSys.isHomeDirectory && itemName === "") {
+                                selectLibraryFolderDialog.open();
+                                return;
+                            }
+
                             if(mouse.button === Qt.LeftButton) {
-                                console.log("Enter dir : " + model.modelData.itemName);
+                                MFileSys.restoreLibraryViewPosition = false;
                                 MFileSys.pushLibraryViewPosition(index);
                                 MFileSys.invokeFolder(model.modelData.itemName);
                                 return;
                             }
                         }
 
-                        hoverEnabled: true;
+                        hoverEnabled: MFileSys.editMode || MFileSys.isHomeDirectory;
                         onHoveredChanged: {
+
+                            if(containsMouse && MFileSys.isHomeDirectory) {
+                                musicFolderRect.color = "dark grey";
+                            } else {
+                                musicFolderRect.color = "transparent";
+                            }
+
                             if(regenSaikoData.visible === false && containsMouse === true) {
-//                                regenSaikoData.visible = true;
                                 activeItemIndex = index
                             }
                         }
@@ -243,7 +267,6 @@ Item
                     text: model.modelData.itemName
                     elide: Text.ElideRight
                 }
-
             }
         }
 

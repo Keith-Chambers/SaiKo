@@ -1,6 +1,7 @@
 QT += qml quick quickcontrols2
 
 CONFIG += c++17
+#CONFIG += static
 
 #CONFIG  += qt warn_off release
 #DEFINES += QT_NO_DEBUG_OUTPUT
@@ -70,10 +71,8 @@ INSTALLS += external_dependencies
 
 LIBS += -ltag
 LIBS += -lz
-LIBS += $$EXTERNAL_PATH/libIrrKlang.so
+LIBS += -lIrrKlang
 
-#LIBS += $$EXTERNAL_PATH/irrKlang.so
-
-LIBS += $$EXTERNAL_PATH/ikpMP3.so
-LIBS += $$EXTERNAL_PATH/ikpFlac.so
+LIBS += -l:ikpMP3.so
+LIBS += -l:ikpFlac.so
 

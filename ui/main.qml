@@ -13,11 +13,9 @@ ApplicationWindow
     id: root;
     width: 1100
     height: 600
-    minimumHeight: 600
+    minimumHeight: 400
     minimumWidth: 800
     title: qsTr("Saiko");
-
-    property bool showFolderView: true
 
     Rectangle
     {
@@ -140,7 +138,7 @@ ApplicationWindow
                 anchors.fill: parent
                 onClicked: {
                     console.log("Close clicked");
-                    showFolderView = !showFolderView;
+                    MFileSys.audioListTrayOpen = ! MFileSys.audioListTrayOpen;
                 }
             }
         }
@@ -163,6 +161,7 @@ ApplicationWindow
         Rectangle
         {
             id: backButton;
+            visible: !MFileSys.isHomeDirectory
             anchors
             {
                 left: sideMenuBackground.right
@@ -229,7 +228,7 @@ ApplicationWindow
         AudioFileListView
         {
             id: audioFileListView
-            width: (MFileSys.audioViewDirName == "" || showFolderView == false) ? 0 : 250;
+            width: (MFileSys.audioViewDirName == "" || MFileSys.audioListTrayOpen == false) ? 0 : 250;
 
             anchors
             {
@@ -238,7 +237,7 @@ ApplicationWindow
                 bottom: audioControls.top;
                 bottomMargin: 0;
                 right: parent.right;
-                rightMargin: (MFileSys.audioViewDirName == "" || showFolderView == false) ? 0 : 15;
+                rightMargin: (MFileSys.audioViewDirName == "" || MFileSys.audioListTrayOpen == false) ? 0 : 15;
             }
         }
 
@@ -273,6 +272,7 @@ ApplicationWindow
 
                 anchors {
                     left: nowPlayingImageRect.left
+                    leftMargin: 2
                     bottom: sideMenuBackground.bottom
                     bottomMargin: 0
                 }
@@ -409,21 +409,5 @@ ApplicationWindow
                 bottom: parent.bottom;
             }
         }
-
-//        Image
-//        {
-//            id: logoImg
-//            anchors.left: parent.left
-//            anchors.top: parent.top
-//            anchors.topMargin: 20;
-//            anchors.leftMargin: 50;
-
-//            width: 100
-//            height: 70
-//            sourceSize.width: 100;
-//            sourceSize.height: 70
-
-//            source: "qrc:///resources/saiko_logo.png"
-//        }
     }
 }

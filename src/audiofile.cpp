@@ -131,11 +131,8 @@ QList<AudioFile> AudioFile::fromFileNames(const kfs::DirectoryPath& parent_path,
 
     QString prefix_path = parent_path.absolutePath();
 
-    qDebug() << "Path prefix: " << prefix_path;
-
     for(const auto& file : file_names)
     {
-        qDebug() << "Audio file: " << file;
         std::optional<kfs::FileIdentifier> complete_file_opt = kfs::FileIdentifier::make( parent_path, file );
 
         if(complete_file_opt == std::nullopt) {
@@ -146,7 +143,6 @@ QList<AudioFile> AudioFile::fromFileNames(const kfs::DirectoryPath& parent_path,
         std::optional<AudioFile> audio_file_opt = fromFileName( *complete_file_opt );
 
         if(audio_file_opt != std::nullopt) {
-            qDebug() << "Appending";
             audio_files.append( *audio_file_opt );
         }
     }

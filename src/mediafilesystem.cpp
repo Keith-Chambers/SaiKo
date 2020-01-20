@@ -16,16 +16,9 @@ MediaFileSystem::MediaFileSystem(const QList<kfs::DirectoryPath>& library_roots,
         m_current_audio_index {-1},
         m_error_message {}
 {
-
-    for(const auto& root_dir : m_root_library_directories) {
-        m_library_media_items << MediaItem { root_dir.leafName(), false };
-        m_library_view_qml.append( &m_library_media_items.back() );
-    }
-
-    m_qt_engine->rootContext()->setContextProperty(QML_LIBRARY_VIEW_NAME, QVariant::fromValue(m_library_view_qml));
-
     loadAudioListToQmlContext();
     loadPlaylistsToQML();
+    loadLibraryViewContent();
 
     emit playlistIndexChanged(m_current_audio_index);
 }
@@ -34,6 +27,7 @@ int MediaFileSystem::popLibraryViewPosition()
 {
     int pos = m_saved_library_view_position.back();
     m_saved_library_view_position.pop_back();
+
     return pos;
 }
 
@@ -121,7 +115,6 @@ void MediaFileSystem::setRestoreLibraryViewPosition(bool restore_position)
 
 void MediaFileSystem::pushLibraryViewPosition(int pos)
 {
-    qDebug() << "Saving restore index -> " << pos;
     m_saved_library_view_position.append(pos);
 }
 
@@ -226,7 +219,7 @@ void MediaFileSystem::cdLibraryRoot()
     m_library_view_depth = 0;
     m_library_view_directory = std::nullopt;
 
-    emit libraryViewDirChanged();
+    emit libraryViewDirChanged( getLibraryViewDirectoryName() );
 }
 
 void MediaFileSystem::cdDown(const kfs::RelativePath& dir)
@@ -240,7 +233,7 @@ void MediaFileSystem::cdDown(const kfs::RelativePath& dir)
 
     m_library_view_depth++;
     loadLibraryViewContent();
-    emit libraryViewDirChanged();
+    emit libraryViewDirChanged( getLibraryViewDirectoryName() );
 }
 
 void MediaFileSystem::cdDown(const QString& root_name)
@@ -336,6 +329,7 @@ QString MediaFileSystem::getLibraryViewDirectoryName()
 
 QString MediaFileSystem::getAudioViewDirectoryName()
 {
+    // TODO: Maybe move this into model data
     switch(m_playlist_index)
     {
         case 0:
@@ -436,9 +430,13 @@ void MediaFileSystem::cdUp()
 
     qDebug() << "New Depth -> " << m_library_view_depth;
 
-    emit libraryViewDirChanged();
+    if(atRootDirectory()) {
+        m_saved_library_view_position.clear();
+        m_restore_library_view_position = false;
+        emit isHomeDirectoryChanged(true);
+    }
 
-//    m_library_media_items
+    emit libraryViewDirChanged( getLibraryViewDirectoryName() );
 }
 
 void MediaFileSystem::loadAudioList()
@@ -466,6 +464,8 @@ void MediaFileSystem::invokeFolder(QString folder_name)
 
     if(m_library_view_directory == std::nullopt) {
         cdDown(folder_name);
+        emit libraryViewDirChanged( getLibraryViewDirectoryName() );
+        emit isHomeDirectoryChanged(false);
         return;
     }
 
@@ -496,11 +496,15 @@ void MediaFileSystem::invokeFolder(QString folder_name)
         }
 
         m_audio_list_directory = {child_dir, image_path};
-
         loadAudioList();
         audioViewDirChanged(m_audio_list_directory->directory().dirName());
+
+        setIsAudioListTrayOpen(true);
+
     } else {
         cdDown(child_path_opt.value());
+        emit isHomeDirectoryChanged(false);
+        emit libraryViewDirChanged( getLibraryViewDirectoryName() );
     }
 }
 
@@ -905,11 +909,13 @@ void MediaFileSystem::loadLibraryViewContent()
 
     if(m_library_view_depth == 0)
     {
-        m_library_media_items.reserve( m_root_library_directories.size() );
+        m_library_media_items.reserve( m_root_library_directories.size() + 1);
 
         for(const auto& root : m_root_library_directories) {
             m_library_media_items << MediaItem { root.leafName(), false };
         }
+
+        m_library_media_items << MediaItem { "", "qrc:///resources/2x/sharp_add_white_36dp.png", false };
 
         loadLibraryViewItemsToQmlContext();
         return;

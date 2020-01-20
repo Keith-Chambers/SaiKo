@@ -13,7 +13,7 @@ MediaItem::MediaItem(QString pItemPath, QString pImagePath, bool pIsPlayable, QO
     QChar sep('/');
     setItemName(pItemPath.section(sep, -1, -1));
     mImagePath = pImagePath;
-    mImagePath.prepend("file:///");
+//    mImagePath.prepend("file:///");
 }
 
 MediaItem::MediaItem(const MediaItem& copy)

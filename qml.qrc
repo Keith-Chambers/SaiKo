@@ -32,5 +32,6 @@
         <file>resources/saiko_logo.svg</file>
         <file>resources/2x/sharp_info_white_18dp.png</file>
         <file>ui/components/BinaryOption.qml</file>
+        <file>resources/2x/sharp_add_white_36dp.png</file>
     </qresource>
 </RCC>
