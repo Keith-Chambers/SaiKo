@@ -38,8 +38,8 @@ Options loadOptions(std::string config_path)
 
     assert(document.IsObject());
 
-    for(u32 i = 0; i < document["library_paths"].Size(); i++) {
-        options.library_paths += document["library_paths"][i].GetString();
+    for(u32 i = 0; i < document["libraryPaths"].Size(); i++) {
+        options.library_paths += document["libraryPaths"][i].GetString();
     }
 
     return options;
@@ -49,6 +49,8 @@ int main(int argc, char *argv[])
 {
 //    QQuickStyle::setStyle("Imagine");
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+    std::cout << "Here" << std::endl;
 
     QGuiApplication app(argc, argv);
     app.setWindowIcon(QIcon(":/resources/saiko_logo.ico"));
@@ -77,7 +79,11 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("AudioPlayer", QVariant::fromValue(&audioplayer));
     engine.rootContext()->setContextProperty("MFileSys", QVariant::fromValue(&mFileSys));
 
+    std::cout << "Pre load" << std::endl;
+
     engine.load(QUrl(QLatin1String("qrc:/ui/main.qml")));
+
+    std::cout << "Post load" << std::endl;
 
     return app.exec();
 }
