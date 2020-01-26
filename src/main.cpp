@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     QList<kpl::filesystem::DirectoryPath> library_roots;
     QStringList library_paths;
 
-    Options options = loadOptions("../settings.json");
+    Options options = loadOptions("./settings.json");
 
     for(const auto& lib_path : options.library_paths) {
         library_roots += *kfs::DirectoryPath::make(lib_path);
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
     std::cout << "Pre load" << std::endl;
 
-    engine.load(QUrl(QLatin1String("qrc:/ui/main.qml")));
+    engine.load(QUrl(QLatin1String("qrc:///ui/main.qml")));
 
     std::cout << "Post load" << std::endl;
 

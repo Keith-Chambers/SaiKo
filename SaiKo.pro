@@ -18,8 +18,8 @@ SOURCES +=  $$SRC_PATH/main.cpp \
             $$SRC_PATH/mediafilesystem.cpp \
             $$SRC_PATH/soundstopevent.cpp \
             $$SRC_PATH/textparser.cpp \
-            src/audioplaylist.cpp \
-            src/mediadirectory.cpp
+            $$SRC_PATH/audioplaylist.cpp \
+            $$SRC_PATH/mediadirectory.cpp
 
 RESOURCES += \
     qml.qrc
@@ -40,8 +40,8 @@ HEADERS += \
     $$SRC_PATH/mediafilesystem.h \
     $$SRC_PATH/soundstopevent.h \
     $$SRC_PATH/textparser.h \
-    src/audioplaylist.h \
-    src/mediadirectory.h
+    $$SRC_PATH/audioplaylist.h \
+    $$SRC_PATH/mediadirectory.h
 
 # Image Magick
 INCLUDEPATH += $$EXTERNAL_PATH
@@ -59,6 +59,10 @@ LIBS += -lMagick++-7.Q16HDRI
 LIBS += -lMagickWand-7.Q16HDRI
 LIBS += -lMagickCore-7.Q16HDRI
 
+#LIBS += -lMagickWand
+#LIBS += -lMagickCore
+#LIBS += -lMagick++
+
 DEFINES += "DMAGICKCORE_HDRI_ENABLE=1"
 DEFINES += "MAGICKCORE_QUANTUM_DEPTH=16"
 DEFINES += "MAGICKCORE_HDRI_ENABLE=0"
@@ -67,7 +71,13 @@ DEFINES += "MAGICKCORE_HDRI_ENABLE=0"
 external_dependencies.path = bin/
 external_dependencies.files = external/*.so
 
+#qmlfiles.files = $$PWD/ui
+#qmlfiles.path = $$OUT_PWD/ui
+#INSTALLS += qmlfiles
+
 INSTALLS += external_dependencies
+
+#LIBS += $$EXTERNAL_PATH/libQt5QuickTemplates2.so
 
 LIBS += -ltag
 LIBS += -lz
