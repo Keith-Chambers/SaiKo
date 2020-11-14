@@ -79,11 +79,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("AudioPlayer", QVariant::fromValue(&audioplayer));
     engine.rootContext()->setContextProperty("MFileSys", QVariant::fromValue(&mFileSys));
 
-    std::cout << "Pre load" << std::endl;
-
     engine.load(QUrl(QLatin1String("qrc:///ui/main.qml")));
-
-    std::cout << "Post load" << std::endl;
 
     return app.exec();
 }
